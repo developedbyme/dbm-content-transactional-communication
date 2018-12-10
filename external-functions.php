@@ -5,7 +5,7 @@
 		
 		$used_keywords = array();
 		foreach($matches[0] as $match) {
-			$used_keywords[] = substr($match, 1, count($match)-2);
+			$used_keywords[] = substr($match, 1, strlen($match)-2);
 		}
 	
 		array_unique($used_keywords);
