@@ -3,12 +3,9 @@
 		$matches = array();
 		preg_match_all('/%[a-zA-Z0-0\\-_]+%/', $text, $matches);
 		
-		var_dump($text);
-		var_dump($matches);
-		
 		$used_keywords = array();
 		foreach($matches[0] as $match) {
-			$used_keywords[] = substr($match, 1, count($match[0])-2);
+			$used_keywords[] = substr($match, 1, count($match)-2);
 		}
 	
 		array_unique($used_keywords);
