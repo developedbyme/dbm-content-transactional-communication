@@ -69,6 +69,27 @@
 			
 		}
 		
+		public function hook_save_post($post_id, $post, $update) {
+			//echo("\DbmContentTransactionalCommunication\Plugin::hook_save_post<br />");
+			
+			parent::hook_save_post($post_id, $post, $update);
+			
+			if(function_exists('dbm_has_post_type')) {
+				if(dbm_has_post_type($post_id, 'transactional-template')) {
+					$keywords = dbm_content_tc_get_keywords_in_text($post->post_content);
+					
+					if(dbm_has_post_relation($post_id, 'transactional-template-types/email')) {
+						$subject = get_post_meta($post_id, 'dbmtc_email_subject', true);
+						$title_keywords = dbm_content_tc_get_keywords_in_text($subject);
+						
+						$keywords = array_unique(array_merge($keywords, $title_keywords));
+					}
+					
+					update_post_meta($post_id, 'dbmtc_dynamic_keywords', $keywords);
+				}
+			}
+		}
+		
 		public function activation_setup() {
 			\DbmContentTransactionalCommunication\Admin\PluginActivation::run_setup();
 		}
