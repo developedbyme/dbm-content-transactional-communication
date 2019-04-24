@@ -100,9 +100,15 @@
 			
 			self::add_term('dbm_type:admin-grouping', 'Admin grouping');
 			self::add_term('dbm_type:admin-grouping/sent-communications', 'Sent communications');
+			self::add_term('dbm_type:admin-grouping/address-verifications', 'Address verifications');
 			
 			$sent_communications_group = self::create_page('sent-communications', 'Sent communications', 'dbm_data', 0);
 			self::add_terms_to_post(array('dbm_type:admin-grouping', 'dbm_type:admin-grouping/sent-communications'), $sent_communications_group);
+			
+			$address_verifications_group = self::create_page('address-verifications', 'Address verifications', 'dbm_data', 0);
+			var_dump($address_verifications_group);
+			self::add_terms_to_post(array('dbm_type:admin-grouping', 'dbm_type:admin-grouping/address-verifications'), $address_verifications_group);
+			
 			
 			self::add_term('dbm_type:transactional-template', 'Transactional template');
 			self::add_term('dbm_type:transactional-communication', 'Transactional communication');
@@ -113,6 +119,7 @@
 			
 			self::add_term('dbm_relation:global-transactional-templates', 'Global transactional templates');
 			self::add_term('dbm_relation:global-transactional-templates/reset-password', 'Reset password');
+			self::add_term('dbm_relation:global-transactional-templates/verify-email', 'Verify email');
 			
 		}
 		
