@@ -106,7 +106,6 @@
 			self::add_terms_to_post(array('dbm_type:admin-grouping', 'dbm_type:admin-grouping/sent-communications'), $sent_communications_group);
 			
 			$address_verifications_group = self::create_page('address-verifications', 'Address verifications', 'dbm_data', 0);
-			var_dump($address_verifications_group);
 			self::add_terms_to_post(array('dbm_type:admin-grouping', 'dbm_type:admin-grouping/address-verifications'), $address_verifications_group);
 			
 			
