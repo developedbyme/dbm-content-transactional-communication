@@ -33,8 +33,8 @@
 			$hash = md5($email.$hash_salt);
 			
 			$data_id = dbm_create_data('Email verification - '.$hash, 'address-verification', 'admin-grouping/address-verifications');
-			update_post_meta($data_id, 'verififcation_hash', $hash);
-			update_post_meta($data_id, 'verififcation_code', $code);
+			update_post_meta($data_id, 'verification_hash', $hash);
+			update_post_meta($data_id, 'verification_code', $code);
 			update_post_meta($data_id, 'verified', false);
 			
 			wp_update_post(array(
@@ -68,8 +68,8 @@
 			//METODO: add filter around salt
 			$hash = md5($email.$hash_salt);
 			
-			$stored_hash = get_post_meta($data_id, 'verififcation_hash', true);
-			$stored_code = get_post_meta($data_id, 'verififcation_code', true);
+			$stored_hash = get_post_meta($data_id, 'verification_hash', true);
+			$stored_code = get_post_meta($data_id, 'verification_code', true);
 			
 			if($stored_hash === $hash && $stored_code === $code) {
 				update_post_meta($data_id, 'verified', true);

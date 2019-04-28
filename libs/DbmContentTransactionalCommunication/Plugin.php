@@ -51,7 +51,7 @@
 
 			$custom_range_filters = new \DbmContentTransactionalCommunication\CustomRangeFilters();
 			
-			
+			add_filter('dbm_custom_login/registration_is_verified', array($this, 'filter_dbm_custom_login_registration_is_verified'), 10, 2);
 			
 		}
 		
@@ -89,6 +89,23 @@
 					update_post_meta($post_id, 'dbmtc_dynamic_keywords', $keywords);
 				}
 			}
+		}
+		
+		public function filter_dbm_custom_login_registration_is_verified($is_verified, $data) {
+			$email = $data['email'];
+			$data_id = $data['verificationId'];
+			
+			$hash_salt = 'Tw?otIAwI%ourB-:@VeZ4tGLY0=Twh)1J Wwhxc!5AOg:*L$Ff@CAY+d-iW47Ztm';
+			//METODO: add filter around salt
+			$hash = md5($email.$hash_salt);
+			
+			$stored_hash = get_post_meta($data_id, 'verification_hash', true);
+			$verified = (bool)get_post_meta($data_id, 'verified', true);
+			
+			if($verified && ($stored_hash === $hash)) {
+				return true;
+			}
+			return false;
 		}
 		
 		public function activation_setup() {
