@@ -29,6 +29,7 @@
 			//echo("\DbmContentTransactionalCommunication\Plugin::create_additional_hooks<br />");
 			
 			$this->add_additional_hook(new \DbmContentTransactionalCommunication\ChangePostHooks());
+			$this->add_additional_hook(new \DbmContentTransactionalCommunication\ApiActionHooks());
 		}
 		
 		protected function create_rest_api_end_points() {

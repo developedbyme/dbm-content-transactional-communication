@@ -108,7 +108,7 @@
 			$address_verifications_group = self::create_page('address-verifications', 'Address verifications', 'dbm_data', 0);
 			self::add_terms_to_post(array('dbm_type:admin-grouping', 'dbm_type:admin-grouping/address-verifications'), $address_verifications_group);
 			
-			
+			self::add_term('dbm_type:address-verification', 'Address verification');
 			self::add_term('dbm_type:transactional-template', 'Transactional template');
 			self::add_term('dbm_type:transactional-communication', 'Transactional communication');
 			

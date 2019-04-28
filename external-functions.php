@@ -124,6 +124,8 @@
 		
 		$send_result = apply_filters('dbm_content_tc/send_email', false, $title, $content, $to, $from, $tc_id, $additional_data);
 		update_post_meta($tc_id, 'send_result', $send_result);
+		
+		return $tc_id;
 	}
 	
 	function dbm_content_tc_send_text_message($content, $to, $from, $tc_id = 0, $additional_data = null) {
@@ -148,5 +150,7 @@
 		
 		$send_result = apply_filters('dbm_content_tc/send_text_message', false, $content, $to, $from, $tc_id, $additional_data);
 		update_post_meta($tc_id, 'send_result', $send_result);
+		
+		return $tc_id;
 	}
 ?>
