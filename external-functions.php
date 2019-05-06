@@ -1,7 +1,7 @@
 <?php
 	function dbm_content_tc_get_keywords_in_text($text) {
 		$matches = array();
-		preg_match_all('/%[a-zA-Z0-0\\-_]+%/', $text, $matches);
+		preg_match_all('/%[a-zA-Z0-9\\-_]+%/', $text, $matches);
 		
 		$used_keywords = array();
 		foreach($matches[0] as $match) {
