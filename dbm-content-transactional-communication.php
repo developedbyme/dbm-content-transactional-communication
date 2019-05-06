@@ -37,6 +37,7 @@ require_once( DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DIR . "/libs/DbmContentTra
 global $DbmContentTransactionalCommunicationPlugin;
 $DbmContentTransactionalCommunicationPlugin = new \DbmContentTransactionalCommunication\Plugin();
 
+require_once( DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DIR . "/register-acf-fields.php" );
 require_once( DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DIR . "/external-functions.php" );
 
 function dbm_content_transactional_communication_plugin_activate() {
