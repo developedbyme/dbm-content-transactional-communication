@@ -85,16 +85,18 @@
 		$base_text = apply_filters('the_content', $post->post_content);
 		
 		$used_keywords = dbm_content_tc_get_keywords_in_text($base_text);
-		$replacements = dbm_content_tc_get_replacement_array($used_keywords, $replacements);
+		$body_replacements = dbm_content_tc_get_replacement_array($used_keywords, $replacements);
 		
-		$replaced_text = str_replace(array_keys($replacements), array_values($replacements), $base_text);
+		$replaced_text = str_replace(array_keys($body_replacements), array_values($body_replacements), $base_text);
 		$return_object['body'] = $replaced_text;
 		
 		if(dbm_has_post_relation($post_id, 'transactional-template-types/email')) {
 			
 			$base_title = get_post_meta($post_id, 'dbmtc_email_subject', true);
+			$used_keywords = dbm_content_tc_get_keywords_in_text($base_title);
+			$title_replacements = dbm_content_tc_get_replacement_array($used_keywords, $replacements);
 			
-			$replaced_title = str_replace(array_keys($replacements), array_values($replacements), $base_title);
+			$replaced_title = str_replace(array_keys($title_replacements), array_values($title_replacements), $base_title);
 			$return_object['title'] = $replaced_title;
 		}
 		
