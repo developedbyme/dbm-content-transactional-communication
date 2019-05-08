@@ -45,7 +45,7 @@
 			$template_id = dbm_new_query('dbm_additional')->add_relation_by_path('global-transactional-templates/verify-email')->get_post_id();
 			
 			$template = dbm_content_tc_get_template_with_replacements($template_id, $replacements);
-			$communication_id = dbm_content_tc_send_email($template['title'], $template['body'], $email, 'info@lagerkungen.dev.dbm.delivery');
+			$communication_id = dbm_content_tc_send_email($template['title'], $template['body'], $email, apply_filters('dbm_content_tc/default_from_email', get_option('admin_email')));
 			
 			update_post_meta($data_id, 'send_time', time());
 			update_post_meta($data_id, 'communication_id', $communication_id);

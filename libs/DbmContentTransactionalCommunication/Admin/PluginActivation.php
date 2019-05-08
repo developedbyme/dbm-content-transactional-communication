@@ -98,15 +98,26 @@
 		
 		public static function run_setup() {
 			
+			self::add_term('dbm_type:internal-message', 'Internal message');
+			self::add_term('dbm_type:internal-message-group', 'Internal message group');
+			
 			self::add_term('dbm_type:admin-grouping', 'Admin grouping');
 			self::add_term('dbm_type:admin-grouping/sent-communications', 'Sent communications');
 			self::add_term('dbm_type:admin-grouping/address-verifications', 'Address verifications');
+			self::add_term('dbm_type:admin-grouping/internal-messages', 'Internal messages');
+			self::add_term('dbm_type:admin-grouping/internal-message-groups', 'Internal message groups');
 			
 			$sent_communications_group = self::create_page('sent-communications', 'Sent communications', 'dbm_data', 0);
 			self::add_terms_to_post(array('dbm_type:admin-grouping', 'dbm_type:admin-grouping/sent-communications'), $sent_communications_group);
 			
 			$address_verifications_group = self::create_page('address-verifications', 'Address verifications', 'dbm_data', 0);
 			self::add_terms_to_post(array('dbm_type:admin-grouping', 'dbm_type:admin-grouping/address-verifications'), $address_verifications_group);
+			
+			$current_group = self::create_page('internal-messages', 'Internal messages', 'dbm_data', 0);
+			self::add_terms_to_post(array('dbm_type:admin-grouping', 'dbm_type:admin-grouping/internal-messages'), $current_group);
+			
+			$current_group = self::create_page('internal-message-groups', 'Internal message groups', 'dbm_data', 0);
+			self::add_terms_to_post(array('dbm_type:admin-grouping', 'dbm_type:admin-grouping/internal-message-groups'), $current_group);
 			
 			self::add_term('dbm_type:address-verification', 'Address verification');
 			self::add_term('dbm_type:transactional-template', 'Transactional template');
@@ -119,6 +130,9 @@
 			self::add_term('dbm_relation:global-transactional-templates', 'Global transactional templates');
 			self::add_term('dbm_relation:global-transactional-templates/reset-password', 'Reset password');
 			self::add_term('dbm_relation:global-transactional-templates/verify-email', 'Verify email');
+			self::add_term('dbm_relation:global-transactional-templates/new-internal-message', 'New internal message');
+			
+			self::add_term('dbm_relation:internal-message-groups', 'Internal message groups');
 			
 		}
 		

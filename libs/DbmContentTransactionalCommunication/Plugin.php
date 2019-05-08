@@ -25,6 +25,24 @@
 			
 		}
 		
+		public function register_hooks() {
+			//echo("\DbmContentTransactionalCommunication\Plugin::register_hooks<br />");
+			
+			parent::register_hooks();
+			
+			add_action('plugins_loaded', array($this, 'hook_plugins_loaded'), $this->_default_hook_priority);
+			
+			
+		}
+		
+		public function hook_plugins_loaded() {
+			//echo("\DbmContentTransactionalCommunication\Plugin::hook_plugins_loaded<br />");
+			
+			if(function_exists('dbm_content_add_owned_relationship')) {
+				dbm_content_add_owned_relationship_with_auto_add('internal-message-group', 'internal-message-groups');
+			}
+		}
+		
 		protected function create_additional_hooks() {
 			//echo("\DbmContentTransactionalCommunication\Plugin::create_additional_hooks<br />");
 			

@@ -153,4 +153,52 @@
 		
 		return $tc_id;
 	}
+	
+	function dbm_content_tc_create_internal_message_group($title, $user_ids = array()) {
+		$new_id = dbm_create_data($title, 'internal-message-group', 'admin-grouping/internal-message-groups');
+		
+		update_post_meta($new_id, 'users_to_notify', $user_ids);
+		
+		foreach($user_ids as $user_id) {
+			add_post_meta($new_id, 'user_access', $user_id);
+		}
+		
+		$args = array(
+			'ID' => $new_id,
+			'post_status' => 'private'
+		);
+		
+		wp_update_post($args);
+		
+		return $new_id;
+	}
+	
+	function dbm_content_tc_create_internal_message($title, $body, $from_user, $group_id = 0) {
+		
+		$new_id = dbm_create_data($title, 'internal-message', 'admin-grouping/internal-messages');
+		
+		$args = array(
+			'ID' => $new_id,
+			'post_content' => $body,
+			'post_author' => $from_user,
+			'post_status' => 'private'
+		);
+		
+		if($group_id > 0) {
+			$args['post_parent'] = $group_id;
+			$group_term = dbm_get_owned_relation($group_id, 'internal-message-group');
+			
+			$parent_term = dbm_get_relation_by_path('internal-message-groups');
+		
+			dbm_replace_relations($new_id, $parent_term, array($group_term->term_id));
+		}
+		
+		wp_update_post($args);
+		
+		return $new_id;
+	}
+	
+	function dbm_content_tc_notify_for_new_message($message_id) {
+		//METODO
+	}
 ?>
