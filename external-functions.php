@@ -201,6 +201,56 @@
 	}
 	
 	function dbm_content_tc_notify_for_new_message($message_id) {
-		//METODO
+		$group_query = dbm_new_query('dbm_data')->set_argument('post_status', 'private')->add_type_by_path('internal-message-group')->add_relations_from_post($message_id, 'internal-message-groups');
+		$group_id = $group_query->get_post_id();
+		
+		$url = null;
+		
+		$view_page_id = dbm_new_query('page')->add_relation_by_path('global-pages/view-internal-message')->get_post_id();
+		if($view_page_id) {
+			$url = get_permalink($view_page_id);
+			$url .= '?group='.$group_id.'&message='.$message_id;
+		}
+		
+		$message_post = get_post($message_id);
+		$message = apply_filters('the_content', get_post_field('post_content', $message_id));
+		
+		$from_user = get_user_by('id', $message_post->post_author);
+		
+		$replacements = array(
+			'link' => $url,
+			'message' => $message,
+			'title' => $message_post->post_title,
+			'from-email' => $from_user->user_email,
+			'from-name' => $from_user->display_name,
+			'group-id' => $group_id
+		);
+		
+		$email_query = dbm_new_query('dbm_additional')->add_relation_by_path('global-transactional-templates/new-internal-message');
+		$email_id = $email_query->get_post_id();
+		
+		$template = dbm_content_tc_get_template_with_replacements($email_id, $replacements);
+		
+		$communications = array();
+		
+		$user_ids = get_post_meta($group_id, 'users_to_notify', true);
+		foreach($user_ids as $user_id) {
+			if($user_id !== $from_user->ID || true) {
+				$current_user = get_user_by('id', $user_id);
+				$email = $current_user->user_email;
+			
+				$user_replacements = array(
+					'to-email' => $email,
+					'to-name' => $current_user->display_name,
+				);
+			
+				$title = $template['title'];
+				$body = $template['body'];
+			
+				$communications[] = dbm_content_tc_send_email($title, $body, $email, apply_filters('dbm_content_tc/default_from_email', get_option('admin_email')));
+			}
+		}
+		
+		return $communications;
 	}
 ?>

@@ -134,6 +134,8 @@
 			
 			self::add_term('dbm_relation:internal-message-groups', 'Internal message groups');
 			
+			$current_term_id = self::add_term('dbm_relation:global-pages', 'Global pages');
+			$current_term_id = self::add_term('dbm_relation:global-pages/view-internal-message', 'View internal message');
 		}
 		
 		public static function test_import() {
