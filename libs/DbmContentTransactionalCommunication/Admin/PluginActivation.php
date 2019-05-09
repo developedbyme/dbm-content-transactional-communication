@@ -132,6 +132,18 @@
 			self::add_term('dbm_relation:global-transactional-templates/verify-email', 'Verify email');
 			self::add_term('dbm_relation:global-transactional-templates/new-internal-message', 'New internal message');
 			
+			self::add_term('dbm_relation:internal-message-group-types', 'Internal message group types');
+			self::add_term('dbm_relation:internal-message-group-types/standard', 'Standard');
+			
+			self::add_term('dbm_relation:internal-message-group-status', 'Internal message status');
+			self::add_term('dbm_relation:internal-message-group-status/open', 'Open');
+			self::add_term('dbm_relation:internal-message-group-status/closed', 'Closed');
+			
+			self::add_term('dbm_relation:internal-message-types', 'Internal message types');
+			self::add_term('dbm_relation:internal-message-types/message', 'Message');
+			self::add_term('dbm_relation:internal-message-types/reopen-ticket', 'Reopen ticket');
+			self::add_term('dbm_relation:internal-message-types/close-ticket', 'Close ticket');
+			
 			self::add_term('dbm_relation:internal-message-groups', 'Internal message groups');
 			
 			$current_term_id = self::add_term('dbm_relation:global-pages', 'Global pages');

@@ -156,7 +156,7 @@
 		return $tc_id;
 	}
 	
-	function dbm_content_tc_create_internal_message_group($title, $user_ids = array()) {
+	function dbm_content_tc_create_internal_message_group($title, $user_ids = array(), $add_standard_settings = true) {
 		$new_id = dbm_create_data($title, 'internal-message-group', 'admin-grouping/internal-message-groups');
 		
 		update_post_meta($new_id, 'users_to_notify', $user_ids);
@@ -164,6 +164,11 @@
 		foreach($user_ids as $user_id) {
 			add_post_meta($new_id, 'user_access', $user_id);
 		}
+		
+		if($add_standard_settings) {
+			dbm_add_post_relation($new_id, 'internal-message-group-types/standard');
+		}
+		dbm_add_post_relation($new_id, 'internal-message-group-status/open');
 		
 		$args = array(
 			'ID' => $new_id,
@@ -175,7 +180,7 @@
 		return $new_id;
 	}
 	
-	function dbm_content_tc_create_internal_message($title, $body, $from_user, $group_id = 0) {
+	function dbm_content_tc_create_internal_message($title, $body, $from_user, $group_id = 0, $add_standard_settings = true) {
 		
 		$new_id = dbm_create_data($title, 'internal-message', 'admin-grouping/internal-messages');
 		
@@ -193,6 +198,10 @@
 			$parent_term = dbm_get_relation_by_path('internal-message-groups');
 		
 			dbm_replace_relations($new_id, $parent_term, array($group_term->term_id));
+		}
+		
+		if($add_standard_settings) {
+			dbm_add_post_relation($new_id, 'internal-message-types/message');
 		}
 		
 		wp_update_post($args);
