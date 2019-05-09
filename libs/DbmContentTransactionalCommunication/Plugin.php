@@ -48,6 +48,7 @@
 			
 			$this->add_additional_hook(new \DbmContentTransactionalCommunication\ChangePostHooks());
 			$this->add_additional_hook(new \DbmContentTransactionalCommunication\ApiActionHooks());
+			$this->add_additional_hook(new \DbmContentTransactionalCommunication\CustomRangeFilters());
 		}
 		
 		protected function create_rest_api_end_points() {
