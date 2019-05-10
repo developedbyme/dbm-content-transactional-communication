@@ -51,14 +51,30 @@
 			$post = get_post($post_id);
 			$encoded_data['title'] = $post->post_title;
 			
-			$user_ids = get_post_meta($post_id, user_access, false);
+			$user_ids = get_post_meta($post_id, 'user_access', false);
 			
 			$encoded_users = array();
 			foreach($user_ids as $user_id) {
 				$encoded_users[] = wprr_encode_user(get_user_by('id', $user_id));
 			}
 			
-			$encoded_data['users'] = $encoded_users; //METODO: encode users
+			$encoded_data['users'] = $encoded_users;
+			
+			$type_ids = dbm_get_post_relation($post_id, 'internal-message-group-types');
+			if(count($type_ids) > 0) {
+				$encoded_message['type'] = wprr_encode_term(get_term_by('id', $type_ids[0], 'dbm_relation'));
+			}
+			else {
+				$encoded_message['type'] = null;
+			}
+			
+			$status_ids = dbm_get_post_relation($post_id, 'internal-message-group-status');
+			if(count($status_ids) > 0) {
+				$encoded_message['status'] = wprr_encode_term(get_term_by('id', $status_ids[0], 'dbm_relation'));
+			}
+			else {
+				$encoded_message['status'] = null;
+			}
 			
 			return $encoded_data;
 		}
@@ -71,9 +87,18 @@
 			foreach($message_ids as $message_id) {
 				$encoded_message = array();
 				
+				$encoded_message['id'] = $message_id;
 				$encoded_message['body'] = apply_filters('the_content', get_post_field('post_content', $message_id));
-				$encoded_message['date'] = get_the_date('Y-m-d h:i:s', $message_id);
+				$encoded_message['date'] = get_the_date('Y-m-d H:i:s', $message_id);
 				$encoded_message['user'] = wprr_encode_user(get_user_by('id', get_post_field('post_author', $message_id)));
+				
+				$type_ids = dbm_get_post_relation($message_id, 'internal-message-types');
+				if(count($type_ids) > 0) {
+					$encoded_message['type'] = wprr_encode_term(get_term_by('id', $type_ids[0], 'dbm_relation'));
+				}
+				else {
+					$encoded_message['type'] = null;
+				}
 				
 				$encoded_messages[] = $encoded_message;
 			}
