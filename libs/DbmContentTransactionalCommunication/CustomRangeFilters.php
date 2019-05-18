@@ -93,12 +93,19 @@
 				$encoded_message['user'] = wprr_encode_user(get_user_by('id', get_post_field('post_author', $message_id)));
 				
 				$type_ids = dbm_get_post_relation($message_id, 'internal-message-types');
+				$type_id = 0;
+				$type_slug = null;
 				if(count($type_ids) > 0) {
-					$encoded_message['type'] = wprr_encode_term(get_term_by('id', $type_ids[0], 'dbm_relation'));
+					$type_id = $type_ids[0];
+					$encoded_message['type'] = wprr_encode_term(get_term_by('id', $type_id, 'dbm_relation'));
+					$type_slug = $encoded_message['type']['slug'];
+					$encoded_message = apply_filters(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/'.$type_slug, $encoded_message, $message_id, $type_slug, $data);
 				}
 				else {
 					$encoded_message['type'] = null;
 				}
+				
+				$encoded_message = apply_filters(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message', $encoded_message, $message_id, $type_slug, $data);
 				
 				$encoded_messages[] = $encoded_message;
 			}
