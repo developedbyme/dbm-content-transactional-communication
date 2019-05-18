@@ -244,7 +244,7 @@
 		
 		$user_ids = get_post_meta($group_id, 'users_to_notify', true);
 		foreach($user_ids as $user_id) {
-			if($user_id !== $from_user->ID || true) {
+			if($user_id !== $from_user->ID) {
 				$current_user = get_user_by('id', $user_id);
 				$email = $current_user->user_email;
 			
