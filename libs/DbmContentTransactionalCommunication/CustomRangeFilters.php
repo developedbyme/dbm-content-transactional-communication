@@ -60,28 +60,34 @@
 			
 			$encoded_data['users'] = $encoded_users;
 			
-			$type_ids = dbm_get_post_relation($post_id, 'internal-message-group-types');
-			if(count($type_ids) > 0) {
-				$encoded_message['type'] = wprr_encode_term(get_term_by('id', $type_ids[0], 'dbm_relation'));
-			}
-			else {
-				$encoded_message['type'] = null;
-			}
-			
 			$status_ids = dbm_get_post_relation($post_id, 'internal-message-group-status');
 			if(count($status_ids) > 0) {
-				$encoded_message['status'] = wprr_encode_term(get_term_by('id', $status_ids[0], 'dbm_relation'));
+				$encoded_data['status'] = wprr_encode_term(get_term_by('id', $status_ids[0], 'dbm_relation'));
 			}
 			else {
-				$encoded_message['status'] = null;
+				$encoded_data['status'] = null;
 			}
+			
+			$type_slug = null;
+			$type_ids = dbm_get_post_relation($post_id, 'internal-message-group-types');
+			if(count($type_ids) > 0) {
+				$type_term = get_term_by('id', $type_ids[0], 'dbm_relation');
+				$type_slug = $type_term->slug;
+				$encoded_data['type'] = wprr_encode_term($type_term);
+				$encoded_data = apply_filters(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message-group/'.$type_slug, $encoded_data, $post_id, $type_slug, $data);
+			}
+			else {
+				$encoded_data['type'] = null;
+			}
+			
+			$encoded_data = apply_filters(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message-group', $encoded_data, $post_id, $type_slug, $data);
 			
 			return $encoded_data;
 		}
 		
 		public function filter_encode_messagesInGroup($encoded_data, $post_id, $data) {
 			
-			$message_ids = dbm_new_query('dbm_data')->add_type_by_path('internal-message')->set_argument('post_status', 'private')->add_relations_from_post($post_id, 'internal-message-groups')->get_post_ids();
+			$message_ids = dbm_new_query('dbm_data')->add_type_by_path('internal-message')->set_argument('post_status', 'private')->set_argument('order', 'ASC')->add_relations_from_post($post_id, 'internal-message-groups')->get_post_ids();
 			
 			$encoded_messages = array();
 			foreach($message_ids as $message_id) {
