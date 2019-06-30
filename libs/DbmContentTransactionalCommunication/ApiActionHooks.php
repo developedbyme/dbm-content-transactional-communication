@@ -15,6 +15,8 @@
 			add_action('wprr/api_action/send-email-verification', array($this, 'hook_send_email_verification'), 10, 2);
 			add_action('wprr/api_action/verify-email', array($this, 'hook_verify_email'), 10, 2);
 			add_action('wprr/api_action/internal-message/reply', array($this, 'hook_internal_message_reply'), 10, 2);
+			add_action('wprr/api_action/internal-message/close', array($this, 'hook_internal_message_close'), 10, 2);
+			add_action('wprr/api_action/internal-message/re-open', array($this, 'hook_internal_message_re_open'), 10, 2);
 			
 		}
 
@@ -96,6 +98,42 @@
 			
 			$communication_ids = dbm_content_tc_notify_for_new_message($message_id);
 			$response_data['communicationIds'] = $communication_ids;
+		}
+		
+		public function hook_internal_message_close($data, &$response_data) {
+			//echo("\DbmContentTransactionalCommunication\ApiActionHooks::hook_internal_message_close<br />");
+			
+			$group_id = $data['groupId'];
+			$title = get_post($group_id)->post_title;
+			$body = $data['body'];
+			
+			//METODO: check that current user is allowed
+			
+			$current_user = (int)$data['userId'];
+			
+			$close_message_id = dbm_content_tc_create_internal_message($title, $body, $current_user_id, $group_id, false);
+			dbm_add_post_relation($close_message_id, 'internal-message-types/close-ticket');
+			dbm_set_single_relation_by_name($group_id, 'internal-message-group-status', 'closed');
+			
+			$response_data['messageId'] = $close_message_id;
+		}
+		
+		public function hook_internal_message_re_open($data, &$response_data) {
+			//echo("\DbmContentTransactionalCommunication\ApiActionHooks::hook_internal_message_re_open<br />");
+			
+			$group_id = $data['groupId'];
+			$title = get_post($group_id)->post_title;
+			$body = $data['body'];
+			
+			//METODO: check that current user is allowed
+			
+			$current_user = (int)$data['userId'];
+			
+			$close_message_id = dbm_content_tc_create_internal_message($title, $body, $current_user_id, $group_id, false);
+			dbm_add_post_relation($close_message_id, 'internal-message-types/reopen-ticket');
+			dbm_set_single_relation_by_name($group_id, 'internal-message-group-status', 'open');
+			
+			$response_data['messageId'] = $close_message_id;
 		}
 		
 		public static function test_import() {
