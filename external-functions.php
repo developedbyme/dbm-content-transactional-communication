@@ -108,6 +108,11 @@
 			$tc_id = dbm_content_tc_create_transactional_communication('email');
 		}
 		
+		$time_zone = get_option('timezone_string');
+		if($time_zone) {
+			date_default_timezone_set($time_zone);
+		}
+		
 		$current_date = new \DateTime();
 		
 		update_post_meta($tc_id, 'title', $title);
@@ -133,6 +138,11 @@
 	function dbm_content_tc_send_text_message($content, $to, $from, $tc_id = 0, $additional_data = null) {
 		if($tc_id === 0) {
 			$tc_id = dbm_content_tc_create_transactional_communication('text-message');
+		}
+		
+		$time_zone = get_option('timezone_string');
+		if($time_zone) {
+			date_default_timezone_set($time_zone);
 		}
 		
 		$current_date = new \DateTime();
