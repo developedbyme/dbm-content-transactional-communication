@@ -272,4 +272,16 @@
 		
 		return $communications;
 	}
+	
+	function dbmtc_get_internal_message_group($post_id) {
+		$internal_message_group = new \DbmContentTransactionalCommunication\InternalMessageGroup($post_id);
+		
+		return $internal_message_group;
+	}
+	
+	function dbmtc_get_internal_message($post_id) {
+		$internal_message = new \DbmContentTransactionalCommunication\InternalMessage($post_id);
+		
+		return $internal_message;
+	}
 ?>

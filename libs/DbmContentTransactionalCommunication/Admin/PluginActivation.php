@@ -143,6 +143,7 @@
 			self::add_term('dbm_relation:internal-message-types/message', 'Message');
 			self::add_term('dbm_relation:internal-message-types/reopen-ticket', 'Reopen ticket');
 			self::add_term('dbm_relation:internal-message-types/close-ticket', 'Close ticket');
+			self::add_term('dbm_relation:internal-message-types/change-comment', 'Change comment');
 			
 			self::add_term('dbm_relation:internal-message-groups', 'Internal message groups');
 			
