@@ -12,8 +12,13 @@
 			
 			add_filter('wprr/range_query/myInternalMessageGroups', array($this, 'filter_query_myInternalMessageGroups'), 10, 2);
 			add_filter('wprr/range_query/groupsWithUser', array($this, 'filter_query_groupsWithUser'), 10, 2);
+			add_filter('wprr/range_query/messagesInGroup', array($this, 'filter_query_messagesInGroup'), 10, 2);
+			
 			add_filter('wprr/range_encoding/internalMessageGroup', array($this, 'filter_encode_internalMessageGroup'), 10, 3);
 			add_filter('wprr/range_encoding/messagesInGroup', array($this, 'filter_encode_messagesInGroup'), 10, 3);
+			add_filter('wprr/range_encoding/message', array($this, 'filter_encode_message'), 10, 3);
+			
+			add_filter(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/change-comment', array($this, 'filter_encode_internal_message_group_change_comment'), 10, 2);
 		}
 		
 		public function filter_query_groupsWithUser($query_args, $data) {
@@ -23,6 +28,18 @@
 			
 			$dbm_query = dbm_new_query($query_args);
 			$dbm_query->add_meta_query('user_access', $user_id);
+			
+			return $dbm_query->get_query_args();
+		}
+		
+		public function filter_query_messagesInGroup($query_args, $data) {
+			//echo("\DbmContentTransactionalCommunication\CustomRangeFilters::filter_query_messagesInGroup<br />");
+			
+			$group = (int)$data['group'];
+			
+			$dbm_query = dbm_new_query($query_args);
+			$dbm_query->add_type_by_path('internal-message');
+			$dbm_query->add_relations_from_post($group, 'internal-message-groups');
 			
 			return $dbm_query->get_query_args();
 		}
@@ -117,6 +134,44 @@
 			}
 			
 			$encoded_data['messages'] = $encoded_messages;
+			
+			return $encoded_data;
+		}
+		
+		public function filter_encode_message($encoded_data, $post_id, $data) {
+			
+			$message_id = $post_id;
+			
+			$encoded_data['id'] = $message_id;
+			$encoded_data['body'] = apply_filters('the_content', get_post_field('post_content', $message_id));
+			$encoded_data['date'] = get_the_date('Y-m-d H:i:s', $message_id);
+			$encoded_data['user'] = wprr_encode_user(get_user_by('id', get_post_field('post_author', $message_id)));
+			
+			$type_ids = dbm_get_post_relation($message_id, 'internal-message-types');
+			$type_id = 0;
+			$type_slug = null;
+			if(count($type_ids) > 0) {
+				$type_id = $type_ids[0];
+				$encoded_data['type'] = wprr_encode_term(get_term_by('id', $type_id, 'dbm_relation'));
+				$type_slug = $encoded_data['type']['slug'];
+				$encoded_data = apply_filters(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/'.$type_slug, $encoded_data, $message_id, $type_slug, $data);
+			}
+			else {
+				$encoded_data['type'] = null;
+			}
+			
+			$encoded_data = apply_filters(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message', $encoded_data, $message_id, $type_slug, $data);
+			
+			
+			return $encoded_data;
+		}
+		
+		public function filter_encode_internal_message_group_change_comment($encoded_data, $message_id) {
+			
+			$encoded_data['oldValue'] = get_post_meta($message_id, 'oldValue', true);
+			$encoded_data['newValue'] = get_post_meta($message_id, 'newValue', true);
+			$encoded_data['changeType'] = get_post_meta($message_id, 'changeType', true);
+			$encoded_data['field'] = get_post_meta($message_id, 'field', true);
 			
 			return $encoded_data;
 		}
