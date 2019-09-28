@@ -21,16 +21,16 @@
 		}
 		
 		public function add_type_to_post() {
-			echo("\DbmContentTransactionalCommunication\InternalMessageGroup::add_type_to_post<br />");
-			$dbm_post = dbm_get_post($this->id);
+			//echo("\DbmContentTransactionalCommunication\InternalMessageGroup::add_type_to_post<br />");
+			
+			$post_id = $this->id;
+			
+			$dbm_post = dbm_get_post($post_id);
 			$dbm_post->add_type_by_name('internal-message-group');
 			
-			//MENOTE: resaving it triggers setup of owned relations
-			$args = array(
-				'ID' => $this->id
-			);
-			
-			wp_update_post($args);
+			$post = get_post($post_id);
+			$dbm_content_object = dbm_get_content_object_for_type_and_relation($post_id);
+			do_action('dbm_content/parse_dbm_content', $dbm_content_object, $post_id, $post);
 			
 			$group_term = $dbm_post->dbm_get_owned_relation('internal-message-group');
 			if(!$group_term) {
