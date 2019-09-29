@@ -16,6 +16,7 @@
 			
 			add_filter('wprr/range_encoding/internalMessageGroup', array($this, 'filter_encode_internalMessageGroup'), 10, 3);
 			add_filter('wprr/range_encoding/messagesInGroup', array($this, 'filter_encode_messagesInGroup'), 10, 3);
+			add_filter('wprr/range_encoding/messagesCount', array($this, 'filter_encode_messagesCount'), 10, 3);
 			add_filter('wprr/range_encoding/message', array($this, 'filter_encode_message'), 10, 3);
 			
 			add_filter(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/change-comment', array($this, 'filter_encode_internal_message_group_change_comment'), 10, 2);
@@ -134,6 +135,14 @@
 			}
 			
 			$encoded_data['messages'] = $encoded_messages;
+			
+			return $encoded_data;
+		}
+		
+		public function filter_encode_messagesCount($encoded_data, $post_id, $data) {
+			
+			$message_ids = dbm_new_query('dbm_data')->add_type_by_path('internal-message')->set_argument('post_status', 'private')->set_argument('order', 'ASC')->add_relations_from_post($post_id, 'internal-message-groups')->get_post_ids();
+			$encoded_data['numberOfMessages'] = count($message_ids);
 			
 			return $encoded_data;
 		}
