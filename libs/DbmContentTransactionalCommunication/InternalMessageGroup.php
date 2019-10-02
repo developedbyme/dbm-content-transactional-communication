@@ -21,7 +21,7 @@
 		}
 		
 		public function add_type_to_post() {
-			//echo("\DbmContentTransactionalCommunication\InternalMessageGroup::add_type_to_post<br />");
+			echo("\DbmContentTransactionalCommunication\InternalMessageGroup::add_type_to_post<br />");
 			
 			$post_id = $this->id;
 			
@@ -33,6 +33,8 @@
 			do_action('dbm_content/parse_dbm_content', $dbm_content_object, $post_id, $post);
 			
 			$group_term = $dbm_post->dbm_get_owned_relation('internal-message-group');
+			var_dump($group_term);
+			
 			if(!$group_term) {
 				return 0;
 			}
@@ -40,6 +42,8 @@
 		}
 		
 		public function ensure_group_term_id_exists() {
+			echo("\DbmContentTransactionalCommunication\InternalMessageGroup::ensure_group_term_id_exists<br />");
+			
 			$group_term_id = $this->get_group_term_id();
 			
 			if(!$group_term_id) {
@@ -54,6 +58,7 @@
 		}
 		
 		public function create_message($type, $body, $from_user) {
+			echo("\DbmContentTransactionalCommunication\InternalMessageGroup::create_message<br />");
 			$group_post = get_post($this->id);
 			
 			$new_id = dbm_create_data($group_post->post_title, 'internal-message', 'admin-grouping/internal-messages');
