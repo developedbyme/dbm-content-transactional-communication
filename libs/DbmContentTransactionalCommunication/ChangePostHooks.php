@@ -23,7 +23,7 @@
 			
 		}
 		
-		public function hook_dbmtc_commentChange($data, $post_id, &$logger) {
+		public function hook_dbmtc_commentChange($data, $post_id, $logger) {
 			var_dump('\DbmContentTransactionalCommunication\ChangePostHooks::hook_dbmtc_commentChange');
 			
 			$internal_message_group = dbmtc_get_internal_message_group($post_id);
