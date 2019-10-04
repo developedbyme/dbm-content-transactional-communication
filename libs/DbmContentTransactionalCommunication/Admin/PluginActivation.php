@@ -144,6 +144,11 @@
 			self::add_term('dbm_relation:internal-message-types/reopen-ticket', 'Reopen ticket');
 			self::add_term('dbm_relation:internal-message-types/close-ticket', 'Close ticket');
 			self::add_term('dbm_relation:internal-message-types/change-comment', 'Change comment');
+			self::add_term('dbm_relation:internal-message-types/comment', 'Comment');
+			self::add_term('dbm_relation:internal-message-types/request-for-data', 'Request for data');
+			
+			self::add_term('dbm_relation:internal-message-status', 'Internal message status');
+			self::add_term('dbm_relation:internal-message-status/removed', 'Removed');
 			
 			self::add_term('dbm_relation:internal-message-groups', 'Internal message groups');
 			
