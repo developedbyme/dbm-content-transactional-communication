@@ -11,6 +11,17 @@
 			$this->id = $id;
 		}
 		
+		public function get_id() {
+			return $this->id;
+		}
+		
+		public function update_meta($field, $value) {
+			
+			update_post_meta($this->id, $field, $value);
+			
+			return $this;
+		}
+		
 		public function get_group_term_id() {
 			$group_term = dbm_get_owned_relation($this->id, 'internal-message-group');
 			if(!$group_term) {
@@ -82,6 +93,18 @@
 			$message = dbmtc_get_internal_message($new_id);
 			
 			return $message;
+		}
+		
+		public function get_view_url() {
+			$id = dbm_get_global_page_id('view-internal-message');
+			
+			if(!$id) {
+				return null;
+			}
+			$permalink = get_permalink($id);
+			$permalink = add_query_arg('group', $this->id, $permalink);
+			
+			return $permalink;
 		}
 		
 		public static function test_import() {

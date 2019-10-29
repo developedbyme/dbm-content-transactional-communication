@@ -273,6 +273,16 @@
 		return $communications;
 	}
 	
+	function dbmtc_create_group($title, $type = null, $user_ids = array()) {
+		$new_id = dbm_content_tc_create_internal_message_group($title, $user_ids, false);
+		
+		if($type) {
+			dbm_add_post_relation($new_id, 'internal-message-group-types/'.$type);
+		}
+		
+		return dbmtc_get_internal_message_group($new_id);
+	}
+	
 	function dbmtc_get_internal_message_group($post_id) {
 		$internal_message_group = new \DbmContentTransactionalCommunication\InternalMessageGroup($post_id);
 		
@@ -283,5 +293,19 @@
 		$internal_message = new \DbmContentTransactionalCommunication\InternalMessage($post_id);
 		
 		return $internal_message;
+	}
+	
+	function dbmtc_send_email_template($template_slug, $to, $from, $replacements = array(), $additional_data = array()) {
+		
+		$template_id = dbm_new_query('dbm_additional')->add_relation_by_path($template_slug)->get_post_id();
+		
+		if(!$template_id) {
+			return 0;
+		}
+		
+		$template = dbm_content_tc_get_template_with_replacements($template_id, $replacements);
+		$new_id = dbm_content_tc_send_email($template['title'], $template['body'], $to, $from, 0, $additional_data);
+		
+		return $new_id;
 	}
 ?>
