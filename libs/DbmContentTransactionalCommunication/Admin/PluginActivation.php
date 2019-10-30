@@ -139,6 +139,10 @@
 			self::add_term('dbm_relation:internal-message-group-status/open', 'Open');
 			self::add_term('dbm_relation:internal-message-group-status/closed', 'Closed');
 			
+			self::add_term('dbm_relation:internal-message-group-flags', 'Internal message flags');
+			self::add_term('dbm_relation:internal-message-group-flags/unassigned', 'Unassigned');
+			self::add_term('dbm_relation:internal-message-group-flags/assigned', 'Assigned');
+			
 			self::add_term('dbm_relation:internal-message-types', 'Internal message types');
 			self::add_term('dbm_relation:internal-message-types/message', 'Message');
 			self::add_term('dbm_relation:internal-message-types/reopen-ticket', 'Reopen ticket');
@@ -146,6 +150,9 @@
 			self::add_term('dbm_relation:internal-message-types/change-comment', 'Change comment');
 			self::add_term('dbm_relation:internal-message-types/comment', 'Comment');
 			self::add_term('dbm_relation:internal-message-types/request-for-data', 'Request for data');
+			self::add_term('dbm_relation:internal-message-types/user-assigned', 'User assigned');
+			self::add_term('dbm_relation:internal-message-types/user-unassigned', 'User unassigned');
+			self::add_term('dbm_relation:internal-message-types/needs-to-be-assigned', 'Needs to be assigned');
 			
 			self::add_term('dbm_relation:internal-message-status', 'Internal message status');
 			self::add_term('dbm_relation:internal-message-status/removed', 'Removed');
