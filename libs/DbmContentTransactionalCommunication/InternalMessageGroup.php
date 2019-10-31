@@ -56,10 +56,7 @@
 			
 			$message->update_meta('assignedUser', $user_id);
 			
-			$users = get_post_meta($this->id, 'assignedUsers', true);
-			if(!$users) {
-				$users = array();
-			}
+			$users = $this->get_assigned_users();
 			$users[] = $user_id;
 			update_post_meta($this->id, 'assignedUser', $users);
 			
@@ -71,9 +68,29 @@
 			
 			$message->update_meta('unassignedUser', $user_id);
 			
-			//METODO: update this group
+			$users = $this->get_assigned_users();
+			
+			if(($key = array_search($user_id, $users)) !== false) {
+				unset($users[$key]);
+				update_post_meta($this->id, 'assignedUser', $users);
+			}
 			
 			return $message;
+		}
+		
+		public function add_notification_for_user($user_id) {
+			$users = $this->get_users_to_notify();
+			$users[] = $user_id;
+			update_post_meta($this->id, 'users_to_notify', $users);
+		}
+		
+		public function remove_notification_for_user($user_id) {
+			$users = $this->get_users_to_notify();
+			
+			if(($key = array_search($user_id, $users)) !== false) {
+				unset($users[$key]);
+				update_post_meta($this->id, 'users_to_notify', $users);
+			}
 		}
 		
 		public function request_data($data, $body = '', $by_user = 0) {
