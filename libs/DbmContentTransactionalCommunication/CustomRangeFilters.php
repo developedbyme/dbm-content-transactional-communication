@@ -117,7 +117,14 @@
 				$encoded_message['id'] = $message_id;
 				$encoded_message['body'] = apply_filters('the_content', get_post_field('post_content', $message_id));
 				$encoded_message['date'] = get_the_date('Y-m-d H:i:s', $message_id);
-				$encoded_message['user'] = wprr_encode_user(get_user_by('id', get_post_field('post_author', $message_id)));
+				
+				$author_id = (int)get_post_field('post_author', $message_id);
+				if($author_id) {
+					$encoded_message['user'] = wprr_encode_user(get_user_by('id', $author_id));
+				}
+				else {
+					$encoded_message['user'] = null;
+				}
 				
 				$type_ids = dbm_get_post_relation($message_id, 'internal-message-types');
 				$type_id = 0;
@@ -192,7 +199,7 @@
 			
 			$user_id = (int)get_post_meta($message_id, 'assignedUser', true);
 			
-			$encoded_data['user'] = wprr_encode_user($user_id);
+			$encoded_data['assignedUser'] = wprr_encode_user(get_user_by('id', $user_id));
 			
 			return $encoded_data;
 		}
@@ -201,7 +208,7 @@
 			
 			$user_id = (int)get_post_meta($message_id, 'unassignedUser', true);
 			
-			$encoded_data['user'] = wprr_encode_user($user_id);
+			$encoded_data['unassignedUser'] = wprr_encode_user(get_user_by('id', $user_id));
 			
 			return $encoded_data;
 		}

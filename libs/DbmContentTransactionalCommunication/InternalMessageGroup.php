@@ -139,6 +139,7 @@
 		
 		public function create_message($type, $body, $from_user) {
 			//echo("\DbmContentTransactionalCommunication\InternalMessageGroup::create_message<br />");
+			
 			$group_post = get_post($this->id);
 			
 			$new_id = dbm_create_data($group_post->post_title, 'internal-message', 'admin-grouping/internal-messages');
