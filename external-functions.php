@@ -270,6 +270,8 @@
 			}
 		}
 		
+		add_post_meta($message_id, 'sent_notifications', array('time' => time(), 'communications' => $communications));
+		
 		return $communications;
 	}
 	

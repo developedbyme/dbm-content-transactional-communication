@@ -22,6 +22,10 @@
 			return $this;
 		}
 		
+		public function notify() {
+			dbm_content_tc_notify_for_new_message($this->id);
+		}
+		
 		public static function test_import() {
 			echo("Imported \DbmContentTransactionalCommunication\InternalMessage<br />");
 		}

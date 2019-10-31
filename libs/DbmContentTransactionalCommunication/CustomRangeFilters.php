@@ -20,6 +20,9 @@
 			add_filter('wprr/range_encoding/message', array($this, 'filter_encode_message'), 10, 3);
 			
 			add_filter(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/change-comment', array($this, 'filter_encode_internal_message_group_change_comment'), 10, 2);
+			add_filter(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/user-assigned', array($this, 'filter_encode_internal_message_user_assigned'), 10, 2);
+			add_filter(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/user-unassigned', array($this, 'filter_encode_internal_message_user_unassigned'), 10, 2);
+			add_filter(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/request-for-data', array($this, 'filter_encode_internal_message_request_for_data'), 10, 2);
 		}
 		
 		public function filter_query_groupsWithUser($query_args, $data) {
@@ -181,6 +184,33 @@
 			$encoded_data['newValue'] = get_post_meta($message_id, 'newValue', true);
 			$encoded_data['changeType'] = get_post_meta($message_id, 'changeType', true);
 			$encoded_data['field'] = get_post_meta($message_id, 'field', true);
+			
+			return $encoded_data;
+		}
+		
+		public function filter_encode_internal_message_user_assigned($encoded_data, $message_id) {
+			
+			$user_id = (int)get_post_meta($message_id, 'assignedUser', true);
+			
+			$encoded_data['user'] = wprr_encode_user($user_id);
+			
+			return $encoded_data;
+		}
+		
+		public function filter_encode_internal_message_user_unassigned($encoded_data, $message_id) {
+			
+			$user_id = (int)get_post_meta($message_id, 'unassignedUser', true);
+			
+			$encoded_data['user'] = wprr_encode_user($user_id);
+			
+			return $encoded_data;
+		}
+		
+		public function filter_encode_internal_message_request_for_data($encoded_data, $message_id) {
+			
+			$requested_data = get_post_meta($message_id, 'requestedData', true);
+			
+			$encoded_data['requestedData'] = $requested_data;
 			
 			return $encoded_data;
 		}

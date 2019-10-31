@@ -31,6 +31,59 @@
 			return $group_term->term_id;
 		}
 		
+		public function get_users_to_notify() {
+			$users = get_post_meta($group_id, 'users_to_notify', true);
+			
+			if(!$users) {
+				$users = array();
+			}
+			
+			return $users;
+		}
+		
+		public function get_assigned_users() {
+			$users = get_post_meta($this->id, 'assignedUsers', true);
+			
+			if(!$users) {
+				$users = array();
+			}
+			
+			return $users;
+		}
+		
+		public function assign_user($user_id, $body = '', $by_user = 0) {
+			$message = $this->create_message('internal-message-types/user-assigned', $body, $by_user);
+			
+			$message->update_meta('assignedUser', $user_id);
+			
+			$users = get_post_meta($this->id, 'assignedUsers', true);
+			if(!$users) {
+				$users = array();
+			}
+			$users[] = $user_id;
+			update_post_meta($this->id, 'assignedUser', $users);
+			
+			return $message;
+		}
+		
+		public function unassign_user($user_id, $body = '', $by_user = 0) {
+			$message = $this->create_message('internal-message-types/user-unassigned', $body, $by_user);
+			
+			$message->update_meta('unassignedUser', $user_id);
+			
+			//METODO: update this group
+			
+			return $message;
+		}
+		
+		public function request_data($data, $body = '', $by_user = 0) {
+			$message = $this->create_message('internal-message-types/request-for-data', $body, $by_user);
+			
+			$message->update_meta('requestedData', $data);
+			
+			return $message;
+		}
+		
 		public function add_type_to_post() {
 			//echo("\DbmContentTransactionalCommunication\InternalMessageGroup::add_type_to_post<br />");
 			

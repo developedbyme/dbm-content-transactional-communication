@@ -18,6 +18,8 @@
 			add_action('wprr/api_action/internal-message/close', array($this, 'hook_internal_message_close'), 10, 2);
 			add_action('wprr/api_action/internal-message/re-open', array($this, 'hook_internal_message_re_open'), 10, 2);
 			
+			add_action('wprr/api_action/internal-message/change-assignment', array($this, 'hook_internal_message_change_assignment'), 10, 2);
+			add_action('wprr/api_action/internal-message/request-data', array($this, 'hook_internal_message_request_data'), 10, 2);
 		}
 
 		public function hook_send_email_verification($data, &$response_data) {
@@ -134,6 +136,51 @@
 			dbm_set_single_relation_by_name($group_id, 'internal-message-group-status', 'open');
 			
 			$response_data['messageId'] = $close_message_id;
+		}
+		
+		public function hook_internal_message_change_assignment($data, &$response_data) {
+			$group_id = $data['groupId'];
+			$title = get_post($group_id)->post_title;
+			$body = $data['body'];
+			
+			$current_user = (int)$data['userId'];
+			
+			$assign_users = $data['assignUsers'];
+			$unassign_users = $data['unassignUsers'];
+			
+			$group = dbmtc_get_internal_message_group($group_id);
+			
+			$new_messages = array();
+			
+			if($assign_users) {
+				foreach($assign_users as $user_id) {
+					$new_messages[] = $group->assign_user($user_id, $body, $current_user);
+				}
+			}
+			
+			if($unassign_users) {
+				foreach($unassign_users as $user_id) {
+					$new_messages[] = $group->unassign_user($user_id, $body, $current_user);
+				}
+			}
+		}
+		
+		public function hook_internal_message_request_data($data, &$response_data) {
+			$group_id = $data['groupId'];
+			$title = get_post($group_id)->post_title;
+			$body = $data['body'];
+			
+			$current_user = (int)$data['userId'];
+			
+			$requested_data = $data['requestedData'];
+			
+			$group = dbmtc_get_internal_message_group($group_id);
+			
+			$message = $group->request_data($requested_data);
+			
+			if(!(isset($data['skipNotify']) && $data['skipNotify'])) {
+				$message->notify();
+			}
 		}
 		
 		public static function test_import() {
