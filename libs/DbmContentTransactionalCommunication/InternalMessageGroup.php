@@ -101,6 +101,16 @@
 			return $message;
 		}
 		
+		public function try_to_auto_assign() {
+			$assigned_users = $this->get_assigned_users();
+			if(empty($assigned_users)) {
+				$new_assigned_user = apply_filters('dbmtc/auto_assigned_user_for_group', 0, $this->id, $this);
+				if($new_assigned_user) {
+					$this->assign_user($new_assigned_user);
+				}
+			}
+		}
+		
 		public function add_type_to_post() {
 			//echo("\DbmContentTransactionalCommunication\InternalMessageGroup::add_type_to_post<br />");
 			
