@@ -31,8 +31,18 @@
 			return $group_term->term_id;
 		}
 		
+		public function get_users_with_access() {
+			$users = get_post_meta($this->id, 'user_access', false);
+			
+			if(!$users) {
+				$users = array();
+			}
+			
+			return $users;
+		}
+		
 		public function get_users_to_notify() {
-			$users = get_post_meta($group_id, 'users_to_notify', true);
+			$users = get_post_meta($this->id, 'users_to_notify', true);
 			
 			if(!$users) {
 				$users = array();
@@ -42,7 +52,7 @@
 		}
 		
 		public function get_assigned_users() {
-			$users = get_post_meta($this->id, 'assignedUsers', true);
+			$users = get_post_meta($this->id, 'assigned_users', true);
 			
 			if(!$users) {
 				$users = array();
@@ -58,7 +68,7 @@
 			
 			$users = $this->get_assigned_users();
 			$users[] = $user_id;
-			update_post_meta($this->id, 'assignedUser', $users);
+			update_post_meta($this->id, 'assigned_users', $users);
 			
 			return $message;
 		}
@@ -72,7 +82,7 @@
 			
 			if(($key = array_search($user_id, $users)) !== false) {
 				unset($users[$key]);
-				update_post_meta($this->id, 'assignedUser', $users);
+				update_post_meta($this->id, 'assigned_users', $users);
 			}
 			
 			return $message;
@@ -106,9 +116,11 @@
 			if(empty($assigned_users)) {
 				$new_assigned_user = apply_filters('dbmtc/auto_assigned_user_for_group', 0, $this->id, $this);
 				if($new_assigned_user) {
-					$this->assign_user($new_assigned_user);
+					return $this->assign_user($new_assigned_user);
 				}
 			}
+			
+			return null;
 		}
 		
 		public function add_type_to_post() {

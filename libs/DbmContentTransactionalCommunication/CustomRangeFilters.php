@@ -67,19 +67,23 @@
 			return $dbm_query->get_query_args();
 		}
 		
-		public function filter_encode_internalMessageGroup($encoded_data, $post_id, $data) {
-			
-			$post = get_post($post_id);
-			$encoded_data['title'] = $post->post_title;
-			
-			$user_ids = get_post_meta($post_id, 'user_access', false);
-			
+		protected function encode_users($user_ids) {
 			$encoded_users = array();
 			foreach($user_ids as $user_id) {
 				$encoded_users[] = wprr_encode_user(get_user_by('id', $user_id));
 			}
+			return $encoded_users;
+		}
+		
+		public function filter_encode_internalMessageGroup($encoded_data, $post_id, $data) {
 			
-			$encoded_data['users'] = $encoded_users;
+			$post = get_post($post_id);
+			$message_group = dbmtc_get_internal_message_group($post_id);
+			$encoded_data['title'] = $post->post_title;
+			
+			$encoded_data['users'] = $this->encode_users($message_group->get_users_with_access());
+			$encoded_data['notifiedUsers'] = $this->encode_users($message_group->get_users_to_notify());
+			$encoded_data['assignedUsers'] = $this->encode_users($message_group->get_assigned_users());
 			
 			$status_ids = dbm_get_post_relation($post_id, 'internal-message-group-status');
 			if(count($status_ids) > 0) {
