@@ -79,7 +79,7 @@
 			$return_object = array();
 			
 			$return_object['key'] = get_post_meta($post_id, 'dbmtc_key', true);
-			$return_object['value'] = get_post_meta($field_id, 'dbmtc_value', true);
+			$return_object['value'] = get_post_meta($post_id, 'dbmtc_value', true);
 			
 			$type = dbm_get_single_post_relation($post_id, 'field-type');
 			if($type) {

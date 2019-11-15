@@ -56,6 +56,11 @@
 			
 			$api_namespace = 'dbm-content-transactional-communication';
 			
+			$current_end_point = new \DbmContentTransactionalCommunication\RestApi\UploadFileForFieldEndpoint();
+			$current_end_point->add_headers(array('Access-Control-Allow-Origin' => '*'));
+			$current_end_point->setup('internal-message-group/(?P<group>\d+)/field/(?P<field>[a-zA-Z0-9_\\-]+)/upload', $api_namespace, 1, 'POST');
+			$this->_rest_api_end_points[] = $current_end_point;
+			
 			$current_end_point = new \DbmContentTransactionalCommunication\OddCore\RestApi\ReactivatePluginEndpoint();
 			$current_end_point->set_plugin($this);
 			$current_end_point->add_headers(array('Access-Control-Allow-Origin' => '*'));

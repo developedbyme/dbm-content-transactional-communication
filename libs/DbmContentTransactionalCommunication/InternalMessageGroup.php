@@ -61,6 +61,10 @@
 			return $users;
 		}
 		
+		public function get_field_id($key) {
+			return dbm_new_query('dbm_data')->set_argument('post_status', 'private')->add_type_by_path('internal-message-group-field')->add_relations_from_post($this->id, 'internal-message-groups')->add_meta_query('dbmtc_key', $key)->get_post_id();
+		}
+		
 		public function assign_user($user_id, $body = '', $by_user = 0) {
 			$message = $this->create_message('internal-message-types/user-assigned', $body, $by_user);
 			
@@ -230,6 +234,19 @@
 				
 				wp_update_post($args);
 			}
+		}
+		
+		public function set_field($key, $value) {
+			$field_id = dbm_new_query('dbm_data')->set_argument('post_status', 'private')->add_type_by_path('internal-message-group-field')->add_relations_from_post($this->id, 'internal-message-groups')->add_meta_query('dbmtc_key', $key)->get_post_id();
+			if(!$field_id) {
+				trigger_error('No field for key '.$key, E_USER_ERROR);
+				return;
+			}
+			
+			$original_value = get_post_meta($field_id, 'dbmtc_value', true);
+			update_post_meta($field_id, 'dbmtc_value', $value);
+			
+			//METODO: add message for field set or changed
 		}
 		
 		public function get_view_url() {
