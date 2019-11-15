@@ -75,6 +75,25 @@
 			return $encoded_users;
 		}
 		
+		protected function _encode_field($post_id) {
+			$return_object = array();
+			
+			$return_object['key'] = get_post_meta($post_id, 'dbmtc_key', true);
+			$return_object['value'] = get_post_meta($field_id, 'dbmtc_value', true);
+			
+			$type = dbm_get_single_post_relation($post_id, 'field-type');
+			if($type) {
+				$return_object['type'] = wprr_encode_term(get_term_by('id', $type, 'dbm_relation'));
+			}
+			else {
+				$return_object['type'] = null;
+			}
+			
+			//METODO: add filter for encoding
+			
+			return $return_object;
+		}
+		
 		public function filter_encode_internalMessageGroup($encoded_data, $post_id, $data) {
 			
 			$post = get_post($post_id);
@@ -92,6 +111,13 @@
 			else {
 				$encoded_data['status'] = null;
 			}
+			
+			$encoded_fields = array();
+			$field_ids = dbm_new_query('dbm_data')->set_argument('post_status', 'private')->add_type_by_path('internal-message-group-field')->add_relations_from_post($post_id, 'internal-message-groups')->get_post_ids();
+			foreach($field_ids as $field_id) {
+				$encoded_fields[] = $this->_encode_field($field_id);
+			}
+			$encoded_data['fields'] = $encoded_fields;
 			
 			$type_slug = null;
 			$type_ids = dbm_get_post_relation($post_id, 'internal-message-group-types');
@@ -219,9 +245,8 @@
 		
 		public function filter_encode_internal_message_request_for_data($encoded_data, $message_id) {
 			
-			$requested_data = get_post_meta($message_id, 'requestedData', true);
-			
-			$encoded_data['requestedData'] = $requested_data;
+			$encoded_data['requestedData'] = get_post_meta($message_id, 'requestedData', true);
+			$encoded_data['fields'] = get_post_meta($message_id, 'fields', true);
 			
 			return $encoded_data;
 		}

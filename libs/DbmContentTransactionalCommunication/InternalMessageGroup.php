@@ -69,6 +69,8 @@
 			$users = $this->get_assigned_users();
 			$users[] = $user_id;
 			update_post_meta($this->id, 'assigned_users', $users);
+			$this->add_notification_for_user($user_id);
+			$this->add_user_access($user_id);
 			
 			return $message;
 		}
@@ -84,6 +86,7 @@
 				unset($users[$key]);
 				update_post_meta($this->id, 'assigned_users', $users);
 			}
+			$this->remove_notification_for_user($user_id);
 			
 			return $message;
 		}
@@ -103,10 +106,27 @@
 			}
 		}
 		
-		public function request_data($data, $body = '', $by_user = 0) {
+		public function add_user_access($user_id) {
+			add_post_meta($this->id, 'user_access', $user_id);
+		}
+		
+		public function remove_user_access($user_id) {
+			delete_post_meta($this->id, 'user_access', $user_id);
+		}
+		
+		public function request_data($fields, $body = '', $by_user = 0) {
 			$message = $this->create_message('internal-message-types/request-for-data', $body, $by_user);
 			
-			$message->update_meta('requestedData', $data);
+			$message->update_meta('requestedData', $fields);
+			
+			$fields_keys = array();
+			
+			foreach($fields as $field) {
+				$fields_keys[] = $field['field'];
+				$this->create_field($field['field'], $field['type']);
+			}
+			
+			$message->update_meta('fields', $fields_keys);
 			
 			return $message;
 		}
@@ -171,6 +191,7 @@
 			$parent_term = dbm_get_relation_by_path('internal-message-groups');
 		
 			dbm_replace_relations($new_id, $parent_term, array($group_id));
+			dbm_add_post_relation($new_id, $type);
 			
 			$args = array(
 				'ID' => $new_id,
@@ -179,13 +200,36 @@
 				'post_status' => 'private'
 			);
 			
-			dbm_add_post_relation($new_id, $type);
-			
 			wp_update_post($args);
 			
 			$message = dbmtc_get_internal_message($new_id);
 			
 			return $message;
+		}
+		
+		public function create_field($key, $type, $value = null) {
+			$field_id = dbm_new_query('dbm_data')->set_argument('post_status', 'private')->add_type_by_path('internal-message-group-field')->add_relations_from_post($this->id, 'internal-message-groups')->add_meta_query('dbmtc_key', $key)->get_post_id();
+			if(!$field_id) {
+				$group_post = get_post($this->id);
+				
+				$field_id = dbm_create_data($group_post->post_title.' - '.$key, 'internal-message-group-field', 'admin-grouping/internal-message-group-fields');
+				
+				$group_id = $this->ensure_group_term_id_exists();
+				$parent_term = dbm_get_relation_by_path('internal-message-groups');
+				dbm_replace_relations($field_id, $parent_term, array($group_id));
+				
+				dbm_add_post_relation($field_id, 'field-type/'.$type);
+				
+				update_post_meta($field_id, 'dbmtc_key', $key);
+				update_post_meta($field_id, 'dbmtc_value', $value);
+				
+				$args = array(
+					'ID' => $field_id,
+					'post_status' => 'private'
+				);
+				
+				wp_update_post($args);
+			}
 		}
 		
 		public function get_view_url() {

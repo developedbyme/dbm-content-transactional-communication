@@ -100,12 +100,14 @@
 			
 			self::add_term('dbm_type:internal-message', 'Internal message');
 			self::add_term('dbm_type:internal-message-group', 'Internal message group');
+			self::add_term('dbm_type:internal-message-group-field', 'Internal message group field');
 			
 			self::add_term('dbm_type:admin-grouping', 'Admin grouping');
 			self::add_term('dbm_type:admin-grouping/sent-communications', 'Sent communications');
 			self::add_term('dbm_type:admin-grouping/address-verifications', 'Address verifications');
 			self::add_term('dbm_type:admin-grouping/internal-messages', 'Internal messages');
 			self::add_term('dbm_type:admin-grouping/internal-message-groups', 'Internal message groups');
+			self::add_term('dbm_type:admin-grouping/internal-message-group-fields', 'Internal message group fields');
 			
 			$sent_communications_group = self::create_page('sent-communications', 'Sent communications', 'dbm_data', 0);
 			self::add_terms_to_post(array('dbm_type:admin-grouping', 'dbm_type:admin-grouping/sent-communications'), $sent_communications_group);
@@ -118,6 +120,9 @@
 			
 			$current_group = self::create_page('internal-message-groups', 'Internal message groups', 'dbm_data', 0);
 			self::add_terms_to_post(array('dbm_type:admin-grouping', 'dbm_type:admin-grouping/internal-message-groups'), $current_group);
+			
+			$current_group = self::create_page('internal-message-group-fields', 'Internal message group fields', 'dbm_data', 0);
+			self::add_terms_to_post(array('dbm_type:admin-grouping', 'dbm_type:admin-grouping/internal-message-group-fields'), $current_group);
 			
 			self::add_term('dbm_type:address-verification', 'Address verification');
 			self::add_term('dbm_type:transactional-template', 'Transactional template');
@@ -156,6 +161,17 @@
 			
 			self::add_term('dbm_relation:internal-message-status', 'Internal message status');
 			self::add_term('dbm_relation:internal-message-status/removed', 'Removed');
+			
+			self::add_term('dbm_relation:field-type', 'Field type');
+			self::add_term('dbm_relation:field-type/string', 'String');
+			self::add_term('dbm_relation:field-type/image', 'Image');
+			self::add_term('dbm_relation:field-type/file', 'File');
+			self::add_term('dbm_relation:field-type/mobile-phone-number', 'Mobile phone number');
+			
+			self::add_term('dbm_relation:field-status', 'Field status');
+			self::add_term('dbm_relation:field-status/complete', 'Complete');
+			self::add_term('dbm_relation:field-status/verified', 'Verified');
+			self::add_term('dbm_relation:field-status/incorrect', 'Incorrect');
 			
 			self::add_term('dbm_relation:internal-message-groups', 'Internal message groups');
 			
