@@ -24,6 +24,7 @@
 			add_filter(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/user-unassigned', array($this, 'filter_encode_internal_message_user_unassigned'), 10, 2);
 			add_filter(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/request-for-data', array($this, 'filter_encode_internal_message_request_for_data'), 10, 2);
 			add_filter(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/field-changed', array($this, 'filter_encode_internal_message_field_changed'), 10, 2);
+			add_filter(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/verify-mobile-phone-field', array($this, 'filter_encode_internal_message_verify_mobile_phone_field'), 10, 2);
 		}
 		
 		public function filter_query_groupsWithUser($query_args, $data) {
@@ -257,6 +258,13 @@
 			$encoded_data['field'] = get_post_meta($message_id, 'field', true);
 			$encoded_data['oldValue'] = get_post_meta($message_id, 'oldValue', true);
 			$encoded_data['newValue'] = get_post_meta($message_id, 'newValue', true);
+			
+			return $encoded_data;
+		}
+		
+		public function filter_encode_internal_message_verify_mobile_phone_field($encoded_data, $message_id) {
+			
+			$encoded_data['field'] = get_post_meta($message_id, 'field', true);
 			
 			return $encoded_data;
 		}

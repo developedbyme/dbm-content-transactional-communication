@@ -314,4 +314,41 @@
 		
 		return $new_id;
 	}
+	
+	function dbmtc_send_text_message_verification($phone_number) {
+		$code = mt_rand(100000, 999999);
+		
+		$replacements = array(
+			'code' => $code,
+			'phone-number' => $phone_number
+		);
+		
+		$hash_salt = 'Tw?otIAwI%ourB-:@VeZ4tGLY0=Twh)1J Wwhxc!5AOg:*L$Ff@CAY+d-iW47Ztm';
+		//METODO: add filter around salt
+		$hash = md5($phone_number.$hash_salt);
+		
+		$data_id = dbm_create_data('Phone number verification - '.$hash, 'address-verification', 'admin-grouping/address-verifications');
+		update_post_meta($data_id, 'verification_hash', $hash);
+		update_post_meta($data_id, 'verification_code', $code);
+		update_post_meta($data_id, 'verified', false);
+		
+		wp_update_post(array(
+			'ID' => $data_id,
+			'post_status' => 'private'
+		));
+		
+		$template_id = dbm_new_query('dbm_additional')->add_relation_by_path('global-transactional-templates/verify-phone-number')->get_post_id();
+		
+		$site_name = substr(preg_replace('/[^a-zA-Z0-9 \\-]+/', '', get_bloginfo('name'), -1), 0, 8);
+		
+		$template = dbm_content_tc_get_template_with_replacements($template_id, $replacements);
+		
+		$clean_text = wp_strip_all_tags($template['body']);
+		$communication_id = dbm_content_tc_send_text_message($clean_text, $phone_number, apply_filters('dbm_content_tc/default_from_phone_number', $site_name));
+		
+		update_post_meta($data_id, 'send_time', time());
+		update_post_meta($data_id, 'communication_id', $communication_id);
+		
+		return $data_id = $data_id;
+	}
 ?>

@@ -135,6 +135,7 @@
 			self::add_term('dbm_relation:global-transactional-templates', 'Global transactional templates');
 			self::add_term('dbm_relation:global-transactional-templates/reset-password', 'Reset password');
 			self::add_term('dbm_relation:global-transactional-templates/verify-email', 'Verify email');
+			self::add_term('dbm_relation:global-transactional-templates/verify-phone-number', 'Verify phone number');
 			self::add_term('dbm_relation:global-transactional-templates/new-internal-message', 'New internal message');
 			
 			self::add_term('dbm_relation:internal-message-group-types', 'Internal message group types');
@@ -159,6 +160,7 @@
 			self::add_term('dbm_relation:internal-message-types/user-unassigned', 'User unassigned');
 			self::add_term('dbm_relation:internal-message-types/needs-to-be-assigned', 'Needs to be assigned');
 			self::add_term('dbm_relation:internal-message-types/field-changed', 'Field changed');
+			self::add_term('dbm_relation:internal-message-types/verify-mobile-phone-field', 'Verify mobile phone field');
 			
 			self::add_term('dbm_relation:internal-message-status', 'Internal message status');
 			self::add_term('dbm_relation:internal-message-status/removed', 'Removed');

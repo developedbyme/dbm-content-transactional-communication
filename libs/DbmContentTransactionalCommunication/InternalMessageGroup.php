@@ -246,12 +246,14 @@
 			$original_value = get_post_meta($field_id, 'dbmtc_value', true);
 			update_post_meta($field_id, 'dbmtc_value', $value);
 			
-			$message = $this->create_message('internal-message-types/field-changed', '', get_current_user_id());
+			$user_id = get_current_user_id();
+			
+			$message = $this->create_message('internal-message-types/field-changed', '', $user_id);
 			$message->update_meta('field', $key);
 			$message->update_meta('oldValue', $original_value);
 			$message->update_meta('newValue', $value);
 			
-			//METODO: add hook for field changed
+			do_action('dbmtc/internal_message/group_field_set', $this, $key, $value, $user_id, $message);
 			
 			return $message;
 		}
