@@ -23,7 +23,16 @@
 		}
 		
 		public function notify() {
-			dbm_content_tc_notify_for_new_message($this->id);
+			$sent_notifications = dbm_content_tc_notify_for_new_message($this->id);
+			
+			$send_data = array(
+				'time' => time(),
+				'sentNotifications' => $sent_notifications
+			);
+			
+			add_post_meta($this->id, 'sent_notifications', $send_data);
+			
+			return $this;
 		}
 		
 		public static function test_import() {

@@ -158,6 +158,7 @@
 			self::add_term('dbm_relation:internal-message-types/user-assigned', 'User assigned');
 			self::add_term('dbm_relation:internal-message-types/user-unassigned', 'User unassigned');
 			self::add_term('dbm_relation:internal-message-types/needs-to-be-assigned', 'Needs to be assigned');
+			self::add_term('dbm_relation:internal-message-types/field-changed', 'Field changed');
 			
 			self::add_term('dbm_relation:internal-message-status', 'Internal message status');
 			self::add_term('dbm_relation:internal-message-status/removed', 'Removed');

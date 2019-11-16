@@ -20,6 +20,7 @@
 			
 			add_action('wprr/api_action/internal-message/change-assignment', array($this, 'hook_internal_message_change_assignment'), 10, 2);
 			add_action('wprr/api_action/internal-message/request-data', array($this, 'hook_internal_message_request_data'), 10, 2);
+			add_action('wprr/api_action/internal-message/set-field', array($this, 'hook_internal_message_set_field'), 10, 2);
 		}
 
 		public function hook_send_email_verification($data, &$response_data) {
@@ -124,7 +125,6 @@
 			//echo("\DbmContentTransactionalCommunication\ApiActionHooks::hook_internal_message_re_open<br />");
 			
 			$group_id = $data['groupId'];
-			$title = get_post($group_id)->post_title;
 			$body = $data['body'];
 			
 			//METODO: check that current user is allowed
@@ -140,7 +140,6 @@
 		
 		public function hook_internal_message_change_assignment($data, &$response_data) {
 			$group_id = $data['groupId'];
-			$title = get_post($group_id)->post_title;
 			$body = $data['body'];
 			
 			$current_user = (int)$data['userId'];
@@ -167,7 +166,6 @@
 		
 		public function hook_internal_message_request_data($data, &$response_data) {
 			$group_id = $data['groupId'];
-			$title = get_post($group_id)->post_title;
 			$body = $data['body'];
 			
 			$current_user = (int)$data['userId'];
@@ -177,6 +175,24 @@
 			$group = dbmtc_get_internal_message_group($group_id);
 			
 			$message = $group->request_data($requested_data);
+			
+			if(!(isset($data['skipNotify']) && $data['skipNotify'])) {
+				$message->notify();
+			}
+		}
+		
+		public function hook_internal_message_set_field($data, &$response_data) {
+			$group_id = $data['groupId'];
+			$body = $data['body'];
+			
+			$current_user = get_current_user_id();
+			
+			$field = $data['field'];
+			$value = $data['value'];
+			
+			$group = dbmtc_get_internal_message_group($group_id);
+			
+			$message = $group->set_field($field, $value);
 			
 			if(!(isset($data['skipNotify']) && $data['skipNotify'])) {
 				$message->notify();

@@ -250,6 +250,10 @@
 		
 		$template = dbm_content_tc_get_template_with_replacements($email_id, $replacements);
 		
+		if(!$template['title'] && !$template['body']) {
+			return array();
+		}
+		
 		$communications = array();
 		
 		$user_ids = get_post_meta($group_id, 'users_to_notify', true);

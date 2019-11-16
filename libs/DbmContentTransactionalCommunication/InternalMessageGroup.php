@@ -246,7 +246,14 @@
 			$original_value = get_post_meta($field_id, 'dbmtc_value', true);
 			update_post_meta($field_id, 'dbmtc_value', $value);
 			
-			//METODO: add message for field set or changed
+			$message = $this->create_message('internal-message-types/field-changed', '', get_current_user_id());
+			$message->update_meta('field', $key);
+			$message->update_meta('oldValue', $original_value);
+			$message->update_meta('newValue', $value);
+			
+			//METODO: add hook for field changed
+			
+			return $message;
 		}
 		
 		public function get_view_url() {
