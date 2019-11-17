@@ -227,6 +227,13 @@
 				update_post_meta($field_id, 'dbmtc_key', $key);
 				update_post_meta($field_id, 'dbmtc_value', $value);
 				
+				if($value) {
+					dbm_set_single_relation_by_name($field_id, 'field-status', 'complete');
+				}
+				else {
+					dbm_set_single_relation_by_name($field_id, 'field-status', 'none');
+				}
+				
 				$args = array(
 					'ID' => $field_id,
 					'post_status' => 'private'
@@ -245,6 +252,8 @@
 			
 			$original_value = get_post_meta($field_id, 'dbmtc_value', true);
 			update_post_meta($field_id, 'dbmtc_value', $value);
+			
+			dbm_set_single_relation_by_name($field_id, 'field-status', 'complete');
 			
 			$user_id = get_current_user_id();
 			

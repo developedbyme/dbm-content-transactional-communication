@@ -175,6 +175,7 @@
 			self::add_term('dbm_relation:field-type/name', 'Name');
 			
 			self::add_term('dbm_relation:field-status', 'Field status');
+			self::add_term('dbm_relation:field-status/none', 'None');
 			self::add_term('dbm_relation:field-status/complete', 'Complete');
 			self::add_term('dbm_relation:field-status/verified', 'Verified');
 			self::add_term('dbm_relation:field-status/incorrect', 'Incorrect');

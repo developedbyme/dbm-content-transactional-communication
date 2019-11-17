@@ -91,6 +91,14 @@
 				$return_object['type'] = null;
 			}
 			
+			$status = dbm_get_single_post_relation($post_id, 'field-status');
+			if($status) {
+				$return_object['status'] = wprr_encode_term(get_term_by('id', $status, 'dbm_relation'));
+			}
+			else {
+				$return_object['status'] = null;
+			}
+			
 			//METODO: add filter for encoding
 			
 			return $return_object;
