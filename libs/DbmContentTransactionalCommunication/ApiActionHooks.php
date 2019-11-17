@@ -21,6 +21,7 @@
 			add_action('wprr/api_action/internal-message/change-assignment', array($this, 'hook_internal_message_change_assignment'), 10, 2);
 			add_action('wprr/api_action/internal-message/request-data', array($this, 'hook_internal_message_request_data'), 10, 2);
 			add_action('wprr/api_action/internal-message/set-field', array($this, 'hook_internal_message_set_field'), 10, 2);
+			add_action('wprr/api_action/internal-message/verify-phone-number-field', array($this, 'hook_internal_message_verify_phone_number_field'), 10, 2);
 		}
 
 		public function hook_send_email_verification($data, &$response_data) {
@@ -197,6 +198,38 @@
 			if(!(isset($data['skipNotify']) && $data['skipNotify'])) {
 				$message->notify();
 			}
+		}
+		
+		public function hook_internal_message_verify_phone_number_field($data, &$response_data) {
+			$group_id = $data['groupId'];
+			$field = $data['field'];
+			$value = $data['value'];
+			
+			$group = dbmtc_get_internal_message_group($group_id);
+			
+			$field_id = $group->get_field_id($field);
+			
+			$verification_id = get_post_meta($field_id, 'textMessageVerification', true);
+			
+			$result = false;
+			
+			$phone_number = get_post_meta($field_id, 'dbmtc_value', true);
+			$code = $data['verificationCode'];
+			
+			$hash_salt = 'Tw?otIAwI%ourB-:@VeZ4tGLY0=Twh)1J Wwhxc!5AOg:*L$Ff@CAY+d-iW47Ztm';
+			//METODO: add filter around salt
+			$hash = md5($phone_number.$hash_salt);
+			
+			$stored_hash = get_post_meta($verification_id, 'verification_hash', true);
+			$stored_code = get_post_meta($verification_id, 'verification_code', true);
+			
+			if($stored_hash === $hash && $stored_code === $code) {
+				update_post_meta($data_id, 'verified', true);
+				dbm_set_single_relation_by_name($field_id, 'field-status', 'verified');
+				$result = true;
+			}
+			
+			$response_data['verified'] = $result;
 		}
 		
 		public static function test_import() {
