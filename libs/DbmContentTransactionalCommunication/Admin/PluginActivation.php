@@ -135,6 +135,7 @@
 			self::add_term('dbm_relation:global-transactional-templates', 'Global transactional templates');
 			self::add_term('dbm_relation:global-transactional-templates/reset-password', 'Reset password');
 			self::add_term('dbm_relation:global-transactional-templates/verify-email', 'Verify email');
+			self::add_term('dbm_relation:global-transactional-templates/reset-password-by-verification', 'Reset password by verification');
 			self::add_term('dbm_relation:global-transactional-templates/verify-phone-number', 'Verify phone number');
 			self::add_term('dbm_relation:global-transactional-templates/new-internal-message', 'New internal message');
 			
