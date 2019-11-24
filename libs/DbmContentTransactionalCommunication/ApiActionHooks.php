@@ -248,7 +248,6 @@
 			
 			$user_id = $user->ID;
 			$email = get_userdata($user_id)->user_email;
-			var_dump($email);
 			
 			$code = mt_rand(100000, 999999);
 			
@@ -274,7 +273,6 @@
 			
 			if($email) {
 				$template_id = dbm_new_query('dbm_additional')->add_relation_by_path('global-transactional-templates/reset-password-by-verification')->add_relation_by_path('transactional-template-types/email')->get_post_id();
-				var_dump($template_id);
 				if($template_id) {
 					$replacements = array(
 						'code' => $code,
