@@ -24,6 +24,8 @@
 			add_action('wprr/api_action/internal-message/verify-phone-number-field', array($this, 'hook_internal_message_verify_phone_number_field'), 10, 2);
 			
 			add_action('wprr/api_action/dbmtc/sendPasswordResetVerification', array($this, 'hook_sendPasswordResetVerification'), 10, 2);
+			add_action('wprr/api_action/dbmtc/verifyResetPassword', array($this, 'hook_verifyResetPassword'), 10, 2);
+			add_action('wprr/api_action/dbmtc/setPasswordWithVerification', array($this, 'hook_setPasswordWithVerification'), 10, 2);
 		}
 
 		public function hook_send_email_verification($data, &$response_data) {
@@ -86,6 +88,59 @@
 			}
 			
 			$response_data['verified'] = $result;
+		}
+		
+		public function hook_verifyResetPassword($data, &$response_data) {
+			//echo("\DbmContentTransactionalCommunication\ApiActionHooks::hook_verifyResetPassword<br />");
+			
+			$result = false;
+			
+			$user = $data['user'];
+			$data_id = $data['verificationId'];
+			$code = $data['verificationCode'];
+			
+			$hash_salt = 'Tw?otIAwI%ourB-:@VeZ4tGLY0=Twh)1J Wwhxc!5AOg:*L$Ff@CAY+d-iW47Ztm';
+			//METODO: add filter around salt
+			$hash = md5($user.$hash_salt);
+			
+			$stored_hash = get_post_meta($data_id, 'verification_hash', true);
+			$stored_code = get_post_meta($data_id, 'verification_code', true);
+			
+			if($stored_hash === $hash && $stored_code === $code) {
+				update_post_meta($data_id, 'verified', true);
+				$result = true;
+			}
+			
+			$response_data['verified'] = $result;
+		}
+		
+		public function hook_setPasswordWithVerification($data, &$response_data) {
+			//echo("\DbmContentTransactionalCommunication\ApiActionHooks::hook_setPasswordWithVerification<br />");
+			
+			$result = false;
+			
+			$user = $data['user'];
+			$data_id = $data['verificationId'];
+			
+			$hash_salt = 'Tw?otIAwI%ourB-:@VeZ4tGLY0=Twh)1J Wwhxc!5AOg:*L$Ff@CAY+d-iW47Ztm';
+			//METODO: add filter around salt
+			$hash = md5($user.$hash_salt);
+			
+			$stored_hash = get_post_meta($data_id, 'verification_hash', true);
+			
+			if($stored_hash === $hash) {
+				$password = $data['password'];
+				
+				$user_id = (int)get_post_meta($data_id, 'user_id', true);
+				
+				wp_set_password($password, $user_id);
+				
+				wp_clear_auth_cookie();
+				wp_set_current_user($user_id);
+				wp_set_auth_cookie($user_id);
+			}
+			
+			
 		}
 		
 		public function hook_internal_message_reply($data, &$response_data) {
