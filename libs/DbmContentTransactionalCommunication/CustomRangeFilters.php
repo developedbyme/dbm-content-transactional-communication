@@ -10,6 +10,7 @@
 		public function register() {
 			//echo("\DbmContentTransactionalCommunication\CustomRangeFilters::register<br />");
 			
+			add_filter('wprr/range_query/internalMessageGroup', array($this, 'filter_query_internalMessageGroup'), 10, 2);
 			add_filter('wprr/range_query/myInternalMessageGroups', array($this, 'filter_query_myInternalMessageGroups'), 10, 2);
 			add_filter('wprr/range_query/groupsWithUser', array($this, 'filter_query_groupsWithUser'), 10, 2);
 			add_filter('wprr/range_query/messagesInGroup', array($this, 'filter_query_messagesInGroup'), 10, 2);
@@ -50,6 +51,25 @@
 			return $dbm_query->get_query_args();
 		}
 		
+		public function filter_query_internalMessageGroup($query_args, $data) {
+			//echo("\DbmContentTransactionalCommunication\CustomRangeFilters::filter_query_internalMessageGroup<br />");
+			
+			//METODO: check if user has access
+			if(!current_user_can('edit_others_posts')) {
+				$query_args['post__in'] = array(0);
+				return $query_args;
+			}
+			
+			$dbm_query = dbm_new_query($query_args);
+			$dbm_query->add_type_by_path('internal-message-group');
+			$dbm_query->set_argument('post_status', array('publish', 'private'));
+			
+			$group_id = (int)$data['groupId'];
+			$dbm_query->set_argument('post__in', array($group_id));
+			
+			return $dbm_query->get_query_args();
+		}
+		
 		public function filter_query_myInternalMessageGroups($query_args, $data) {
 			//echo("\DbmContentTransactionalCommunication\CustomRangeFilters::filter_query_myInternalMessageGroups<br />");
 			
@@ -63,7 +83,7 @@
 			
 			$dbm_query = dbm_new_query($query_args);
 			$dbm_query->add_type_by_path('internal-message-group');
-			$dbm_query->set_argument('post_status', 'private');
+			$dbm_query->set_argument('post_status', array('publish', 'private'));
 			$dbm_query->add_meta_query('user_access', $user_id);
 			
 			return $dbm_query->get_query_args();
