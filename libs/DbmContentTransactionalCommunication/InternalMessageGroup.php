@@ -61,6 +61,20 @@
 			return $users;
 		}
 		
+		public function get_started_date() {
+			return get_the_date('Y-m-d\TH:i:s', $this->id);
+		}
+		
+		public function get_updated_date() {
+			$meta_value = get_post_meta($this->id, 'updated_date', true);
+			
+			if($meta_value) {
+				return $meta_value;
+			}
+			
+			return $this->get_started_date();
+		}
+		
 		public function get_field_id($key) {
 			return dbm_new_query('dbm_data')->set_argument('post_status', 'private')->add_type_by_path('internal-message-group-field')->add_relations_from_post($this->id, 'internal-message-groups')->add_meta_query('dbmtc_key', $key)->get_post_id();
 		}
@@ -208,6 +222,8 @@
 			
 			$message = dbmtc_get_internal_message($new_id);
 			
+			$this->update_updated_date();
+			
 			return $message;
 		}
 		
@@ -240,6 +256,8 @@
 				);
 				
 				wp_update_post($args);
+				
+				$this->update_updated_date();
 			}
 		}
 		
@@ -264,7 +282,13 @@
 			
 			do_action('dbmtc/internal_message/group_field_set', $this, $key, $value, $user_id, $message);
 			
+			$this->update_updated_date();
+			
 			return $message;
+		}
+		
+		public function update_updated_date() {
+			update_post_meta($this->id, 'updated_date', date('Y-m-d\TH:i:s'));
 		}
 		
 		public function get_view_url() {

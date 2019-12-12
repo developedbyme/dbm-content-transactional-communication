@@ -133,6 +133,10 @@
 			$encoded_data['users'] = $this->encode_users($message_group->get_users_with_access());
 			$encoded_data['notifiedUsers'] = $this->encode_users($message_group->get_users_to_notify());
 			$encoded_data['assignedUsers'] = $this->encode_users($message_group->get_assigned_users());
+			$encoded_data['dates'] = array(
+				'started' => $message_group->get_started_date(),
+				'updated' => $message_group->get_updated_date()
+			);
 			
 			$status_ids = dbm_get_post_relation($post_id, 'internal-message-group-status');
 			if(count($status_ids) > 0) {
