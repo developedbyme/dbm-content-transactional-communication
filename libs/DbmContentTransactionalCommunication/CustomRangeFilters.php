@@ -11,6 +11,7 @@
 			//echo("\DbmContentTransactionalCommunication\CustomRangeFilters::register<br />");
 			
 			add_filter('wprr/range_query/internalMessageGroup', array($this, 'filter_query_internalMessageGroup'), 10, 2);
+			add_filter('wprr/range_query/allInternalMessageGroups', array($this, 'filter_query_allInternalMessageGroups'), 10, 2);
 			add_filter('wprr/range_query/myInternalMessageGroups', array($this, 'filter_query_myInternalMessageGroups'), 10, 2);
 			add_filter('wprr/range_query/groupsWithUser', array($this, 'filter_query_groupsWithUser'), 10, 2);
 			add_filter('wprr/range_query/messagesInGroup', array($this, 'filter_query_messagesInGroup'), 10, 2);
@@ -54,18 +55,43 @@
 		public function filter_query_internalMessageGroup($query_args, $data) {
 			//echo("\DbmContentTransactionalCommunication\CustomRangeFilters::filter_query_internalMessageGroup<br />");
 			
-			//METODO: check if user has access
-			if(!current_user_can('edit_others_posts')) {
-				$query_args['post__in'] = array(0);
-				return $query_args;
+			$current_user_id = get_current_user_id();
+			$group_id = (int)$data['groupId'];
+			$user_access = get_post_meta($group_id, 'user_access');
+			
+			$has_access_to_post = in_array($current_user_id, $user_access);
+			
+			$has_permissions = apply_filters('dbmtc/has_permission_to_view_internal_messages', (current_user_can('read_private_posts') || $has_access_to_post));
+			
+			
+			if(!$has_permissions) {
+				throw(new \Exception("User doesn't have permission permission"));
 			}
 			
 			$dbm_query = dbm_new_query($query_args);
 			$dbm_query->add_type_by_path('internal-message-group');
 			$dbm_query->set_argument('post_status', array('publish', 'private'));
 			
-			$group_id = (int)$data['groupId'];
+			
 			$dbm_query->set_argument('post__in', array($group_id));
+			
+			return $dbm_query->get_query_args();
+		}
+		
+		public function filter_query_allInternalMessageGroups($query_args, $data) {
+			//echo("\DbmContentTransactionalCommunication\CustomRangeFilters::filter_query_allInternalMessageGroups<br />");
+			
+			$current_user_id = get_current_user_id();
+			
+			$has_permissions = apply_filters('dbmtc/has_permission_to_view_internal_messages', current_user_can('read_private_posts'));
+			
+			if(!$has_permissions) {
+				throw(new \Exception("User doesn't have permission permission"));
+			}
+			
+			$dbm_query = dbm_new_query($query_args);
+			$dbm_query->add_type_by_path('internal-message-group');
+			$dbm_query->set_argument('post_status', array('publish', 'private'));
 			
 			return $dbm_query->get_query_args();
 		}
