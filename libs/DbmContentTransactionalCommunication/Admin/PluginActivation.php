@@ -181,7 +181,7 @@
 			self::add_term('dbm_relation:field-status/verified', 'Verified');
 			self::add_term('dbm_relation:field-status/incorrect', 'Incorrect');
 			
-			self::add_term('dbm_relation:field-storage/field-data', 'Field data');
+			self::add_term('dbm_relation:field-storage', 'Field storage');
 			self::add_term('dbm_relation:field-storage/meta', 'Meta');
 			self::add_term('dbm_relation:field-storage/single-relation', 'Single relation');
 			

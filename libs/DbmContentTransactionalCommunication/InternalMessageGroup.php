@@ -244,6 +244,9 @@
 				$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
 				
 				$field->set_type($type);
+				
+				do_action('dbmtc/setup_default_field_storage', $field);
+				
 				$field->set_value($value);
 				
 				$status = $value ? 'complete' : 'none';

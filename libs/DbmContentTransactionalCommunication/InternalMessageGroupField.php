@@ -31,18 +31,37 @@
 		
 		public function get_value() {
 			
-			//METODO: check storage method
+			$return_value = get_post_meta($this->id, 'dbmtc_value', true);
 			
-			return get_post_meta($this->id, 'dbmtc_value', true);
+			$storage_type_term = $this->get_storage_type_term();
+			if($storage_type_term) {
+				$return_value = apply_filters('dbmtc/get_field_value/'.$storage_type_term->slug, $return_value, $this);
+			}
+			
+			return $return_value;
 		}
 		
 		public function set_value($value) {
 			
-			//METODO: check storage method
+			$storage_type_term = $this->get_storage_type_term();
+			if($storage_type_term) {
+				do_action('dbmtc/set_field_value/'.$storage_type_term->slug, $this, $value);
+			}
 			
 			update_post_meta($this->id, 'dbmtc_value', $value);
 			
 			return $this;
+		}
+		
+		public function update_meta($field, $value) {
+			
+			update_post_meta($this->id, $field, $value);
+			
+			return $this;
+		}
+		
+		public function get_meta($field) {
+			return get_post_meta($this->id, $field, true);
 		}
 		
 		public function set_status($status) {
@@ -69,6 +88,22 @@
 		
 		public function get_type_term() {
 			$term_id = dbm_get_single_post_relation($this->id, 'field-type');
+			
+			if($term_id) {
+				return get_term_by('id', $term_id, 'dbm_relation');
+			}
+			
+			return null;
+		}
+		
+		public function set_storage_type($type) {
+			dbm_set_single_relation_by_name($this->id, 'field-storage', $type);
+			
+			return $this;
+		}
+		
+		public function get_storage_type_term() {
+			$term_id = dbm_get_single_post_relation($this->id, 'field-storage');
 			
 			if($term_id) {
 				return get_term_by('id', $term_id, 'dbm_relation');

@@ -77,6 +77,11 @@
 			
 			add_filter('dbm_custom_login/registration_is_verified', array($this, 'filter_dbm_custom_login_registration_is_verified'), 10, 2);
 			
+			add_action('dbmtc/set_field_value/meta', array($this, 'hook_set_field_value_meta'), 10, 2);
+			add_filter('dbmtc/get_field_value/meta', array($this, 'filter_get_field_value_meta'), 10, 2);
+			
+			add_action('dbmtc/set_field_value/single-relation', array($this, 'hook_set_field_value_single_relation'), 10, 2);
+			add_filter('dbmtc/get_field_value/single-relation', array($this, 'filter_get_field_value_single_relation'), 10, 2);
 		}
 		
 		protected function create_shortcodes() {
@@ -130,6 +135,29 @@
 				return true;
 			}
 			return false;
+		}
+		
+		public function hook_set_field_value_meta($field, $value) {
+			$meta_key = $field->get_meta('dbmtc_meta_name');
+			update_post_meta($field->get_group_id(), $meta_key, $value);
+		}
+		
+		public function filter_get_field_value_meta($return_value, $field) {
+			$meta_key = $field->get_meta('dbmtc_meta_name');
+			return get_post_meta($field->get_group_id(), $meta_key, true);
+		}
+		
+		public function hook_set_field_value_single_relation($field, $value) {
+			$path = $field->get_meta('dbmtc_relation_path');
+			$parent_term = dbm_get_relation_by_path($path);
+			
+			dbm_replace_relations($field->get_group_id(), $parent_term, array((int)$value));
+		}
+		
+		public function filter_get_field_value_single_relation($return_value, $field) {
+			$path = $field->get_meta('dbmtc_relation_path');
+			
+			return dbm_get_single_post_relation($field->get_group_id(), $path);
 		}
 		
 		public function activation_setup() {

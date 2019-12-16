@@ -22,6 +22,10 @@
 			return $this;
 		}
 		
+		public function get_meta($field) {
+			return get_post_meta($this->id, $field, true);
+		}
+		
 		public function notify() {
 			$sent_notifications = dbm_content_tc_notify_for_new_message($this->id);
 			
