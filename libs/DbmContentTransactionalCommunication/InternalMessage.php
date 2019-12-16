@@ -3,7 +3,7 @@
 
 	class InternalMessage {
 
-		protected $id = array();
+		protected $id = 0;
 
 		function __construct($id) {
 			//echo("\DbmContentTransactionalCommunication\InternalMessage::__construct<br />");

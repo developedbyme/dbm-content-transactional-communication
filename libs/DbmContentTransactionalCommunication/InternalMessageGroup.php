@@ -3,7 +3,7 @@
 
 	class InternalMessageGroup {
 
-		protected $id = array();
+		protected $id = 0;
 
 		function __construct($id) {
 			//echo("\DbmContentTransactionalCommunication\InternalMessageGroup::__construct<br />");
@@ -227,51 +227,47 @@
 			return $message;
 		}
 		
+		public function relate_post_to_group($post_id) {
+			$group_id = $this->ensure_group_term_id_exists();
+			$parent_term = dbm_get_relation_by_path('internal-message-groups');
+			dbm_replace_relations($post_id, $parent_term, array($group_id));
+			
+			return $this;
+		}
+		
 		public function create_field($key, $type, $value = null) {
 			$field_id = dbm_new_query('dbm_data')->set_argument('post_status', 'private')->add_type_by_path('internal-message-group-field')->add_relations_from_post($this->id, 'internal-message-groups')->add_meta_query('dbmtc_key', $key)->get_post_id();
 			if(!$field_id) {
 				$group_post = get_post($this->id);
 				
 				$field_id = dbm_create_data($group_post->post_title.' - '.$key, 'internal-message-group-field', 'admin-grouping/internal-message-group-fields');
-				
-				$group_id = $this->ensure_group_term_id_exists();
-				$parent_term = dbm_get_relation_by_path('internal-message-groups');
-				dbm_replace_relations($field_id, $parent_term, array($group_id));
-				
-				dbm_add_post_relation($field_id, 'field-type/'.$type);
-				
+				$this->relate_post_to_group($field_id);
 				update_post_meta($field_id, 'dbmtc_key', $key);
-				update_post_meta($field_id, 'dbmtc_value', $value);
 				
-				if($value) {
-					dbm_set_single_relation_by_name($field_id, 'field-status', 'complete');
-				}
-				else {
-					dbm_set_single_relation_by_name($field_id, 'field-status', 'none');
-				}
+				$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
 				
-				$args = array(
-					'ID' => $field_id,
-					'post_status' => 'private'
-				);
+				$field->set_type($type);
+				$field->set_value($value);
 				
-				wp_update_post($args);
+				$status = $value ? 'complete' : 'none';
+				$field->set_status($status);
+				
+				$field->make_private();
 				
 				$this->update_updated_date();
 			}
 		}
 		
 		public function set_field($key, $value) {
-			$field_id = dbm_new_query('dbm_data')->set_argument('post_status', 'private')->add_type_by_path('internal-message-group-field')->add_relations_from_post($this->id, 'internal-message-groups')->add_meta_query('dbmtc_key', $key)->get_post_id();
-			if(!$field_id) {
-				trigger_error('No field for key '.$key, E_USER_ERROR);
-				return;
+			$field = $this->get_field($key);
+			if(!$field) {
+				return null;
 			}
 			
-			$original_value = get_post_meta($field_id, 'dbmtc_value', true);
-			update_post_meta($field_id, 'dbmtc_value', $value);
+			$original_value = $field->get_value();
+			$field->set_value($value);
 			
-			dbm_set_single_relation_by_name($field_id, 'field-status', 'complete');
+			$field->set_status('complete');
 			
 			$user_id = get_current_user_id();
 			
@@ -285,6 +281,19 @@
 			$this->update_updated_date();
 			
 			return $message;
+		}
+		
+		public function get_field($key) {
+			$field_id = dbm_new_query('dbm_data')->set_argument('post_status', 'private')->add_type_by_path('internal-message-group-field')->add_relations_from_post($this->id, 'internal-message-groups')->add_meta_query('dbmtc_key', $key)->get_post_id();
+			
+			if(!$field_id) {
+				trigger_error('No field for key '.$key, E_USER_ERROR);
+				return null;
+			}
+			
+			$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
+			
+			return $field;
 		}
 		
 		public function update_updated_date() {

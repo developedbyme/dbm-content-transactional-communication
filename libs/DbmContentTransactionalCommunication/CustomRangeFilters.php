@@ -126,24 +126,13 @@
 		protected function _encode_field($post_id) {
 			$return_object = array();
 			
-			$return_object['key'] = get_post_meta($post_id, 'dbmtc_key', true);
-			$return_object['value'] = get_post_meta($post_id, 'dbmtc_value', true);
+			$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($post_id);
 			
-			$type = dbm_get_single_post_relation($post_id, 'field-type');
-			if($type) {
-				$return_object['type'] = wprr_encode_term(get_term_by('id', $type, 'dbm_relation'));
-			}
-			else {
-				$return_object['type'] = null;
-			}
+			$return_object['key'] = $field->get_key();
+			$return_object['value'] = $field->get_value();
 			
-			$status = dbm_get_single_post_relation($post_id, 'field-status');
-			if($status) {
-				$return_object['status'] = wprr_encode_term(get_term_by('id', $status, 'dbm_relation'));
-			}
-			else {
-				$return_object['status'] = null;
-			}
+			$return_object['type'] = wprr_encode_term($field->get_type_term());
+			$return_object['status'] = wprr_encode_term($field->get_status_term());
 			
 			//METODO: add filter for encoding
 			

@@ -181,6 +181,10 @@
 			self::add_term('dbm_relation:field-status/verified', 'Verified');
 			self::add_term('dbm_relation:field-status/incorrect', 'Incorrect');
 			
+			self::add_term('dbm_relation:field-storage/field-data', 'Field data');
+			self::add_term('dbm_relation:field-storage/meta', 'Meta');
+			self::add_term('dbm_relation:field-storage/single-relation', 'Single relation');
+			
 			self::add_term('dbm_relation:internal-message-groups', 'Internal message groups');
 			
 			$current_term_id = self::add_term('dbm_relation:global-pages', 'Global pages');
