@@ -24,6 +24,7 @@
 			add_action('wprr/api_action/internal-message/verify-phone-number-field', array($this, 'hook_internal_message_verify_phone_number_field'), 10, 2);
 			
 			add_action('wprr/api_action/dbmtc/sendPasswordResetVerification', array($this, 'hook_sendPasswordResetVerification'), 10, 2);
+			add_action('wprr/api_action/dbmtc/resendPasswordResetVerification', array($this, 'hook_resendPasswordResetVerification'), 10, 2);
 			add_action('wprr/api_action/dbmtc/verifyResetPassword', array($this, 'hook_verifyResetPassword'), 10, 2);
 			add_action('wprr/api_action/dbmtc/setPasswordWithVerification', array($this, 'hook_setPasswordWithVerification'), 10, 2);
 		}
@@ -292,6 +293,7 @@
 		public function hook_sendPasswordResetVerification($data, &$response_data) {
 			$username_or_email = $data['user'];
 			$user = get_user_by('login', $username_or_email);
+			
 			if(!$user) {
 				$user = get_user_by('email', $username_or_email);
 			}
@@ -300,6 +302,8 @@
 				//METODO: return error message
 				return;
 			}
+			
+			$send_type = $data['sendType'];
 			
 			$user_id = $user->ID;
 			$email = get_userdata($user_id)->user_email;
@@ -313,6 +317,7 @@
 			$data_id = dbm_create_data('Reset password verification - '.$hash, 'address-verification', 'admin-grouping/address-verifications');
 			$response_data['verificationId'] = $data_id;
 			$response_data['sent'] = array();
+			$response_data['availableOptions'] = array();
 			
 			update_post_meta($data_id, 'user_id', $user_id);
 			update_post_meta($data_id, 'verification_hash', $hash);
@@ -326,25 +331,11 @@
 			
 			$site_name = substr(preg_replace('/[^a-zA-Z0-9 \\-]+/', '', get_bloginfo('name'), -1), 0, 8);
 			
-			if($email) {
-				$template_id = dbm_new_query('dbm_additional')->add_relation_by_path('global-transactional-templates/reset-password-by-verification')->add_relation_by_path('transactional-template-types/email')->get_post_id();
-				if($template_id) {
-					$replacements = array(
-						'code' => $code,
-						'email' => $email
-					);
-					$template = dbm_content_tc_get_template_with_replacements($template_id, $replacements);
-					
-					$communication_id = dbm_content_tc_send_email($template['title'], $template['body'], $email, apply_filters('dbm_content_tc/default_from_email', get_option('admin_email')));
-					
-					update_post_meta($data_id, 'email_send_time', time());
-					update_post_meta($data_id, 'email_communication_id', $communication_id);
-					$response_data['sent'][] = 'email';
-				}
-			}
-			
+			$sent_text_message = false;
 			$phone_number = apply_filters('dbmtc/get_mobile_number_for_user', null, $user);
 			if($phone_number) {
+				$response_data['availableOptions'][] = 'textMessage';
+				
 				$template_id = dbm_new_query('dbm_additional')->add_relation_by_path('global-transactional-templates/reset-password-by-verification')->add_relation_by_path('transactional-template-types/text-message')->get_post_id();
 				
 				$replacements = array(
@@ -358,7 +349,86 @@
 				
 				update_post_meta($data_id, 'text_message_send_time', time());
 				update_post_meta($data_id, 'text_message_communication_id', $communication_id);
+				
 				$response_data['sent'][] = 'textMessage';
+				
+				$sent_text_message = true;
+			}
+			
+			if($email) {
+				$template_id = dbm_new_query('dbm_additional')->add_relation_by_path('global-transactional-templates/reset-password-by-verification')->add_relation_by_path('transactional-template-types/email')->get_post_id();
+				if($template_id) {
+					$response_data['availableOptions'][] = 'email';
+					
+					if($send_type !== 'preferTextMessage' || !$sent_text_message) {
+						$replacements = array(
+							'code' => $code,
+							'email' => $email
+						);
+						$template = dbm_content_tc_get_template_with_replacements($template_id, $replacements);
+					
+						$communication_id = dbm_content_tc_send_email($template['title'], $template['body'], $email, apply_filters('dbm_content_tc/default_from_email', get_option('admin_email')));
+					
+						update_post_meta($data_id, 'email_send_time', time());
+						update_post_meta($data_id, 'email_communication_id', $communication_id);
+						
+						$response_data['sent'][] = 'email';
+					}
+				}
+			}
+		}
+		
+		public function hook_resendPasswordResetVerification($data, &$response_data) {
+			$verification_id = $data['verificationId'];
+			$send_type = $data['sendType'];
+			
+			$user_id = get_post_meta($verification_id, 'user_id', true);
+			$user = get_user_by('id', $user_id);
+			
+			$response_data['sent'] = array();
+			
+			$code = get_post_meta($verification_id, 'verification_code', true);
+			
+			$site_name = substr(preg_replace('/[^a-zA-Z0-9 \\-]+/', '', get_bloginfo('name'), -1), 0, 8);
+			
+			if($send_type === 'textMessage') {
+				$phone_number = apply_filters('dbmtc/get_mobile_number_for_user', null, $user);
+				if($phone_number) {
+					$template_id = dbm_new_query('dbm_additional')->add_relation_by_path('global-transactional-templates/reset-password-by-verification')->add_relation_by_path('transactional-template-types/text-message')->get_post_id();
+				
+					$replacements = array(
+						'code' => $code,
+						'phone-number' => $phone_number
+					);
+					$template = dbm_content_tc_get_template_with_replacements($template_id, $replacements);
+				
+					$clean_text = wp_strip_all_tags($template['body']);
+					$communication_id = dbm_content_tc_send_text_message($clean_text, $phone_number, apply_filters('dbm_content_tc/default_from_phone_number', $site_name));
+				
+					add_post_meta($verification_id, 'resend_text_message_send_time', time());
+					add_post_meta($verification_id, 'resend_text_message_communication_id', $communication_id);
+				
+					$response_data['sent'][] = 'textMessage';
+				}
+			}
+			if($send_type === 'email') {
+				$template_id = dbm_new_query('dbm_additional')->add_relation_by_path('global-transactional-templates/reset-password-by-verification')->add_relation_by_path('transactional-template-types/email')->get_post_id();
+				if($template_id) {
+					$email = get_userdata($user_id)->user_email;
+					
+					$replacements = array(
+						'code' => $code,
+						'email' => $email
+					);
+					$template = dbm_content_tc_get_template_with_replacements($template_id, $replacements);
+				
+					$communication_id = dbm_content_tc_send_email($template['title'], $template['body'], $email, apply_filters('dbm_content_tc/default_from_email', get_option('admin_email')));
+				
+					add_post_meta($verification_id, 'resend_email_send_time', time());
+					add_post_meta($verification_id, 'resend_email_communication_id', $communication_id);
+					
+					$response_data['sent'][] = 'email';
+				}
 			}
 		}
 		
