@@ -90,6 +90,17 @@
 			return $this;
 		}
 		
+		public function get_type() {
+			$term_id = dbm_get_single_post_relation($this->id, 'field-type');
+			
+			if($term_id) {
+				$term = get_term_by('id', $term_id, 'dbm_relation');
+				return $term->slug;
+			}
+			
+			return 'none';
+		}
+		
 		public function get_type_term() {
 			$term_id = dbm_get_single_post_relation($this->id, 'field-type');
 			
@@ -104,6 +115,17 @@
 			dbm_set_single_relation_by_name($this->id, 'field-storage', $type);
 			
 			return $this;
+		}
+		
+		public function get_storage_type() {
+			$term_id = dbm_get_single_post_relation($this->id, 'field-storage');
+			
+			if($term_id) {
+				$term = get_term_by('id', $term_id, 'dbm_relation');
+				return $term->slug;
+			}
+			
+			return null;
 		}
 		
 		public function get_storage_type_term() {

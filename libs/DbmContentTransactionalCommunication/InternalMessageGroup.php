@@ -140,8 +140,13 @@
 			$fields_keys = array();
 			
 			foreach($fields as $field) {
-				$fields_keys[] = $field['field'];
-				$this->create_field($field['field'], $field['type']);
+				$field_key = $field['field'];
+				
+				$fields_keys[] = $field_key;
+				
+				//METODO: check for field template
+				
+				$this->create_field($field_key, $field['type']);
 			}
 			
 			$message->update_meta('fields', $fields_keys);
@@ -233,10 +238,8 @@
 		}
 		
 		public function create_field($key, $type, $value = null) {
-			$field_id = $this->get_field_id_id_exists($key);
+			$field_id = $this->get_field_id_if_exists($key);
 			if(!$field_id) {
-				
-				//METODO: check for template
 				
 				$group_post = get_post($this->id);
 				
@@ -250,6 +253,45 @@
 				
 				do_action('dbmtc/setup_default_field_storage', $field);
 				
+				$field->set_value($value);
+				
+				$status = $value ? 'complete' : 'none';
+				$field->set_status($status);
+				
+				$field->make_private();
+				
+				$this->update_updated_date();
+			}
+			else {
+				$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
+			}
+			
+			return $field;
+		}
+		
+		public function create_field_from_template($key, $template) {
+			$field_id = $this->get_field_id_if_exists($key);
+			if(!$field_id) {
+				
+				$group_post = get_post($this->id);
+				
+				$field_id = dbm_create_data($group_post->post_title.' - '.$key, 'internal-message-group-field', 'admin-grouping/internal-message-group-fields');
+				$this->relate_post_to_group($field_id);
+				update_post_meta($field_id, 'dbmtc_key', $key);
+				
+				$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
+				
+				$type = $template->get_type();
+				$field->set_type($type);
+				
+				$storage_type = $template->get_storage_type();
+				var_dump($storage_type);
+				$field->set_storage_type($storage_type);
+				
+				do_action('dbmtc/copy_field_template_meta/'.$storage_type, $field, $template);
+				do_action('dbmtc/setup_default_field_storage', $field);
+				
+				$value = $template->get_value();
 				$field->set_value($value);
 				
 				$status = $value ? 'complete' : 'none';
@@ -291,19 +333,40 @@
 			return $message;
 		}
 		
-		public function get_field_id_id_exists($key) {
+		public function get_field_id_if_exists($key) {
 			
-			$local_id = dbm_new_query('dbm_data')->set_argument('post_status', 'private')->add_type_by_path('internal-message-group-field')->add_relations_from_post($this->id, 'internal-message-groups')->add_meta_query('dbmtc_key', $key)->get_post_id();
+			$local_id = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message-group-field')->add_relations_from_post($this->id, 'internal-message-groups')->add_meta_query('dbmtc_key', $key)->get_post_id();
 			
 			return $local_id;
 		}
 		
+		public function get_field_template_if_exists($key) {
+			$type_terms = get_the_terms($this->id, 'dbm_type');
+			if($type_terms) {
+				$type_term_ids = wp_list_pluck($type_terms, 'term_id');
+				
+				$shared_id = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('field-template')->add_meta_query('dbmtc_for_type', $type_term_ids, 'IN', 'NUMERIC')->add_meta_query('dbmtc_key', $key)->get_post_id();
+			
+				if($shared_id) {
+					$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($shared_id);
+					$field->set_group_id_for_template($this->id);
+					
+					return $field;
+				}
+			}
+			
+			return null;
+		}
+		
 		public function get_field($key) {
-			$field_id = $this->get_field_id_id_exists($key);
+			$field_id = $this->get_field_id_if_exists($key);
 			
 			if(!$field_id) {
 				
-				//METODO: check for templates
+				$template = $this->get_field_template_if_exists($key);
+				if($template) {
+					return $this->create_field_from_template($key, $template);
+				}
 				
 				trigger_error('No field for key '.$key, E_USER_ERROR);
 				return null;
