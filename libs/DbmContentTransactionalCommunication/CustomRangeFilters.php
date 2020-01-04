@@ -179,26 +179,6 @@
 		
 		public function filter_encode_fields($encoded_data, $post_id, $data) {
 			
-			//MEDEBUG:
-			$name = get_post_meta($post_id, 'name', true);
-			var_dump($name, is_string($name));
-			if(is_string($name)) {
-				$temp_array = explode(' ', $name);
-				$name = array(
-					'firstName' => $temp_array[0],
-					'lastName' => $temp_array[1]
-				);
-			}
-			var_dump($name);
-			
-			$group = dbmtc_get_internal_message_group($post_id);
-			$group->set_field('name', $name);
-			
-			
-			
-			
-			
-			
 			$encoded_data['fields'] = $this->get_fields($post_id);
 			
 			return $encoded_data;
