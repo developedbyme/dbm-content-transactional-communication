@@ -101,6 +101,7 @@
 			self::add_term('dbm_type:internal-message', 'Internal message');
 			self::add_term('dbm_type:internal-message-group', 'Internal message group');
 			self::add_term('dbm_type:internal-message-group-field', 'Internal message group field');
+			self::add_term('dbm_type:field-template', 'Field template');
 			
 			self::add_term('dbm_type:admin-grouping', 'Admin grouping');
 			self::add_term('dbm_type:admin-grouping/sent-communications', 'Sent communications');
@@ -108,6 +109,7 @@
 			self::add_term('dbm_type:admin-grouping/internal-messages', 'Internal messages');
 			self::add_term('dbm_type:admin-grouping/internal-message-groups', 'Internal message groups');
 			self::add_term('dbm_type:admin-grouping/internal-message-group-fields', 'Internal message group fields');
+			self::add_term('dbm_type:admin-grouping/field-templates', 'Field templates');
 			
 			$sent_communications_group = self::create_page('sent-communications', 'Sent communications', 'dbm_data', 0);
 			self::add_terms_to_post(array('dbm_type:admin-grouping', 'dbm_type:admin-grouping/sent-communications'), $sent_communications_group);
@@ -123,6 +125,9 @@
 			
 			$current_group = self::create_page('internal-message-group-fields', 'Internal message group fields', 'dbm_data', 0);
 			self::add_terms_to_post(array('dbm_type:admin-grouping', 'dbm_type:admin-grouping/internal-message-group-fields'), $current_group);
+			
+			$current_group = self::create_page('field-templates', 'Field templates', 'dbm_data', 0);
+			self::add_terms_to_post(array('dbm_type:admin-grouping', 'dbm_type:admin-grouping/field-templates'), $current_group);
 			
 			self::add_term('dbm_type:address-verification', 'Address verification');
 			self::add_term('dbm_type:transactional-template', 'Transactional template');

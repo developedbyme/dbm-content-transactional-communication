@@ -235,6 +235,9 @@
 		public function create_field($key, $type, $value = null) {
 			$field_id = $this->get_field_id_id_exists($key);
 			if(!$field_id) {
+				
+				//METODO: check for template
+				
 				$group_post = get_post($this->id);
 				
 				$field_id = dbm_create_data($group_post->post_title.' - '.$key, 'internal-message-group-field', 'admin-grouping/internal-message-group-fields');
@@ -289,13 +292,19 @@
 		}
 		
 		public function get_field_id_id_exists($key) {
-			return dbm_new_query('dbm_data')->set_argument('post_status', 'private')->add_type_by_path('internal-message-group-field')->add_relations_from_post($this->id, 'internal-message-groups')->add_meta_query('dbmtc_key', $key)->get_post_id();
+			
+			$local_id = dbm_new_query('dbm_data')->set_argument('post_status', 'private')->add_type_by_path('internal-message-group-field')->add_relations_from_post($this->id, 'internal-message-groups')->add_meta_query('dbmtc_key', $key)->get_post_id();
+			
+			return $local_id;
 		}
 		
 		public function get_field($key) {
 			$field_id = $this->get_field_id_id_exists($key);
 			
 			if(!$field_id) {
+				
+				//METODO: check for templates
+				
 				trigger_error('No field for key '.$key, E_USER_ERROR);
 				return null;
 			}

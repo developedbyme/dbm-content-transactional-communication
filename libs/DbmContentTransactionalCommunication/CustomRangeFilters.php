@@ -20,6 +20,7 @@
 			add_filter('wprr/range_encoding/messagesInGroup', array($this, 'filter_encode_messagesInGroup'), 10, 3);
 			add_filter('wprr/range_encoding/messagesCount', array($this, 'filter_encode_messagesCount'), 10, 3);
 			add_filter('wprr/range_encoding/message', array($this, 'filter_encode_message'), 10, 3);
+			add_filter('wprr/range_encoding/fields', array($this, 'filter_encode_fields'), 10, 3);
 			
 			add_filter(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/change-comment', array($this, 'filter_encode_internal_message_group_change_comment'), 10, 2);
 			add_filter(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/user-assigned', array($this, 'filter_encode_internal_message_user_assigned'), 10, 2);
@@ -139,6 +140,49 @@
 			return $return_object;
 		}
 		
+		protected function _encode_field_from_template($post_id, $group_id) {
+			$return_object = array();
+			
+			$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($post_id);
+			$field->set_group_id_for_template($group_id);
+			
+			$return_object['key'] = $field->get_key();
+			$return_object['value'] = $field->get_value();
+			
+			$return_object['type'] = wprr_encode_term($field->get_type_term());
+			
+			//METODO: add filter for encoding
+			
+			return $return_object;
+		}
+		
+		public function get_fields($post_id) {
+			$encoded_fields = array();
+			$field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message-group-field')->add_relations_from_post($post_id, 'internal-message-groups')->get_post_ids();
+			foreach($field_ids as $field_id) {
+				$encoded_fields[] = $this->_encode_field($field_id);
+			}
+			
+			$type_terms = get_the_terms($post_id, 'dbm_type');
+			if($type_terms) {
+				$type_term_ids = wp_list_pluck($type_terms, 'term_id');
+				
+				$shared_field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('field-template')->add_meta_query('dbmtc_for_type', $type_term_ids, 'IN', 'NUMERIC')->get_post_ids();
+				foreach($shared_field_ids as $field_id) {
+					$encoded_fields[] = $this->_encode_field_from_template($field_id, $post_id);
+				}
+			}
+			
+			
+			return $encoded_fields;
+		}
+		
+		public function filter_encode_fields($encoded_data, $post_id, $data) {
+			$encoded_data['fields'] = $this->get_fields($post_id);
+			
+			return $encoded_data;
+		}
+		
 		public function filter_encode_internalMessageGroup($encoded_data, $post_id, $data) {
 			
 			$post = get_post($post_id);
@@ -161,12 +205,7 @@
 				$encoded_data['status'] = null;
 			}
 			
-			$encoded_fields = array();
-			$field_ids = dbm_new_query('dbm_data')->set_argument('post_status', 'private')->add_type_by_path('internal-message-group-field')->add_relations_from_post($post_id, 'internal-message-groups')->get_post_ids();
-			foreach($field_ids as $field_id) {
-				$encoded_fields[] = $this->_encode_field($field_id);
-			}
-			$encoded_data['fields'] = $encoded_fields;
+			$encoded_data['fields'] = $this->get_fields($post_id);
 			
 			$type_slug = null;
 			$type_ids = dbm_get_post_relation($post_id, 'internal-message-group-types');

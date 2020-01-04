@@ -25,6 +25,10 @@
 			return $this->group_id;
 		}
 		
+		public function set_group_id_for_template($group_id) {
+			$this->group_id = $group_id;
+		}
+		
 		public function get_key() {
 			return get_post_meta($this->id, 'dbmtc_key', true);
 		}
