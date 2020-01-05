@@ -135,32 +135,33 @@
 			$return_object['type'] = wprr_encode_term($field->get_type_term());
 			$return_object['status'] = wprr_encode_term($field->get_status_term());
 			
-			//METODO: add filter for encoding
+			$return_object = apply_filters('dbmtc/encode_field/'.$field->get_type(), $return_object, $field);
 			
 			return $return_object;
 		}
 		
-		protected function _encode_field_from_template($post_id, $group_id) {
+		protected function _encode_field_from_template($field) {
 			$return_object = array();
-			
-			$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($post_id);
-			$field->set_group_id_for_template($group_id);
 			
 			$return_object['key'] = $field->get_key();
 			$return_object['value'] = $field->get_value();
 			
 			$return_object['type'] = wprr_encode_term($field->get_type_term());
 			
-			//METODO: add filter for encoding
+			$return_object = apply_filters('dbmtc/encode_field/'.$field->get_type(), $return_object, $field);
 			
 			return $return_object;
 		}
 		
 		public function get_fields($post_id) {
 			$encoded_fields = array();
+			$keys = array();
+			
 			$field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message-group-field')->add_relations_from_post($post_id, 'internal-message-groups')->get_post_ids();
 			foreach($field_ids as $field_id) {
-				$encoded_fields[] = $this->_encode_field($field_id);
+				$current_encoded_field = $this->_encode_field($field_id);
+				$encoded_fields[] = $current_encoded_field;
+				$keys[] = $current_encoded_field['key'];
 			}
 			
 			$type_terms = get_the_terms($post_id, 'dbm_type');
@@ -169,10 +170,18 @@
 				
 				$shared_field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('field-template')->add_meta_query('dbmtc_for_type', $type_term_ids, 'IN', 'NUMERIC')->get_post_ids();
 				foreach($shared_field_ids as $field_id) {
-					$encoded_fields[] = $this->_encode_field_from_template($field_id, $post_id);
+					
+					$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
+					
+					if(!in_array($field->get_key(), $keys)) {
+						$field->set_group_id_for_template($post_id);
+					
+						$current_encoded_field = $this->_encode_field_from_template($field);
+						$encoded_fields[] = $current_encoded_field;
+						$keys[] = $current_encoded_field['key'];
+					}
 				}
 			}
-			
 			
 			return $encoded_fields;
 		}

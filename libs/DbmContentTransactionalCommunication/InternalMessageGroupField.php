@@ -42,6 +42,12 @@
 				$return_value = apply_filters('dbmtc/get_field_value/'.$storage_type_term->slug, $return_value, $this);
 			}
 			
+			$type = $this->get_type();
+			
+			if($return_value === "") {
+				$return_value = apply_filters('dbmtc/default_field_value/'.$type, $return_value, $this);
+			}
+			
 			return $return_value;
 		}
 		

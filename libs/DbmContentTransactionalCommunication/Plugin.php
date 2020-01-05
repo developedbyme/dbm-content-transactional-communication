@@ -85,6 +85,9 @@
 			add_filter('dbmtc/get_field_value/single-relation', array($this, 'filter_get_field_value_single_relation'), 10, 2);
 			add_filter('dbmtc/copy_field_template_meta/single-relation', array($this, 'hook_copy_field_template_meta_single_relation'), 10, 2);
 			
+			add_filter('dbmtc/default_field_value/name', array($this, 'hook_default_field_value_name'), 10, 2);
+			add_filter('dbmtc/default_field_value/address', array($this, 'hook_default_field_value_address'), 10, 2);
+			add_filter('dbmtc/default_field_value/data-array', array($this, 'hook_default_field_value_data_array'), 10, 2);
 		}
 		
 		protected function create_shortcodes() {
@@ -169,6 +172,21 @@
 		
 		public function hook_copy_field_template_meta_single_relation($field, $template) {
 			$field->update_meta('dbmtc_relation_path', $template->get_meta('dbmtc_relation_path'));
+		}
+		
+		public function hook_default_field_value_name($return_value, $field) {
+			return array("firstName" => "", "lastName" => "");
+		}
+		
+		public function hook_default_field_value_address($return_value, $field) {
+			return array("address1" => "", "address2" => "", "postCode" => "", "city" => "", "country" => "");
+		}
+		
+		public function hook_default_field_value_data_array($return_value, $field) {
+			
+			$return_array = array();
+			
+			return $return_array;
 		}
 		
 		public function activation_setup() {
