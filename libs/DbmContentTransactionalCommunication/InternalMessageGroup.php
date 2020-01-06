@@ -15,6 +15,17 @@
 			return $this->id;
 		}
 		
+		public function get_type() {
+			$term_id = dbm_get_single_post_relation($this->id, 'internal-message-group-types');
+			
+			if($term_id) {
+				$term = get_term_by('id', $term_id, 'dbm_relation');
+				return $term->slug;
+			}
+			
+			return 'none';
+		}
+		
 		public function update_meta($field, $value) {
 			
 			update_post_meta($this->id, $field, $value);
