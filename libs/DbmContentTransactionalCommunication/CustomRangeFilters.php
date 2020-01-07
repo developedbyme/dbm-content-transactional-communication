@@ -21,6 +21,7 @@
 			add_filter('wprr/range_encoding/messagesCount', array($this, 'filter_encode_messagesCount'), 10, 3);
 			add_filter('wprr/range_encoding/message', array($this, 'filter_encode_message'), 10, 3);
 			add_filter('wprr/range_encoding/fields', array($this, 'filter_encode_fields'), 10, 3);
+			add_filter('wprr/range_encoding/fieldValues', array($this, 'filter_encode_fieldValues'), 10, 3);
 			
 			add_filter(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/change-comment', array($this, 'filter_encode_internal_message_group_change_comment'), 10, 2);
 			add_filter(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/user-assigned', array($this, 'filter_encode_internal_message_user_assigned'), 10, 2);
@@ -189,6 +190,16 @@
 		public function filter_encode_fields($encoded_data, $post_id, $data) {
 			
 			$encoded_data['fields'] = $this->get_fields($post_id);
+			
+			return $encoded_data;
+		}
+		
+		public function filter_encode_fieldValues($encoded_data, $post_id, $data) {
+			
+			$fields = $this->get_fields($post_id);
+			foreach($fields as $field) {
+				$encoded_data[$field['key']] = $field['value'];
+			}
 			
 			return $encoded_data;
 		}
