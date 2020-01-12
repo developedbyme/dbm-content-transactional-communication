@@ -88,6 +88,9 @@
 			add_filter('dbmtc/default_field_value/name', array($this, 'hook_default_field_value_name'), 10, 2);
 			add_filter('dbmtc/default_field_value/address', array($this, 'hook_default_field_value_address'), 10, 2);
 			add_filter('dbmtc/default_field_value/data-array', array($this, 'hook_default_field_value_data_array'), 10, 2);
+			
+			add_filter('dbmtc/encode_field/relation', array($this, 'hook_encode_field_relation'), 10, 2);
+			add_filter('dbmtc/encode_field/post-relation', array($this, 'hook_encode_field_post_relation'), 10, 2);
 		}
 		
 		protected function create_shortcodes() {
@@ -188,6 +191,26 @@
 			
 			return $return_array;
 		}
+		
+		public function hook_encode_field_relation($return_value, $field) {
+			
+			$current_meta = $field->get_meta('subtree');
+			$return_value['subtree'] = $current_meta ? $current_meta : null;
+			
+			return $return_value;
+		}
+		
+		public function hook_encode_field_post_relation($return_value, $field) {
+			
+			$current_meta = $field->get_meta('postType');
+			$return_value['postType'] = $current_meta ? $current_meta : 'page';
+			
+			$current_meta = $field->get_meta('selection');
+			$return_value['selection'] = $current_meta ? $current_meta : 'default/default';
+			
+			return $return_value;
+		}
+		
 		
 		public function activation_setup() {
 			\DbmContentTransactionalCommunication\Admin\PluginActivation::run_setup();

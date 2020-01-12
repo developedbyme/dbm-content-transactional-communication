@@ -177,6 +177,7 @@
 			self::add_term('dbm_relation:field-type/file', 'File');
 			self::add_term('dbm_relation:field-type/mobile-phone-number', 'Mobile phone number');
 			self::add_term('dbm_relation:field-type/relation', 'Relation');
+			self::add_term('dbm_relation:field-type/post-relation', 'Post relation');
 			self::add_term('dbm_relation:field-type/address', 'Address');
 			self::add_term('dbm_relation:field-type/name', 'Name');
 			self::add_term('dbm_relation:field-type/data-array', 'Data array');
