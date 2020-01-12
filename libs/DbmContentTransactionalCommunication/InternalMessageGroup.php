@@ -272,6 +272,7 @@
 				$field->make_private();
 				
 				$this->update_updated_date();
+				$this->update_name_after_field_change($field);
 			}
 			else {
 				$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
@@ -340,6 +341,7 @@
 			do_action('dbmtc/internal_message/group_field_set', $this, $key, $value, $user_id, $message);
 			
 			$this->update_updated_date();
+			$this->update_name_after_field_change($field);
 			
 			return $message;
 		}
@@ -390,6 +392,10 @@
 		
 		public function update_updated_date() {
 			update_post_meta($this->id, 'updated_date', date('Y-m-d\TH:i:s'));
+		}
+		
+		public function update_name_after_field_change($field) {
+			do_action('dbmtc/internal_message/update_name_after_field_change', $this, $field);
 		}
 		
 		public function get_view_url() {
