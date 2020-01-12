@@ -85,6 +85,9 @@
 			add_filter('dbmtc/get_field_value/single-relation', array($this, 'filter_get_field_value_single_relation'), 10, 2);
 			add_filter('dbmtc/copy_field_template_meta/single-relation', array($this, 'hook_copy_field_template_meta_single_relation'), 10, 2);
 			
+			add_filter('dbmtc/copy_field_template_meta/type/relation', array($this, 'hook_copy_field_template_meta_type_relation'), 10, 2);
+			add_filter('dbmtc/copy_field_template_meta/type/post-relation', array($this, 'hook_copy_field_template_meta_type_post_relation'), 10, 2);
+			
 			add_filter('dbmtc/default_field_value/name', array($this, 'hook_default_field_value_name'), 10, 2);
 			add_filter('dbmtc/default_field_value/address', array($this, 'hook_default_field_value_address'), 10, 2);
 			add_filter('dbmtc/default_field_value/data-array', array($this, 'hook_default_field_value_data_array'), 10, 2);
@@ -160,6 +163,15 @@
 			$field->update_meta('dbmtc_meta_name', $template->get_meta('dbmtc_meta_name'));
 		}
 		
+		public function hook_copy_field_template_meta_type_relation($field, $template) {
+			$field->update_meta('subtree', $template->get_meta('subtree'));
+		}
+		
+		public function hook_copy_field_template_meta_type_post_relation($field, $template) {
+			$field->update_meta('postType', $template->get_meta('postType'));
+			$field->update_meta('selection', $template->get_meta('selection'));
+		}
+		
 		public function hook_set_field_value_single_relation($field, $value) {
 			$path = $field->get_meta('dbmtc_relation_path');
 			$parent_term = dbm_get_relation_by_path($path);
@@ -193,6 +205,7 @@
 		}
 		
 		public function hook_encode_field_relation($return_value, $field) {
+			//echo("hook_encode_field_relation");
 			
 			$current_meta = $field->get_meta('subtree');
 			$return_value['subtree'] = $current_meta ? $current_meta : null;

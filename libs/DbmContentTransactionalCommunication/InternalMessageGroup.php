@@ -299,6 +299,7 @@
 				$field->set_storage_type($storage_type);
 				
 				do_action('dbmtc/copy_field_template_meta/'.$storage_type, $field, $template);
+				do_action('dbmtc/copy_field_template_meta/type/'.$type, $field, $template);
 				do_action('dbmtc/setup_default_field_storage', $field);
 				
 				$value = $template->get_value();
