@@ -351,4 +351,36 @@
 		
 		return $data_id = $data_id;
 	}
+	
+	function dbmtc_setup_field_template($for_type, $field_name, $type = 'string', $storage_type = null, $meta = array()) {
+		//echo('dbmtc_setup_field_template');
+		
+		$for_type_term = dbm_get_type_by_path($for_type);
+		
+		$existing_id = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('field-template')->add_meta_query('dbmtc_key', $field_name)->add_meta_query('dbmtc_for_type', $for_type_term->term_id)->get_post_id();
+		if($existing_id) {
+			return $existing_id;
+		}
+		
+		$new_id = dbm_create_data($field_name.' ('.$for_type.' field)', 'field-template', 'admin-grouping/field-templates');
+		
+		dbm_add_post_relation($new_id, 'field-type/'.$type);
+		if($storage_type) {
+			dbm_add_post_relation($new_id, 'field-storage/'.$storage_type);
+		}
+		
+		foreach($meta as $key => $value) {
+			update_post_meta($new_id, $key, $value);
+		}
+		
+		update_post_meta($new_id, 'dbmtc_key', $field_name);
+		update_post_meta($new_id, 'dbmtc_for_type', $for_type_term->term_id);
+		
+		wp_update_post(array(
+			'ID' => $new_id,
+			'post_status' => 'private'
+		));
+		
+		return $new_id;
+	}
 ?>
