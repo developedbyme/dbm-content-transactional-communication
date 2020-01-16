@@ -327,7 +327,6 @@
 			}
 			
 			$original_value = $field->get_value();
-			var_dump($field);
 			$field->set_value($value);
 			
 			$field->set_status('complete');
@@ -339,7 +338,6 @@
 			$message->update_meta('oldValue', $original_value);
 			$message->update_meta('newValue', $value);
 			
-			var_dump($this, $key, $value);
 			do_action('dbmtc/internal_message/group_field_set', $this, $key, $value, $user_id, $message);
 			
 			$this->update_updated_date();
@@ -374,10 +372,8 @@
 		}
 		
 		public function get_field($key) {
-			var_dump('get_field');
 			
 			$field_id = $this->get_field_id_if_exists($key);
-			var_dump($field_id);
 			
 			if(!$field_id) {
 				
