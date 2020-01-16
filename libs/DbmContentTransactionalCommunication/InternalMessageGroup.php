@@ -348,7 +348,7 @@
 		
 		public function get_field_id_if_exists($key) {
 			
-			$local_id = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message-group-field')->add_relations_with_children_from_post($this->id, 'internal-message-groups')->add_meta_query('dbmtc_key', $key)->debug_print_query_args()->get_post_id();
+			$local_id = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message-group-field')->add_relations_with_children_from_post($this->id, 'internal-message-groups')->add_meta_query('dbmtc_key', $key)->get_post_id();
 			
 			return $local_id;
 		}
