@@ -338,6 +338,7 @@
 			$message->update_meta('oldValue', $original_value);
 			$message->update_meta('newValue', $value);
 			
+			var_dump($this, $key, $value);
 			do_action('dbmtc/internal_message/group_field_set', $this, $key, $value, $user_id, $message);
 			
 			$this->update_updated_date();

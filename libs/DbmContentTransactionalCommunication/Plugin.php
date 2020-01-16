@@ -151,6 +151,7 @@
 		
 		public function hook_set_field_value_meta($field, $value) {
 			$meta_key = $field->get_meta('dbmtc_meta_name');
+			var_dump($field->get_group_id(), $meta_key, $value);
 			update_post_meta($field->get_group_id(), $meta_key, $value);
 		}
 		
