@@ -374,7 +374,10 @@
 		}
 		
 		public function get_field($key) {
+			var_dump('get_field');
+			
 			$field_id = $this->get_field_id_if_exists($key);
+			var_dump($field_id);
 			
 			if(!$field_id) {
 				
