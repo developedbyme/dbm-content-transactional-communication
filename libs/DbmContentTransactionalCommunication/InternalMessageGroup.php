@@ -327,6 +327,7 @@
 			}
 			
 			$original_value = $field->get_value();
+			var_dump($field);
 			$field->set_value($value);
 			
 			$field->set_status('complete');
