@@ -49,7 +49,7 @@
 			
 			$dbm_query = dbm_new_query($query_args);
 			$dbm_query->add_type_by_path('internal-message');
-			$dbm_query->add_relations_from_post($group, 'internal-message-groups');
+			$dbm_query->add_relations_with_children_from_post($group, 'internal-message-groups');
 			
 			return $dbm_query->get_query_args();
 		}
