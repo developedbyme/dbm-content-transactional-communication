@@ -103,9 +103,13 @@
 		return $return_object;
 	}
 	
-	function dbm_content_tc_send_email($title, $content, $to, $from, $tc_id = 0, $additional_data = null) {
+	function dbm_content_tc_send_email($title, $content, $to, $from = null, $tc_id = 0, $additional_data = null) {
 		if($tc_id === 0) {
 			$tc_id = dbm_content_tc_create_transactional_communication('email');
+		}
+		
+		if(!$from) {
+			$from = dbmtc_get_default_from_email();
 		}
 		
 		$time_zone = get_option('timezone_string');
@@ -135,9 +139,13 @@
 		return $tc_id;
 	}
 	
-	function dbm_content_tc_send_text_message($content, $to, $from, $tc_id = 0, $additional_data = null) {
+	function dbm_content_tc_send_text_message($content, $to, $from = null, $tc_id = 0, $additional_data = null) {
 		if($tc_id === 0) {
 			$tc_id = dbm_content_tc_create_transactional_communication('text-message');
+		}
+		
+		if(!$from) {
+			$from = dbmtc_get_default_from_phone_number();
 		}
 		
 		$time_zone = get_option('timezone_string');
@@ -270,7 +278,7 @@
 				$title = $template['title'];
 				$body = $template['body'];
 			
-				$communications[] = dbm_content_tc_send_email($title, $body, $email, apply_filters('dbm_content_tc/default_from_email', get_option('admin_email')));
+				$communications[] = dbm_content_tc_send_email($title, $body, $email, dbmtc_get_default_from_email());
 			}
 		}
 		
@@ -301,12 +309,16 @@
 		return $internal_message;
 	}
 	
-	function dbmtc_send_email_template($template_slug, $to, $from, $replacements = array(), $additional_data = array()) {
+	function dbmtc_send_email_template($template_slug, $to, $from = null, $replacements = array(), $additional_data = array()) {
 		
 		$template_id = dbm_new_query('dbm_additional')->add_relation_by_path($template_slug)->get_post_id();
 		
 		if(!$template_id) {
 			return 0;
+		}
+		
+		if(!$from) {
+			$from = dbmtc_get_default_from_email();
 		}
 		
 		$template = dbm_content_tc_get_template_with_replacements($template_id, $replacements);
@@ -339,12 +351,10 @@
 		
 		$template_id = dbm_new_query('dbm_additional')->add_relation_by_path('global-transactional-templates/verify-phone-number')->get_post_id();
 		
-		$site_name = substr(preg_replace('/[^a-zA-Z0-9 \\-]+/', '', get_bloginfo('name'), -1), 0, 8);
-		
 		$template = dbm_content_tc_get_template_with_replacements($template_id, $replacements);
 		
 		$clean_text = wp_strip_all_tags($template['body']);
-		$communication_id = dbm_content_tc_send_text_message($clean_text, $phone_number, apply_filters('dbm_content_tc/default_from_phone_number', $site_name));
+		$communication_id = dbm_content_tc_send_text_message($clean_text, $phone_number, dbmtc_get_default_from_phone_number());
 		
 		update_post_meta($data_id, 'send_time', time());
 		update_post_meta($data_id, 'communication_id', $communication_id);
@@ -382,5 +392,15 @@
 		));
 		
 		return $new_id;
+	}
+	
+	function dbmtc_get_default_from_email() {
+		return apply_filters('dbm_content_tc/default_from_email', get_option('admin_email'));
+	}
+	
+	function dbmtc_get_default_from_phone_number() {
+		$site_name = substr(preg_replace('/[^a-zA-Z0-9 \\-]+/', '', get_bloginfo('name'), -1), 0, 8);
+		
+		return apply_filters('dbm_content_tc/default_from_phone_number', $site_name);
 	}
 ?>

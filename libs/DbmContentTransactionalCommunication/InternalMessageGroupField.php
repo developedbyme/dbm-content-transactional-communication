@@ -18,7 +18,8 @@
 		
 		public function get_group_id() {
 			if(!$this->group_id) {
-				$group_id = dbm_new_query('all')->set_field('post_type', get_post_types(array(), 'names'))->set_field('post_status', array('publish', 'pending', 'draft', 'future', 'private', 'inherit'))->add_type_by_path('internal-message-group')->add_relations_with_children_from_post($this->id, 'internal-message-groups')->get_post_id();
+				$post_types = array_keys(get_post_types(array(), 'names'));
+				$group_id = dbm_new_query('all')->set_field('post_type', $post_types)->set_field('post_status', array('publish', 'pending', 'draft', 'future', 'private', 'inherit'))->add_type_by_path('internal-message-group')->add_relations_with_children_from_post($this->id, 'internal-message-groups')->get_post_id();
 				$this->group_id = $group_id;
 			}
 			
