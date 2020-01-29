@@ -403,4 +403,40 @@
 		
 		return apply_filters('dbm_content_tc/default_from_phone_number', $site_name);
 	}
+	
+	function dbmtc_create_verification_generator() {
+		$new_verification = new \DbmContentTransactionalCommunication\Verification\VerificationGenerator();
+		
+		return $new_verification;
+	}
+	
+	function dbmtc_get_verification($id) {
+		$new_verification = new \DbmContentTransactionalCommunication\Verification\Verification($id);
+		
+		return $new_verification;
+	}
+	
+	function dbmtc_get_user_contact($user_or_any_login) {
+		
+		$user = null;
+		if($user_or_any_login instanceof \WP_User) {
+			$user = $user_or_any_login;
+		}
+		else {
+			$user = get_user_by('login', $user_or_any_login);
+		
+			if(!$user) {
+				$user = get_user_by('email', $user_or_any_login);
+			}
+		}
+		
+		
+		if(!$user) {
+			return null;
+		}
+		
+		$contact = new \DbmContentTransactionalCommunication\Contact\UserContact($user->ID);
+		
+		return $contact;
+	}
 ?>

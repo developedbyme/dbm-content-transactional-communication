@@ -290,16 +290,25 @@
 			$response_data['verified'] = $result;
 		}
 		
-		public function hook_sendPasswordResetVerification($data, &$response_data) {
-			$username_or_email = $data['user'];
+		protected function get_user($username_or_email) {
 			$user = get_user_by('login', $username_or_email);
 			
 			if(!$user) {
 				$user = get_user_by('email', $username_or_email);
 			}
 			
+			return $user;
+		}
+		
+		public function sendUserVerification($user, $verification_type, $send_type = 'all', &$response_data = array()) {
+			//METODO
+		}
+		
+		public function hook_sendPasswordResetVerification($data, &$response_data) {
+			$user = $this->get_user($data['user']);
+			
 			if(!$user) {
-				//METODO: return error message
+				$response_data['message'] = "User not found";
 				return;
 			}
 			
@@ -315,6 +324,9 @@
 			$hash = md5($username_or_email.$hash_salt);
 			
 			$data_id = dbm_create_data('Reset password verification - '.$hash, 'address-verification', 'admin-grouping/address-verifications');
+			$data_dbm_post = dbm_get_post($data_id);
+			$data_dbm_post->add_type_by_name('address-verification/'.'password-reset-verification');
+			
 			$response_data['verificationId'] = $data_id;
 			$response_data['sent'] = array();
 			$response_data['availableOptions'] = array();
