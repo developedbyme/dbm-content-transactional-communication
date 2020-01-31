@@ -27,6 +27,8 @@
 			add_action('wprr/api_action/dbmtc/resendPasswordResetVerification', array($this, 'hook_resendPasswordResetVerification'), 10, 2);
 			add_action('wprr/api_action/dbmtc/verifyResetPassword', array($this, 'hook_verifyResetPassword'), 10, 2);
 			add_action('wprr/api_action/dbmtc/setPasswordWithVerification', array($this, 'hook_setPasswordWithVerification'), 10, 2);
+			
+			add_action('wprr/api_action/dbmtc/testMessageNotification', array($this, 'hook_testMessageNotification'), 10, 2);
 		}
 
 		public function hook_send_email_verification($data, &$response_data) {
@@ -442,6 +444,24 @@
 					$response_data['sent'][] = 'email';
 				}
 			}
+		}
+		
+		public function hook_testMessageNotification($data, &$response_data) {
+			$message_id = (int)$data['message'];
+			$for_identifier = $data['for'];
+			$email = $data['email'];
+			
+			if(!$email) {
+				return;
+			}
+			
+			$message = dbmtc_get_internal_message($message_id);
+			$for_user = dbmtc_get_user($for_identifier);
+			
+			$result = $message->testNotification($for_user, $email);
+			
+			$response_data['result'] = $result;
+			$response_data['sentTo'] = $email;
 		}
 		
 		public static function test_import() {

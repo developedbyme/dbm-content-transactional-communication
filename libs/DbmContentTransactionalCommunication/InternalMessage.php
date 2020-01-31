@@ -90,6 +90,48 @@
 			return $this;
 		}
 		
+		public function testNotification($as_user, $email) {
+			
+			$group = $this->get_group();
+			$from_user = get_user_by('id', get_post($this->get_id())->post_author);
+			
+			$default_email_template_id = dbm_new_query('dbm_additional')->add_relation_by_path('global-transactional-templates/new-internal-message')->get_post_id();
+		
+			$from_user_id = 0;
+			if($from_user) {
+				$from_user_id = $from_user->ID;
+			}
+			$from_contact = dbmtc_get_user_contact($from_user);
+			
+			$to_contact = dbmtc_get_user_contact($as_user);
+			
+			$email_template_id = apply_filters('dbmtc/im/notification_template_for_user', $default_email_template_id, $as_user, $this);
+			
+			if(!$email_template_id) {
+				return false;
+			}
+			$template = dbmtc_create_template_from_post($email_template_id);
+			
+			if($from_contact) {
+				$template->add_keywords_provider($from_contact->create_keywords_provider(), 'from');
+			}
+			$template->add_keywords_provider($to_contact->create_keywords_provider(), 'to');
+			$template->add_keywords_provider($this->create_keywords_provider(), 'message');
+			$template->add_keywords_provider($group->create_keywords_provider(), 'messageGroup');
+			
+			do_action('dbmtc/im/setup_notification_template', $template, $as_user, $this);
+			
+			$content = $template->get_content();
+			
+			if(!$content['title'] && !$content['content']) {
+				return false;
+			}
+	
+			dbm_content_tc_send_email($content['title'], $content['content'], $email, dbmtc_get_default_from_email());
+			
+			return true;
+		}
+		
 		public function get_sent_communications() {
 			return get_post_meta($this->get_id(), 'sent_notifications', false);
 		}
