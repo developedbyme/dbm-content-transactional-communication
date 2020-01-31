@@ -46,7 +46,8 @@
 			
 			$code = mt_rand($this->code_range_min, $this->code_range_max);
 			
-			$hash = md5($value.$this->get_salt());
+			$salt = $this->get_salt();
+			$hash = apply_filters('dbmtc/verification/generate_hash', md5($value.$salt), $value, $salt, $this);
 			
 			$data_id = dbm_create_data('Verification '.$hash, 'address-verification', 'admin-grouping/address-verifications');
 			$verification = dbmtc_get_verification($data_id);
@@ -62,17 +63,12 @@
 			return $verification;
 		}
 		
-		public function generate_and_send_to_user($value, $user, $preferred_order = null) {
+		public function generate_and_send_to_user($value, $user, $preferred_order) {
 			$verification = $this->generate($value);
-			$verification_id = $verification->get_id();
+			$verification->update_meta('user_id', $user->ID);
+			$communications = $verification->send_to_user($user, $preferred_order);
 			
-			$user_id = $user->ID;
-			$data_dbm_post->update_meta('user_id', $user_id);
-			$send_methods = $this->get_preferred_send_methods_for_user($user, $preferred_order);
-			
-			foreach($send_methods as $method => $data) {
-				$this->perform_send($verification_id, $method, $data);
-			}
+			return $verification;
 		}
 		
 		public function perform_send($verification_id, $method, $data, $to) {

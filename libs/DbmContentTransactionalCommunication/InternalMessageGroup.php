@@ -1,18 +1,12 @@
 <?php
 	namespace DbmContentTransactionalCommunication;
 
-	class InternalMessageGroup {
-
-		protected $id = 0;
+	class InternalMessageGroup extends \DbmContent\DbmPost {
 
 		function __construct($id) {
 			//echo("\DbmContentTransactionalCommunication\InternalMessageGroup::__construct<br />");
 			
-			$this->id = $id;
-		}
-		
-		public function get_id() {
-			return $this->id;
+			parent::__construct($id);
 		}
 		
 		public function get_type() {
@@ -24,13 +18,6 @@
 			}
 			
 			return 'none';
-		}
-		
-		public function update_meta($field, $value) {
-			
-			update_post_meta($this->id, $field, $value);
-			
-			return $this;
 		}
 		
 		public function get_group_term_id() {
@@ -409,6 +396,14 @@
 			$permalink = add_query_arg('group', $this->id, $permalink);
 			
 			return $permalink;
+		}
+		
+		public function create_keyword_provider() {
+			$provider = new \DbmContentTransactionalCommunication\Template\MessageGroupKeywordsProvider();
+			
+			$provider->set_message_group($this);
+			
+			return $provider;
 		}
 		
 		public static function test_import() {

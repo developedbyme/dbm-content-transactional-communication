@@ -4,6 +4,7 @@
 	// \DbmContentTransactionalCommunication\Contact\Contact
 	class Contact {
 		
+		protected $user_details = array();
 		protected $contact_detials = array();
 		
 		function __construct() {
@@ -51,7 +52,7 @@
 		
 		public function can_handle_send_method($method) {
 			$contact_details_to_check = $method;
-			if($method === 'textMessage') {
+			if($method === 'text-message') {
 				$contact_details_to_check = 'phoneNumber';
 			}
 			
@@ -62,6 +63,13 @@
 			}
 			
 			return false;
+		}
+		
+		public function create_keywords_provider() {
+			$provider = new \DbmContentTransactionalCommunication\Template\ContactKeywordsProvider();
+			$provider->set_contact($this);
+			
+			return $provider;
 		}
 		
 		public static function test_import() {

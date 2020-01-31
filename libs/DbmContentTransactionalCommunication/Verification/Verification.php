@@ -32,17 +32,32 @@
 				}
 			}
 		*/
-		
-		public function get_available_send_methods() {
-			//METODO
-			$type = $this->get_subtypes('address-verification');
+		public function get_verification_types() {
+			return $this->get_subtypes('address-verification');
 		}
 		
-		public function get_available_send_methods_for_contact($contact) {
+		public function get_code() {
+			return $this->get_meta('verification_code');
+		}
+		
+		public function get_available_send_methods($requested_methods) {
+			$available_methods = array();
+			
+			foreach($requested_methods as $requested_method) {
+				$method_data = apply_filters('dbmtc/send_method_for_verification/'.$requested_method, null, $this);
+				if($method_data) {
+					$available_methods[$requested_method] = $method_data;
+				}
+			}
+			
+			return $available_methods;
+		}
+		
+		public function get_available_send_methods_for_contact($requested_methods, $contact) {
 			
 			$return_methods = array();
 			
-			$available_methods = $this->get_available_send_methods();
+			$available_methods = $this->get_available_send_methods($requested_methods);
 			foreach($available_methods as $method => $data) {
 				if($contact->can_handle_send_method($method)) {
 					$return_methods[$method] = $data;
@@ -52,8 +67,8 @@
 			return $return_methods;
 		}
 		
-		public function get_preferred_send_methods_for_contact($contact, $preferred_order = null) {
-			$available_methods = $this->get_available_send_methods_for_contact($contact);
+		public function get_preferred_send_methods_for_contact($contact, $preferred_order) {
+			$available_methods = $this->get_available_send_methods_for_contact($preferred_order, $contact);
 			$selected_methods = $available_methods;
 			
 			if($preferred_order) {
@@ -70,12 +85,9 @@
 			return $selected_methods;
 		}
 		
-		public function send_to_user($user, $preferred_order = null) {
+		public function send_to_user($user, $preferred_order) {
 			
 			$contact = dbmtc_get_user_contact($user);
-			
-			$user_id = $user->ID;
-			$data_dbm_post->update_meta('user_id', $user_id);
 			$send_methods = $this->get_preferred_send_methods_for_contact($contact, $preferred_order);
 			
 			foreach($send_methods as $method => $data) {
@@ -84,8 +96,19 @@
 		}
 		
 		public function perform_send($method, $data, $to_contact) {
-			//METODO: keywords
-			do_action('dbmtc/send_verification/'.$method, $this->get_id(), $data, $to_contact);
+			
+			$data['template']->add_keywords_provider($this->create_keywords_provider(), 'verification');
+			$data['template']->add_keywords_provider($to_contact->create_keywords_provider(), 'to');
+			
+			do_action('dbmtc/send_verification/'.$method, $data, $to_contact, $this);
+		}
+		
+		public function create_keywords_provider() {
+			$provider = new \DbmContentTransactionalCommunication\Template\VerificationKeywordsProvider();
+			
+			$provider->set_verification($this);
+			
+			return $provider;
 		}
 		
 		public static function test_import() {
