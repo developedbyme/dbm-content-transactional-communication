@@ -131,7 +131,6 @@
 			$content = $this->content;
 			
 			$keyword_map = $this->get_keyword_map();
-			var_dump($keyword_map);
 			
 			$title = $this->perform_replacements($title, $keyword_map);
 			$content = $this->perform_replacements($content, $keyword_map);

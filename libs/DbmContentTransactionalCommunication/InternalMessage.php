@@ -32,6 +32,10 @@
 			return $permalink;
 		}
 		
+		public function is_type($type) {
+			return dbm_has_post_relation($this->get_id(), 'internal-message-types/'.$type);
+		}
+		
 		public function notify() {
 			
 			$group = $this->get_group();
@@ -41,11 +45,15 @@
 		
 			$communications = array();
 			
+			$from_user_id = 0;
+			if($from_user) {
+				$from_user_id = $from_user->ID;
+			}
 			$from_contact = dbmtc_get_user_contact($from_user);
-		
+			
 			$user_ids = get_post_meta($group->get_id(), 'users_to_notify', true);
 			foreach($user_ids as $user_id) {
-				if($user_id !== $from_user->ID) {
+				if($user_id !== $from_user_id) {
 					$current_user = get_user_by('id', $user_id);
 					$email = $current_user->user_email;
 					
@@ -58,14 +66,14 @@
 					}
 					$template = dbmtc_create_template_from_post($email_template_id);
 					
-					$template->add_keywords_provider($from_contact->create_keywords_provider(), 'from');
+					if($from_contact) {
+						$template->add_keywords_provider($from_contact->create_keywords_provider(), 'from');
+					}
 					$template->add_keywords_provider($to_contact->create_keywords_provider(), 'to');
-					$template->add_keywords_provider($this->create_keyword_provider(), 'message');
-					$template->add_keywords_provider($group->create_keyword_provider(), 'messageGroup');
+					$template->add_keywords_provider($this->create_keywords_provider(), 'message');
+					$template->add_keywords_provider($group->create_keywords_provider(), 'messageGroup');
 					
 					do_action('dbmtc/im/setup_notification_template', $template, $current_user, $this);
-					
-					var_dump($template);
 					
 					$content = $template->get_content();
 					
@@ -86,7 +94,7 @@
 			return get_post_meta($this->get_id(), 'sent_notifications', false);
 		}
 		
-		public function create_keyword_provider() {
+		public function create_keywords_provider() {
 			$provider = new \DbmContentTransactionalCommunication\Template\MessageKeywordsProvider();
 			
 			$provider->set_message($this);

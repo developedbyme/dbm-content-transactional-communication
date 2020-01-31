@@ -414,7 +414,7 @@
 		return $template;
 	}
 	
-	function dbmtc_create_static_keyword_replacements($keywords = null) {
+	function dbmtc_create_static_keywords_replacements($keywords = null) {
 		$replacement = new \DbmContentTransactionalCommunication\Template\StaticKeywordReplacements();
 		
 		if($keywords) {
@@ -422,5 +422,14 @@
 		}
 		
 		return $replacement;
+	}
+	
+	function dbmtc_create_wc_order_keywords_replacement($order_or_id) {
+		$provider = new \DbmContentTransactionalCommunication\Template\WcOrderKeywordsProvider();
+		
+		$order = wc_get_order($order_or_id);
+		$provider->set_order($order);
+		
+		return $provider;
 	}
 ?>

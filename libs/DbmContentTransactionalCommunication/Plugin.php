@@ -232,7 +232,6 @@
 			}
 			
 			$types = $verification->get_verification_types();
-			var_dump($types);
 			
 			//METODO: check withc types
 			

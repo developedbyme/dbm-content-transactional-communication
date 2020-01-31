@@ -398,7 +398,7 @@
 			return $permalink;
 		}
 		
-		public function create_keyword_provider() {
+		public function create_keywords_provider() {
 			$provider = new \DbmContentTransactionalCommunication\Template\MessageGroupKeywordsProvider();
 			
 			$provider->set_message_group($this);
