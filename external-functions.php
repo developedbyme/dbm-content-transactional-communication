@@ -424,11 +424,27 @@
 		return $replacement;
 	}
 	
-	function dbmtc_create_wc_order_keywords_replacement($order_or_id) {
+	function dbmtc_create_wc_order_keywords_provider($order_or_id) {
 		$provider = new \DbmContentTransactionalCommunication\Template\WcOrderKeywordsProvider();
 		
 		$order = wc_get_order($order_or_id);
 		$provider->set_order($order);
+		
+		return $provider;
+	}
+	
+	function dbmtc_create_filter_keywords_provider($filter_name = null, $data = null, $triggering_keywords = null) {
+		$provider = new \DbmContentTransactionalCommunication\Template\FilterKeywordsProvider();
+		
+		if($filter_name) {
+			$provider->set_filter_name($filter_name);
+		}
+		if($data) {
+			$provider->set_data($data);
+		}
+		if($triggering_keywords) {
+			$provider->set_triggering_keywords($triggering_keywords);
+		}
 		
 		return $provider;
 	}
