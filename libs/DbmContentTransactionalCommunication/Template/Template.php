@@ -41,9 +41,15 @@
 			$post = get_post($post);
 			
 			$title = $post->post_title;
-			$content = $post->post_content;
+			$content = apply_filters('the_content', $post->post_content);
 			
-			//METODO: check for meta title if relation is set
+			if(dbm_has_post_relation($post->ID, 'transactional-template-types/email')) {
+				$meta_title = get_post_meta($post->ID, 'dbmtc_email_subject', true);
+				
+				if($meta_title) {
+					$title = $meta_title;
+				}
+			}
 			
 			$this->set_content($title, $content);
 			
