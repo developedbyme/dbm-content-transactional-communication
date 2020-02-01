@@ -28,6 +28,9 @@
 			add_action('wprr/api_action/dbmtc/verifyResetPassword', array($this, 'hook_verifyResetPassword'), 10, 2);
 			add_action('wprr/api_action/dbmtc/setPasswordWithVerification', array($this, 'hook_setPasswordWithVerification'), 10, 2);
 			
+			add_action('wprr/api_action/dbmtc/sendTwoFactorVerification', array($this, 'hook_sendTwoFactorVerification'), 10, 2);
+			add_action('wprr/api_action/dbmtc/verifyVerification', array($this, 'hook_verifyVerification'), 10, 2);
+			
 			add_action('wprr/api_action/dbmtc/testMessageNotification', array($this, 'hook_testMessageNotification'), 10, 2);
 		}
 
@@ -302,8 +305,27 @@
 			return $user;
 		}
 		
-		public function sendUserVerification($user, $verification_type, $send_type = 'all', &$response_data = array()) {
-			//METODO
+		public function hook_sendTwoFactorVerification($data, &$response_data) {
+			$user = $this->get_user($data['user']);
+			
+			if(!$user) {
+				$response_data['message'] = "User not found";
+				return;
+			}
+			
+			$preferred_order = array('text-message', 'email');
+			
+			$verification_generator = dbmtc_create_verification_generator();
+			$verification_generator->set_type('two-factor-verification');
+			$verification = $verification_generator->generate_and_send_to_user($data['user'], $user, $preferred_order);
+			
+			$response_data['verificationId'] = $verification->get_id();
+		}
+		
+		public function hook_verifyVerification($data, &$response_data) {
+			
+			$verification = dbmtc_get_verification((int)$data['verificationId']);
+			$response_data['verified'] = $verification->verify($data['value'], $data['verificationCode']);
 		}
 		
 		public function hook_sendPasswordResetVerification($data, &$response_data) {

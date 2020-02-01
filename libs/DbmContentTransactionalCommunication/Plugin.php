@@ -31,7 +31,8 @@
 			parent::register_hooks();
 			
 			add_action('plugins_loaded', array($this, 'hook_plugins_loaded'), $this->_default_hook_priority);
-			
+			add_action('dbmtc/send_verification/text-message', array($this, 'hook_dbmtc_send_verification_text_message'), $this->_default_hook_priority, 3);
+			add_action('dbmtc/send_verification/email', array($this, 'hook_dbmtc_send_verification_email'), $this->_default_hook_priority, 3);
 			
 		}
 		
@@ -243,6 +244,22 @@
 			}
 			
 			return $data;
+		}
+		
+		public function hook_dbmtc_send_verification_text_message($data, $to_contact, $verication) {
+			//echo("\DbmContentTransactionalCommunication\Plugin::hook_dbmtc_send_verification_text_message<br />");
+			
+			$content = $data['template']->get_content();
+			
+			dbm_content_tc_send_text_message($content['content'], $to_contact->get_contact_details('phoneNumber'));
+		}
+		
+		public function hook_dbmtc_send_verification_email($data, $to_contact, $verication) {
+			//echo("\DbmContentTransactionalCommunication\Plugin::hook_dbmtc_send_verification_email<br />");
+			
+			$content = $data['template']->get_content();
+			
+			dbm_content_tc_send_email($content['title'], $content['content'], $to_contact->get_contact_details('email'));
 		}
 		
 		public function activation_setup() {
