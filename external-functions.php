@@ -403,4 +403,8 @@
 		
 		return apply_filters('dbm_content_tc/default_from_phone_number', $site_name);
 	}
+	
+	function dbmtc_add_timed_action($time, $action, $data) {
+		
+	}
 ?>
