@@ -28,6 +28,11 @@
 			add_action('wprr/api_action/dbmtc/resendPasswordResetVerification', array($this, 'hook_resendPasswordResetVerification'), 10, 2);
 			add_action('wprr/api_action/dbmtc/verifyResetPassword', array($this, 'hook_verifyResetPassword'), 10, 2);
 			add_action('wprr/api_action/dbmtc/setPasswordWithVerification', array($this, 'hook_setPasswordWithVerification'), 10, 2);
+			
+			add_action('wprr/api_action/dbmtc/sendTwoFactorVerification', array($this, 'hook_sendTwoFactorVerification'), 10, 2);
+			add_action('wprr/api_action/dbmtc/verifyVerification', array($this, 'hook_verifyVerification'), 10, 2);
+			
+			add_action('wprr/api_action/dbmtc/testMessageNotification', array($this, 'hook_testMessageNotification'), 10, 2);
 		}
 
 		public function hook_send_email_verification($data, &$response_data) {
@@ -310,16 +315,44 @@
 			$response_data['verified'] = $result;
 		}
 		
-		public function hook_sendPasswordResetVerification($data, &$response_data) {
-			$username_or_email = $data['user'];
+		protected function get_user($username_or_email) {
 			$user = get_user_by('login', $username_or_email);
 			
 			if(!$user) {
 				$user = get_user_by('email', $username_or_email);
 			}
 			
+			return $user;
+		}
+		
+		public function hook_sendTwoFactorVerification($data, &$response_data) {
+			$user = $this->get_user($data['user']);
+			
 			if(!$user) {
-				//METODO: return error message
+				$response_data['message'] = "User not found";
+				return;
+			}
+			
+			$preferred_order = array('text-message', 'email');
+			
+			$verification_generator = dbmtc_create_verification_generator();
+			$verification_generator->set_type('two-factor-verification');
+			$verification = $verification_generator->generate_and_send_to_user($data['user'], $user, $preferred_order);
+			
+			$response_data['verificationId'] = $verification->get_id();
+		}
+		
+		public function hook_verifyVerification($data, &$response_data) {
+			
+			$verification = dbmtc_get_verification((int)$data['verificationId']);
+			$response_data['verified'] = $verification->verify($data['value'], $data['verificationCode']);
+		}
+		
+		public function hook_sendPasswordResetVerification($data, &$response_data) {
+			$user = $this->get_user($data['user']);
+			
+			if(!$user) {
+				$response_data['message'] = "User not found";
 				return;
 			}
 			
@@ -335,6 +368,9 @@
 			$hash = md5($username_or_email.$hash_salt);
 			
 			$data_id = dbm_create_data('Reset password verification - '.$hash, 'address-verification', 'admin-grouping/address-verifications');
+			$data_dbm_post = dbm_get_post($data_id);
+			$data_dbm_post->add_type_by_name('address-verification/'.'password-reset-verification');
+			
 			$response_data['verificationId'] = $data_id;
 			$response_data['sent'] = array();
 			$response_data['availableOptions'] = array();
@@ -450,6 +486,24 @@
 					$response_data['sent'][] = 'email';
 				}
 			}
+		}
+		
+		public function hook_testMessageNotification($data, &$response_data) {
+			$message_id = (int)$data['message'];
+			$for_identifier = $data['for'];
+			$email = $data['email'];
+			
+			if(!$email) {
+				return;
+			}
+			
+			$message = dbmtc_get_internal_message($message_id);
+			$for_user = dbmtc_get_user($for_identifier);
+			
+			$result = $message->testNotification($for_user, $email);
+			
+			$response_data['result'] = $result;
+			$response_data['sentTo'] = $email;
 		}
 		
 		public static function test_import() {

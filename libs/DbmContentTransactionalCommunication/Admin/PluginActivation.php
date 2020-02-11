@@ -131,6 +131,8 @@
 			self::add_terms_to_post(array('dbm_type:admin-grouping', 'dbm_type:admin-grouping/field-templates'), $current_group);
 			
 			self::add_term('dbm_type:address-verification', 'Address verification');
+			self::add_term('dbm_type:address-verification/password-reset-verification', 'Password reset verification');
+			self::add_term('dbm_type:address-verification/two-factor-verification', 'Two factor verification');
 			self::add_term('dbm_type:transactional-template', 'Transactional template');
 			self::add_term('dbm_type:transactional-communication', 'Transactional communication');
 			

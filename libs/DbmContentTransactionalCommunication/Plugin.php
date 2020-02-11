@@ -31,7 +31,8 @@
 			parent::register_hooks();
 			
 			add_action('plugins_loaded', array($this, 'hook_plugins_loaded'), $this->_default_hook_priority);
-			
+			add_action('dbmtc/send_verification/text-message', array($this, 'hook_dbmtc_send_verification_text_message'), $this->_default_hook_priority, 3);
+			add_action('dbmtc/send_verification/email', array($this, 'hook_dbmtc_send_verification_email'), $this->_default_hook_priority, 3);
 			
 		}
 		
@@ -94,6 +95,8 @@
 			
 			add_filter('dbmtc/encode_field/relation', array($this, 'hook_encode_field_relation'), 10, 2);
 			add_filter('dbmtc/encode_field/post-relation', array($this, 'hook_encode_field_post_relation'), 10, 2);
+			
+			add_filter('dbmtc/send_method_for_verification/email', array($this, 'filter_send_method_for_verification_email'), 10, 2);
 		}
 		
 		protected function create_shortcodes() {
@@ -224,6 +227,40 @@
 			return $return_value;
 		}
 		
+		public function filter_send_method_for_verification_email($data, $verification) {
+			if($data) {
+				return $data;
+			}
+			
+			$types = $verification->get_verification_types();
+			
+			//METODO: check withc types
+			
+			$template_path = 'global-transactional-templates/reset-password-by-verification';
+			$template_id = dbm_new_query('dbm_additional')->add_relation_by_path($template_path)->add_relation_by_path('transactional-template-types/email')->get_post_id();
+			if($template_id) {
+				$template = dbmtc_create_template_from_post($template_id);
+				return array('template' => $template);
+			}
+			
+			return $data;
+		}
+		
+		public function hook_dbmtc_send_verification_text_message($data, $to_contact, $verication) {
+			//echo("\DbmContentTransactionalCommunication\Plugin::hook_dbmtc_send_verification_text_message<br />");
+			
+			$content = $data['template']->get_content();
+			
+			dbm_content_tc_send_text_message($content['content'], $to_contact->get_contact_details('phoneNumber'));
+		}
+		
+		public function hook_dbmtc_send_verification_email($data, $to_contact, $verication) {
+			//echo("\DbmContentTransactionalCommunication\Plugin::hook_dbmtc_send_verification_email<br />");
+			
+			$content = $data['template']->get_content();
+			
+			dbm_content_tc_send_email($content['title'], $content['content'], $to_contact->get_contact_details('email'));
+		}
 		
 		public function activation_setup() {
 			\DbmContentTransactionalCommunication\Admin\PluginActivation::run_setup();
