@@ -46,4 +46,8 @@ function dbm_content_transactional_communication_plugin_activate() {
 }
 register_activation_hook( __FILE__, 'dbm_content_transactional_communication_plugin_activate' );
 
+if ( ! wp_next_scheduled( 'dbmtc_check_timed_actions' ) ) {
+	wp_schedule_event( time(), '5min', 'dbmtc_check_timed_actions');
+}
+
 ?>

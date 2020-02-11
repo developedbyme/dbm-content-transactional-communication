@@ -33,7 +33,8 @@
 			add_action('plugins_loaded', array($this, 'hook_plugins_loaded'), $this->_default_hook_priority);
 			add_action('dbmtc/send_verification/text-message', array($this, 'hook_dbmtc_send_verification_text_message'), $this->_default_hook_priority, 3);
 			add_action('dbmtc/send_verification/email', array($this, 'hook_dbmtc_send_verification_email'), $this->_default_hook_priority, 3);
-			
+			add_action('dbmtc_check_timed_actions', array($this, 'hook_dbmtc_check_timed_actions'), $this->_default_hook_priority, 0);
+			add_action('dbmtc/timed_action/update_field_timeline', array($this, 'hook_dbmtc_timed_action_update_field_timeline'), $this->_default_hook_priority, 1);
 		}
 		
 		public function hook_plugins_loaded() {
@@ -97,6 +98,9 @@
 			add_filter('dbmtc/encode_field/post-relation', array($this, 'hook_encode_field_post_relation'), 10, 2);
 			
 			add_filter('dbmtc/send_method_for_verification/email', array($this, 'filter_send_method_for_verification_email'), 10, 2);
+			
+			add_filter('cron_schedules', array($this, 'filter_cron_schedules'), 10, 1);
+			
 		}
 		
 		protected function create_shortcodes() {
@@ -260,6 +264,33 @@
 			$content = $data['template']->get_content();
 			
 			dbm_content_tc_send_email($content['title'], $content['content'], $to_contact->get_contact_details('email'));
+		}
+		
+		public function filter_cron_schedules($schedules) {
+			if(!isset($schedules["5min"])){
+				$schedules["5min"] = array(
+					'interval' => 5*60,
+					'display' => __('Once every 5 minutes', DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_TEXTDOMAIN)
+				);
+			}
+			return $schedules;
+		}
+		
+		public function hook_dbmtc_check_timed_actions() {
+			//echo("\DbmContentTransactionalCommunication\Plugin::hook_dbmtc_check_timed_actions<br />");
+			
+			$time = time();
+			
+			$timed_actions = dbm_new_query('dbm_data')->set_field('post_status', array('publish', 'private'))->add_type_by_path('timed-action')->add_relation_by_path('timed-action-status/waiting')->add_meta_query('dbmtc_time', $time, '<=', 'NUMERIC')->get_post_ids();
+			foreach($timed_actions as $timed_action_id) {
+				$timed_action = dbmtc_get_timed_action($timed_action_id);
+				$timed_action->try_to_perform();
+			}
+		}
+		
+		public function hook_dbmtc_timed_action_update_field_timeline($timed_action) {
+			$internal_message_field = dbmtc_get_internal_message_group_field($timed_action->get_action_data()['field']);
+			$internal_message_field->update_to_next_value();
 		}
 		
 		public function activation_setup() {

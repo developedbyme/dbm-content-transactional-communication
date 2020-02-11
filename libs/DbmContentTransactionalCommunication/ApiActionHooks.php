@@ -33,6 +33,9 @@
 			add_action('wprr/api_action/dbmtc/verifyVerification', array($this, 'hook_verifyVerification'), 10, 2);
 			
 			add_action('wprr/api_action/dbmtc/testMessageNotification', array($this, 'hook_testMessageNotification'), 10, 2);
+			
+			add_action('wprr/api_action/dbmtc/timedAction/tryToPerform', array($this, 'hook_timedAction_tryToPerform'), 10, 2);
+			add_action('wprr/api_action/dbmtc/timedAction/checkTimedActions', array($this, 'hook_timedAction_checkTimedActions'), 10, 2);
 		}
 
 		public function hook_send_email_verification($data, &$response_data) {
@@ -267,6 +270,11 @@
 		public function hook_internal_message_set_field_at($data, &$response_data) {
 			$group_id = $data['groupId'];
 			$body = $data['body'];
+			
+			$time_zone = get_option('timezone_string');
+			if($time_zone) {
+				date_default_timezone_set($time_zone);
+			}
 			
 			$current_user = get_current_user_id();
 			
@@ -504,6 +512,17 @@
 			
 			$response_data['result'] = $result;
 			$response_data['sentTo'] = $email;
+		}
+		
+		public function hook_timedAction_checkTimedActions($data, &$response_data) {
+			do_action('dbmtc_check_timed_actions');
+		}
+		
+		public function hook_timedAction_tryToPerform($data, &$response_data) {
+			$id = $data['id'];
+			
+			$timed_action = dbmtc_get_timed_action($id);
+			$timed_action->try_to_perform();
 		}
 		
 		public static function test_import() {

@@ -259,6 +259,12 @@
 		return $internal_message;
 	}
 	
+	function dbmtc_get_internal_message_group_field($post_id) {
+		$internal_message_field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($post_id);
+		
+		return $internal_message_field;
+	}
+	
 	function dbmtc_send_email_template($template_slug, $to, $from = null, $replacements = array(), $additional_data = array()) {
 		
 		$template_id = dbm_new_query('dbm_additional')->add_relation_by_path($template_slug)->get_post_id();
@@ -354,8 +360,24 @@
 		return apply_filters('dbm_content_tc/default_from_phone_number', $site_name);
 	}
 	
-	function dbmtc_add_timed_action($time, $action, $data) {
+	function dbmtc_create_timed_action($time, $action, $data) {
+		$new_id = dbm_create_data($action.' ('.$time.')', 'timed-action', 'admin-grouping/timed-actions');
 		
+		$new_timed_action = new \DbmContentTransactionalCommunication\TimedAction\TimedAction($new_id);
+		
+		$new_timed_action->set_time($time);
+		$new_timed_action->set_action($action);
+		$new_timed_action->set_action_data($data);
+		$new_timed_action->set_action_status('waiting');
+		$new_timed_action->make_private();
+		
+		return $new_timed_action;
+	}
+	
+	function dbmtc_get_timed_action($id) {
+		$new_timed_action = new \DbmContentTransactionalCommunication\TimedAction\TimedAction($id);
+		
+		return $new_timed_action;
 	}
 	
 	function dbmtc_create_verification_generator() {

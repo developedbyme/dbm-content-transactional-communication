@@ -145,7 +145,7 @@
 				$this->ensure_initial_value();
 				
 				$future_changes = array_merge(array(array($time, $value)), $future_changes);
-				//METODO: store next change
+				dbmtc_create_timed_action($time, 'update_field_timeline', array('field' => $this->get_id()));
 			}
 			else {
 				$this->_add_time_change_to_array($value, $time, $future_changes);
@@ -164,7 +164,7 @@
 			
 			$changes = array();
 			foreach($future_changes as $index => $change) {
-				if($change['time'] <= $current_time) {
+				if($change[0] <= $current_time) {
 					$changes[] = $change;
 				}
 				else {
@@ -173,14 +173,19 @@
 			}
 			
 			if(!empty($changes)) {
+				array_splice($future_changes, 0, count($changes));
+				
 				$past_changes = array_merge($past_changes, $changes);
 				$next_value = $changes[count($changes)-1][1];
 				
+				$this->perform_set_value($next_value);
+				$this->update_meta('dbmtc_past_changes', $past_changes);
+				$this->update_meta('dbmtc_future_changes', $future_changes);
 				
-				
+				if(!empty($future_changes)) {
+					dbmtc_create_timed_action($future_changes[0][0], 'update_field_timeline', array('field' => $this->get_id()));
+				}
 			}
-			
-			//METODO
 		}
 		
 		public function update_meta($field, $value) {
