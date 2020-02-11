@@ -21,6 +21,7 @@
 			add_action('wprr/api_action/internal-message/change-assignment', array($this, 'hook_internal_message_change_assignment'), 10, 2);
 			add_action('wprr/api_action/internal-message/request-data', array($this, 'hook_internal_message_request_data'), 10, 2);
 			add_action('wprr/api_action/internal-message/set-field', array($this, 'hook_internal_message_set_field'), 10, 2);
+			add_action('wprr/api_action/internal-message/set-field-at', array($this, 'hook_internal_message_set_field_at'), 10, 2);
 			add_action('wprr/api_action/internal-message/verify-phone-number-field', array($this, 'hook_internal_message_verify_phone_number_field'), 10, 2);
 			
 			add_action('wprr/api_action/dbmtc/sendPasswordResetVerification', array($this, 'hook_sendPasswordResetVerification'), 10, 2);
@@ -252,6 +253,25 @@
 			$group = dbmtc_get_internal_message_group($group_id);
 			
 			$message = $group->set_field($field, $value);
+			
+			if(!(isset($data['skipNotify']) && $data['skipNotify'])) {
+				$message->notify();
+			}
+		}
+		
+		public function hook_internal_message_set_field_at($data, &$response_data) {
+			$group_id = $data['groupId'];
+			$body = $data['body'];
+			
+			$current_user = get_current_user_id();
+			
+			$field = $data['field'];
+			$value = $data['value'];
+			$time = strtotime($data['time']);
+			
+			$group = dbmtc_get_internal_message_group($group_id);
+			
+			$message = $group->set_field_after($field, $value, $time);
 			
 			if(!(isset($data['skipNotify']) && $data['skipNotify'])) {
 				$message->notify();

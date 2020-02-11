@@ -346,6 +346,32 @@
 			return $message;
 		}
 		
+		public function set_field_after($key, $value, $time) {
+			
+			$field = $this->get_field($key);
+			if(!$field) {
+				return null;
+			}
+			
+			$user_id = get_current_user_id();
+			
+			$message = $this->create_message('added-to-field-timeline', '', $user_id);
+			$message->update_meta('field', $key);
+			$message->update_meta('addedValue', $value);
+			$message->update_meta('addedTime', $time);
+			
+			$current_time = time();
+			
+			if($time <= $current_time) {
+				$field->set_history_change($value, $time);
+			}
+			else {
+				$field->set_future_change($value, $time);
+			}
+			
+			return $message;
+		}
+		
 		public function get_field_id_if_exists($key) {
 			
 			$local_id = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message-group-field')->add_relations_with_children_from_post($this->id, 'internal-message-groups')->add_meta_query('dbmtc_key', $key)->get_post_id();

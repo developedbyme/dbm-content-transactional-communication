@@ -21,6 +21,7 @@
 			add_filter('wprr/range_encoding/messagesCount', array($this, 'filter_encode_messagesCount'), 10, 3);
 			add_filter('wprr/range_encoding/message', array($this, 'filter_encode_message'), 10, 3);
 			add_filter('wprr/range_encoding/fields', array($this, 'filter_encode_fields'), 10, 3);
+			add_filter('wprr/range_encoding/fieldsWithChanges', array($this, 'filter_encode_fieldsWithChanges'), 10, 3);
 			add_filter('wprr/range_encoding/fieldValues', array($this, 'filter_encode_fieldValues'), 10, 3);
 			
 			add_filter(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/change-comment', array($this, 'filter_encode_internal_message_group_change_comment'), 10, 2);
@@ -125,13 +126,17 @@
 			return $encoded_users;
 		}
 		
-		protected function _encode_field($post_id) {
+		protected function _encode_field($post_id, $include_changes = 0) {
 			$return_object = array();
 			
 			$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($post_id);
 			
 			$return_object['key'] = $field->get_key();
 			$return_object['value'] = $field->get_value();
+			if($include_changes) {
+				$return_object['pastChanges'] = $field->get_past_changes();
+				$return_object['futureChanges'] = $field->get_future_changes();
+			}
 			
 			$return_object['type'] = wprr_encode_term($field->get_type_term());
 			$return_object['status'] = wprr_encode_term($field->get_status_term());
@@ -154,13 +159,13 @@
 			return $return_object;
 		}
 		
-		public function get_fields($post_id) {
+		public function get_fields($post_id, $include_changes = 0) {
 			$encoded_fields = array();
 			$keys = array();
 			
-			$field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message-group-field')->add_relations_from_post($post_id, 'internal-message-groups')->get_post_ids();
+			$field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message-group-field')->add_relations_with_children_from_post($post_id, 'internal-message-groups')->get_post_ids();
 			foreach($field_ids as $field_id) {
-				$current_encoded_field = $this->_encode_field($field_id);
+				$current_encoded_field = $this->_encode_field($field_id, $include_changes);
 				$encoded_fields[] = $current_encoded_field;
 				$keys[] = $current_encoded_field['key'];
 			}
@@ -190,6 +195,13 @@
 		public function filter_encode_fields($encoded_data, $post_id, $data) {
 			
 			$encoded_data['fields'] = $this->get_fields($post_id);
+			
+			return $encoded_data;
+		}
+		
+		public function filter_encode_fieldsWithChanges($encoded_data, $post_id, $data) {
+			
+			$encoded_data['fields'] = $this->get_fields($post_id, 2);
 			
 			return $encoded_data;
 		}

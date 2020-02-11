@@ -102,6 +102,7 @@
 			self::add_term('dbm_type:internal-message-group', 'Internal message group');
 			self::add_term('dbm_type:internal-message-group-field', 'Internal message group field');
 			self::add_term('dbm_type:field-template', 'Field template');
+			self::add_term('dbm_type:timed-action', 'Timed action');
 			
 			self::add_term('dbm_type:admin-grouping', 'Admin grouping');
 			self::add_term('dbm_type:admin-grouping/sent-communications', 'Sent communications');
@@ -167,6 +168,8 @@
 			self::add_term('dbm_relation:internal-message-types/needs-to-be-assigned', 'Needs to be assigned');
 			self::add_term('dbm_relation:internal-message-types/field-changed', 'Field changed');
 			self::add_term('dbm_relation:internal-message-types/verify-mobile-phone-field', 'Verify mobile phone field');
+			self::add_term('dbm_relation:internal-message-types/added-to-field-timeline', 'Added to field timeline');
+			self::add_term('dbm_relation:internal-message-types/removed-from-field-timeline', 'Removed from field timeline');
 			
 			self::add_term('dbm_relation:internal-message-status', 'Internal message status');
 			self::add_term('dbm_relation:internal-message-status/removed', 'Removed');
@@ -187,6 +190,11 @@
 			self::add_term('dbm_relation:field-status/complete', 'Complete');
 			self::add_term('dbm_relation:field-status/verified', 'Verified');
 			self::add_term('dbm_relation:field-status/incorrect', 'Incorrect');
+			
+			self::add_term('dbm_relation:timed-action-status', 'Timed action status');
+			self::add_term('dbm_relation:timed-action-status/waiting', 'Waiting');
+			self::add_term('dbm_relation:timed-action-status/completed', 'Completed');
+			self::add_term('dbm_relation:timed-action-status/cancelled', 'Cancelled');
 			
 			self::add_term('dbm_relation:field-storage', 'Field storage');
 			self::add_term('dbm_relation:field-storage/meta', 'Meta');
