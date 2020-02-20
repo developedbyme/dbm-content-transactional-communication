@@ -49,7 +49,7 @@
 			$field_name = $data['field'];
 			
 			$group = dbmtc_get_internal_message_group($group_id);
-			$field_id = $group->get_field_id($field_name);
+			$field_id = $group->get_field($field_name)->get_id();
 			
 			if(!$field_id) {
 				return $this->output_error('No field named '.$field_name);
