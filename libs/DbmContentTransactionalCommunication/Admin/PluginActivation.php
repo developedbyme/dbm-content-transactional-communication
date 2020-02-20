@@ -187,6 +187,7 @@
 			self::add_term('dbm_relation:field-type/address', 'Address');
 			self::add_term('dbm_relation:field-type/name', 'Name');
 			self::add_term('dbm_relation:field-type/data-array', 'Data array');
+			self::add_term('dbm_relation:field-type/date', 'Date');
 			
 			self::add_term('dbm_relation:field-status', 'Field status');
 			self::add_term('dbm_relation:field-status/none', 'None');
