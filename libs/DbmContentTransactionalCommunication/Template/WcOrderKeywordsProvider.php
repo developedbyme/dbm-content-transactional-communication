@@ -21,6 +21,10 @@
 			//echo("\DbmContentTransactionalCommunication\Template\WcOrderKeywordsProvider::get_keyword_replacement<br />");
 			//var_dump($keyword);
 			
+			if(!$this->order) {
+				return null;
+			}
+			
 			switch($keyword) {
 				case 'id':
 					return $this->order->get_id();
