@@ -12,6 +12,10 @@
 			
 		}
 		
+		public function get_user_details($type) {
+			return null;
+		}
+		
 		protected function save_contact_details($type) {
 			//MENOTE: should be overridden
 			
