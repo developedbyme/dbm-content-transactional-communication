@@ -243,7 +243,10 @@
 		}
 		
 		public function set_storage_type($type) {
-			dbm_set_single_relation_by_name($this->id, 'field-storage', $type);
+			if($type) {
+				dbm_set_single_relation_by_name($this->id, 'field-storage', $type);
+			}
+			//METODO: remove storage type otherwise
 			
 			return $this;
 		}
