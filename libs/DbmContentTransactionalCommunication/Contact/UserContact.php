@@ -36,6 +36,20 @@
 			return apply_filters('dbmtc/contact/default_contact_details/'.$type, $initial_value, $this);
 		}
 		
+		public function get_user_details($type) {
+			if($type === 'firstName') {
+				return get_userdata($this->get_user_id())->first_name;
+			}
+			if($type === 'lastName') {
+				return get_userdata($this->get_user_id())->last_name;
+			}
+			if($type === 'name') {
+				return get_userdata($this->get_user_id())->display_name;
+			}
+			
+			return null;
+		}
+		
 		//METODO: implement save_contact_details
 		
 		public static function test_import() {

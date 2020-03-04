@@ -21,6 +21,10 @@
 			//echo("\DbmContentTransactionalCommunication\Template\WcOrderKeywordsProvider::get_keyword_replacement<br />");
 			//var_dump($keyword);
 			
+			if(!$this->order) {
+				return null;
+			}
+			
 			switch($keyword) {
 				case 'id':
 					return $this->order->get_id();
@@ -31,9 +35,9 @@
 				case 'total':
 					return $this->order->get_total();
 				case 'orderDate':
-					return $this->order->get_date_created();
+					return date('Y-m-d', strtotime($this->order->get_date_created()));
 				case 'paidDate':
-					return $this->order->get_date_paid();
+					return date('Y-m-d', strtotime($this->order->get_date_paid()));
 				case 'email':
 					return $this->order->get_billing_email();
 				case 'phoneNumber':

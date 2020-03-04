@@ -23,6 +23,8 @@
 				case 'email':
 				case 'phoneNumber':
 					return $this->contact->get_contact_details($keyword);
+				default:
+					return $this->contact->get_user_details($keyword);
 			}
 			
 			return null;
