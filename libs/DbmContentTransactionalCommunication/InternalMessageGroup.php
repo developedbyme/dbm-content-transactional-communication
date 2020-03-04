@@ -284,7 +284,6 @@
 				$field->set_type($type);
 				
 				$storage_type = $template->get_storage_type();
-				var_dump($storage_type);
 				$field->set_storage_type($storage_type);
 				
 				do_action('dbmtc/copy_field_template_meta/'.$storage_type, $field, $template);
