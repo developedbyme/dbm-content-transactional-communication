@@ -409,7 +409,7 @@
 					return $this->create_field_from_template($key, $template);
 				}
 				
-				trigger_error('No field for key '.$key, E_USER_ERROR);
+				throw(new \Exception('No field for key '.$key));
 				return null;
 			}
 			
@@ -428,7 +428,7 @@
 					return $template->get_value();
 				}
 				
-				trigger_error('No field for key '.$key, E_USER_ERROR);
+				throw(new \Exception('No field for key '.$key));
 				return null;
 			}
 			
