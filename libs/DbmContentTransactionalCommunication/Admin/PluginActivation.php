@@ -173,6 +173,8 @@
 			self::add_term('dbm_relation:internal-message-types/verify-mobile-phone-field', 'Verify mobile phone field');
 			self::add_term('dbm_relation:internal-message-types/added-to-field-timeline', 'Added to field timeline');
 			self::add_term('dbm_relation:internal-message-types/removed-from-field-timeline', 'Removed from field timeline');
+			self::add_term('dbm_relation:internal-message-types/added-item', 'Added item');
+			self::add_term('dbm_relation:internal-message-types/removed-item', 'Removed item');
 			
 			self::add_term('dbm_relation:internal-message-status', 'Internal message status');
 			self::add_term('dbm_relation:internal-message-status/removed', 'Removed');

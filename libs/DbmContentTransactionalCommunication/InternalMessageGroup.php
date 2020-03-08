@@ -333,6 +333,20 @@
 			return $message;
 		}
 		
+		public function set_field_if_different($key, $value) {
+			$field = $this->get_field($key);
+			if(!$field) {
+				return null;
+			}
+			
+			$original_value = $field->get_value();
+			if(json_encode($original_value) !== json_encode($value)) {
+				return $this->set_field($key, $value);
+			}
+			
+			return null;
+		}
+		
 		public function set_field_after($key, $value, $time) {
 			
 			$field = $this->get_field($key);
@@ -395,13 +409,32 @@
 					return $this->create_field_from_template($key, $template);
 				}
 				
-				trigger_error('No field for key '.$key, E_USER_ERROR);
+				throw(new \Exception('No field for key '.$key));
 				return null;
 			}
 			
 			$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
 			
 			return $field;
+		}
+		
+		public function get_field_value($key) {
+			$field_id = $this->get_field_id_if_exists($key);
+			
+			if(!$field_id) {
+				
+				$template = $this->get_field_template_if_exists($key);
+				if($template) {
+					return $template->get_value();
+				}
+				
+				throw(new \Exception('No field for key '.$key));
+				return null;
+			}
+			
+			$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
+			
+			return $field->get_value();
 		}
 		
 		public function update_updated_date() {

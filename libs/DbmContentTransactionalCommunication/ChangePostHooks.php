@@ -22,6 +22,7 @@
 			$this->register_hook_for_type('dbmtc/commentChange', 'hook_dbmtc_commentChange');
 			$this->register_hook_for_type('dbmtc/commentAction', 'hook_dbmtc_commentAction');
 			$this->register_hook_for_type('dbmtc/comment', 'hook_dbmtc_comment');
+			$this->register_hook_for_type('dbmtc/setFields', 'hook_dbmtc_setFields');
 		}
 		
 		protected function update_message_meta($message, $meta) {
@@ -76,6 +77,22 @@
 			}
 			
 			$logger->add_return_data('messageId', $message->get_id());
+		}
+		
+		public function hook_dbmtc_setFields($data, $post_id, $logger) {
+			//var_dump('\DbmContentTransactionalCommunication\ChangePostHooks::hook_dbmtc_setFields');
+			
+			$internal_message_group = dbmtc_get_internal_message_group($post_id);
+			
+			$fields = $data['value'];
+			foreach($fields as $name => $value) {
+				try {
+					$internal_message_group->set_field_if_different($name, $value);
+				}
+				catch(\Exception $exception) {
+					$logger->add_log($exception->getMessage());
+				}
+			}
 		}
 		
 		public static function test_import() {
