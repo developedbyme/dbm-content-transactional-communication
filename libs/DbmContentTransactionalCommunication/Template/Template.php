@@ -6,6 +6,7 @@
 		
 		protected $title = '';
 		protected $content = '';
+		protected $wrapper = null;
 		
 		protected $keywords_providers = array();
 		protected $named_keywords_providers = array();
@@ -37,6 +38,21 @@
 			return $this;
 		}
 		
+		public function set_wrapper($wrapper) {
+			$this->wrapper = $wrapper;
+			
+			return $this;
+		}
+		
+		public function set_default_wrapper_for_type($type) {
+			$wrapper = apply_filters('dbmtc/default_wrapper/'.$type, null, $this);
+			if($wrapper) {
+				$this->set_wrapper($wrapper);
+			}
+			
+			return $this;
+		}
+		
 		public function setup_from_post($post) {
 			$post = get_post($post);
 			
@@ -49,6 +65,8 @@
 				if($meta_title) {
 					$title = $meta_title;
 				}
+				
+				$this->set_default_wrapper_for_type('email'); //METODO: run this on other types
 			}
 			
 			$this->set_content($title, $content);
@@ -120,6 +138,8 @@
 		}
 		
 		public function perform_replacements($text, $replacements) {
+			//var_dump('perform_replacements');
+			
 			$replaced_text = str_replace(array_keys($replacements), array_values($replacements), $text);
 	
 			return $replaced_text;
@@ -134,6 +154,10 @@
 			
 			$title = $this->perform_replacements($title, $keyword_map);
 			$content = $this->perform_replacements($content, $keyword_map);
+			
+			if($this->wrapper) {
+				return $this->wrapper->get_wrapped_content($title, $content, $this);
+			}
 			
 			return array('title' => $title, 'content' => $content);
 		}

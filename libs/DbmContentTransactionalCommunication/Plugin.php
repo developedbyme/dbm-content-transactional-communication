@@ -98,6 +98,7 @@
 			add_filter('dbmtc/encode_field/post-relation', array($this, 'hook_encode_field_post_relation'), 10, 2);
 			
 			add_filter('dbmtc/send_method_for_verification/email', array($this, 'filter_send_method_for_verification_email'), 10, 2);
+			add_filter('dbmtc/default_wrapper/email', array($this, 'filter_default_wrapper_email'), 10, 1);
 			
 			add_filter('cron_schedules', array($this, 'filter_cron_schedules'), 10, 1);
 			
@@ -264,6 +265,20 @@
 			$content = $data['template']->get_content();
 			
 			dbm_content_tc_send_email($content['title'], $content['content'], $to_contact->get_contact_details('email'));
+		}
+		
+		public function filter_default_wrapper_email($wrapper_template) {
+			if($wrapper_template) {
+				return $wrapper_template;
+			}
+			
+			$content = apply_filters('dbmtc/default_wrapper/email/content', '');
+			if($content) {
+				$wrapper_template = new \DbmContentTransactionalCommunication\Template\WrapperTemplate();
+				$wrapper_template->set_content('', $content);
+			}
+			
+			return $wrapper_template;
 		}
 		
 		public function filter_cron_schedules($schedules) {
