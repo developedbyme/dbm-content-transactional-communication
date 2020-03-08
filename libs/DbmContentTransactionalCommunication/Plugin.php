@@ -276,6 +276,7 @@
 			if($content) {
 				$wrapper_template = new \DbmContentTransactionalCommunication\Template\WrapperTemplate();
 				$wrapper_template->set_content('', $content);
+				do_action('dbmtc/default_wrapper/email/add_keywords', $wrapper_template);
 			}
 			
 			return $wrapper_template;
