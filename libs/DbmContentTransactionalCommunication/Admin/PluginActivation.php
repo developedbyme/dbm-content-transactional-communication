@@ -185,6 +185,7 @@
 			self::add_term('dbm_relation:field-type/file', 'File');
 			self::add_term('dbm_relation:field-type/mobile-phone-number', 'Mobile phone number');
 			self::add_term('dbm_relation:field-type/relation', 'Relation');
+			self::add_term('dbm_relation:field-type/multiple-relation', 'Multiple relation');
 			self::add_term('dbm_relation:field-type/post-relation', 'Post relation');
 			self::add_term('dbm_relation:field-type/address', 'Address');
 			self::add_term('dbm_relation:field-type/name', 'Name');
@@ -206,6 +207,7 @@
 			self::add_term('dbm_relation:field-storage', 'Field storage');
 			self::add_term('dbm_relation:field-storage/meta', 'Meta');
 			self::add_term('dbm_relation:field-storage/single-relation', 'Single relation');
+			self::add_term('dbm_relation:field-storage/multiple-relation', 'Multiple relation');
 			self::add_term('dbm_relation:field-storage/relation-flag', 'Relation flag');
 			
 			self::add_term('dbm_relation:internal-message-groups', 'Internal message groups');

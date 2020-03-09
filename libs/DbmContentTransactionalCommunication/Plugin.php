@@ -87,19 +87,26 @@
 			add_filter('dbmtc/get_field_value/single-relation', array($this, 'filter_get_field_value_single_relation'), 10, 2);
 			add_filter('dbmtc/copy_field_template_meta/single-relation', array($this, 'hook_copy_field_template_meta_single_relation'), 10, 2);
 			
+			add_action('dbmtc/set_field_value/multiple-relation', array($this, 'hook_set_field_value_multiple_relation'), 10, 2);
+			add_filter('dbmtc/get_field_value/multiple-relation', array($this, 'filter_get_field_value_multiple_relation'), 10, 2);
+			add_filter('dbmtc/copy_field_template_meta/multiple-relation', array($this, 'hook_copy_field_template_meta_multiple_relation'), 10, 2);
+			
 			add_action('dbmtc/set_field_value/relation-flag', array($this, 'hook_set_field_value_relation_flag'), 10, 2);
 			add_filter('dbmtc/get_field_value/relation-flag', array($this, 'filter_get_field_value_relation_flag'), 10, 2);
 			add_filter('dbmtc/copy_field_template_meta/relation-flag', array($this, 'hook_copy_field_template_meta_relation_flag'), 10, 2);
 			
 			add_filter('dbmtc/copy_field_template_meta/type/relation', array($this, 'hook_copy_field_template_meta_type_relation'), 10, 2);
+			add_filter('dbmtc/copy_field_template_meta/type/multiple-relation', array($this, 'hook_copy_field_template_meta_type_multiple_relation'), 10, 2);
 			add_filter('dbmtc/copy_field_template_meta/type/post-relation', array($this, 'hook_copy_field_template_meta_type_post_relation'), 10, 2);
 			
-			add_filter('dbmtc/default_field_value/name', array($this, 'hook_default_field_value_name'), 10, 2);
-			add_filter('dbmtc/default_field_value/address', array($this, 'hook_default_field_value_address'), 10, 2);
-			add_filter('dbmtc/default_field_value/data-array', array($this, 'hook_default_field_value_data_array'), 10, 2);
-			add_filter('dbmtc/default_field_value/boolean', array($this, 'hook_default_field_value_data_boolean'), 10, 2);
+			add_filter('dbmtc/default_field_value/name', array($this, 'filter_default_field_value_name'), 10, 2);
+			add_filter('dbmtc/default_field_value/address', array($this, 'filter_default_field_value_address'), 10, 2);
+			add_filter('dbmtc/default_field_value/data-array', array($this, 'filter_default_field_value_data_array'), 10, 2);
+			add_filter('dbmtc/default_field_value/boolean', array($this, 'filter_default_field_value_data_boolean'), 10, 2);
+			add_filter('dbmtc/default_field_value/multiple-relation', array($this, 'filter_default_field_value_multiple_relation'), 10, 2);
 			
 			add_filter('dbmtc/encode_field/relation', array($this, 'hook_encode_field_relation'), 10, 2);
+			add_filter('dbmtc/encode_field/multiple-relation', array($this, 'hook_encode_field_multiple_relation'), 10, 2);
 			add_filter('dbmtc/encode_field/post-relation', array($this, 'hook_encode_field_post_relation'), 10, 2);
 			
 			add_filter('dbmtc/send_method_for_verification/email', array($this, 'filter_send_method_for_verification_email'), 10, 2);
@@ -180,6 +187,10 @@
 			$field->update_meta('subtree', $template->get_meta('subtree'));
 		}
 		
+		public function hook_copy_field_template_meta_type_multiple_relation($field, $template) {
+			$field->update_meta('subtree', $template->get_meta('subtree'));
+		}
+		
 		public function hook_copy_field_template_meta_type_post_relation($field, $template) {
 			$field->update_meta('postType', $template->get_meta('postType'));
 			$field->update_meta('selection', $template->get_meta('selection'));
@@ -199,6 +210,23 @@
 		}
 		
 		public function hook_copy_field_template_meta_single_relation($field, $template) {
+			$field->update_meta('dbmtc_relation_path', $template->get_meta('dbmtc_relation_path'));
+		}
+		
+		public function hook_set_field_value_multiple_relation($field, $value) {
+			$path = $field->get_meta('dbmtc_relation_path');
+			$parent_term = dbm_get_relation_by_path($path);
+			
+			dbm_replace_relations($field->get_group_id(), $parent_term, $value);
+		}
+		
+		public function filter_get_field_value_multiple_relation($return_value, $field) {
+			$path = $field->get_meta('dbmtc_relation_path');
+			
+			return dbm_get_post_relation($field->get_group_id(), $path);
+		}
+		
+		public function hook_copy_field_template_meta_multiple_relation($field, $template) {
 			$field->update_meta('dbmtc_relation_path', $template->get_meta('dbmtc_relation_path'));
 		}
 		
@@ -227,27 +255,44 @@
 			$field->update_meta('dbmtc_relation_path', $template->get_meta('dbmtc_relation_path'));
 		}
 		
-		public function hook_default_field_value_name($return_value, $field) {
+		public function filter_default_field_value_name($return_value, $field) {
 			return array("firstName" => "", "lastName" => "");
 		}
 		
-		public function hook_default_field_value_address($return_value, $field) {
+		public function filter_default_field_value_address($return_value, $field) {
 			return array("address1" => "", "address2" => "", "postCode" => "", "city" => "", "country" => "");
 		}
 		
-		public function hook_default_field_value_data_array($return_value, $field) {
+		public function filter_default_field_value_data_array($return_value, $field) {
 			
 			$return_array = array();
 			
 			return $return_array;
 		}
 		
-		public function hook_default_field_value_data_boolean($return_value, $field) {
+		public function filter_default_field_value_data_boolean($return_value, $field) {
 			return false;
+		}
+		
+		public function filter_default_field_value_multiple_relation($return_value, $field) {
+			//echo("filter_default_field_value_multiple_relation");
+			
+			$return_array = array();
+			
+			return $return_array;
 		}
 		
 		public function hook_encode_field_relation($return_value, $field) {
 			//echo("hook_encode_field_relation");
+			
+			$current_meta = $field->get_meta('subtree');
+			$return_value['subtree'] = $current_meta ? $current_meta : null;
+			
+			return $return_value;
+		}
+		
+		public function hook_encode_field_multiple_relation($return_value, $field) {
+			//echo("hook_encode_field_multiple_relation");
 			
 			$current_meta = $field->get_meta('subtree');
 			$return_value['subtree'] = $current_meta ? $current_meta : null;
