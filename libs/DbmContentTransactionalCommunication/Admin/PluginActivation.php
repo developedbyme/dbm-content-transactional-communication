@@ -190,6 +190,7 @@
 			self::add_term('dbm_relation:field-type/name', 'Name');
 			self::add_term('dbm_relation:field-type/data-array', 'Data array');
 			self::add_term('dbm_relation:field-type/date', 'Date');
+			self::add_term('dbm_relation:field-type/boolean', 'Boolean');
 			
 			self::add_term('dbm_relation:field-status', 'Field status');
 			self::add_term('dbm_relation:field-status/none', 'None');
@@ -205,6 +206,7 @@
 			self::add_term('dbm_relation:field-storage', 'Field storage');
 			self::add_term('dbm_relation:field-storage/meta', 'Meta');
 			self::add_term('dbm_relation:field-storage/single-relation', 'Single relation');
+			self::add_term('dbm_relation:field-storage/relation-flag', 'Relation flag');
 			
 			self::add_term('dbm_relation:internal-message-groups', 'Internal message groups');
 			

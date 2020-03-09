@@ -87,12 +87,17 @@
 			add_filter('dbmtc/get_field_value/single-relation', array($this, 'filter_get_field_value_single_relation'), 10, 2);
 			add_filter('dbmtc/copy_field_template_meta/single-relation', array($this, 'hook_copy_field_template_meta_single_relation'), 10, 2);
 			
+			add_action('dbmtc/set_field_value/relation-flag', array($this, 'hook_set_field_value_relation_flag'), 10, 2);
+			add_filter('dbmtc/get_field_value/relation-flag', array($this, 'filter_get_field_value_relation_flag'), 10, 2);
+			add_filter('dbmtc/copy_field_template_meta/relation-flag', array($this, 'hook_copy_field_template_meta_relation_flag'), 10, 2);
+			
 			add_filter('dbmtc/copy_field_template_meta/type/relation', array($this, 'hook_copy_field_template_meta_type_relation'), 10, 2);
 			add_filter('dbmtc/copy_field_template_meta/type/post-relation', array($this, 'hook_copy_field_template_meta_type_post_relation'), 10, 2);
 			
 			add_filter('dbmtc/default_field_value/name', array($this, 'hook_default_field_value_name'), 10, 2);
 			add_filter('dbmtc/default_field_value/address', array($this, 'hook_default_field_value_address'), 10, 2);
 			add_filter('dbmtc/default_field_value/data-array', array($this, 'hook_default_field_value_data_array'), 10, 2);
+			add_filter('dbmtc/default_field_value/boolean', array($this, 'hook_default_field_value_data_boolean'), 10, 2);
 			
 			add_filter('dbmtc/encode_field/relation', array($this, 'hook_encode_field_relation'), 10, 2);
 			add_filter('dbmtc/encode_field/post-relation', array($this, 'hook_encode_field_post_relation'), 10, 2);
@@ -197,6 +202,31 @@
 			$field->update_meta('dbmtc_relation_path', $template->get_meta('dbmtc_relation_path'));
 		}
 		
+		public function hook_set_field_value_relation_flag($field, $value) {
+			//echo('hook_set_field_value_relation_flag');
+			//var_dump($field, $value);
+			
+			$path = $field->get_meta('dbmtc_relation_path');
+			$post_id = $field->get_group_id();
+			
+			if($value) {
+				dbm_add_post_relation($post_id, $path);
+			}
+			else {
+				dbm_remove_post_relation($post_id, $path);
+			}
+		}
+		
+		public function filter_get_field_value_relation_flag($return_value, $field) {
+			$path = $field->get_meta('dbmtc_relation_path');
+			
+			return dbm_has_post_relation($field->get_group_id(), $path);
+		}
+		
+		public function hook_copy_field_template_meta_relation_flag($field, $template) {
+			$field->update_meta('dbmtc_relation_path', $template->get_meta('dbmtc_relation_path'));
+		}
+		
 		public function hook_default_field_value_name($return_value, $field) {
 			return array("firstName" => "", "lastName" => "");
 		}
@@ -210,6 +240,10 @@
 			$return_array = array();
 			
 			return $return_array;
+		}
+		
+		public function hook_default_field_value_data_boolean($return_value, $field) {
+			return false;
 		}
 		
 		public function hook_encode_field_relation($return_value, $field) {
