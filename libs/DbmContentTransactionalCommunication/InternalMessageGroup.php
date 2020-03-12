@@ -418,6 +418,35 @@
 			return $field;
 		}
 		
+		public function get_fields() {
+			$return_fields = array();
+			$keys = array();
+			
+			$field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message-group-field')->add_relations_with_children_from_post($this->get_id(), 'internal-message-groups')->get_post_ids();
+			foreach($field_ids as $field_id) {
+				$field_name = get_post_meta($field_id, 'dbmtc_key', true);
+				$return_fields[$field_name] = $this->get_field($field_name);
+				$keys[] = $field_name;
+			}
+			
+			$type_terms = get_the_terms($this->get_id(), 'dbm_type');
+			if($type_terms) {
+				$type_term_ids = wp_list_pluck($type_terms, 'term_id');
+				
+				$shared_field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('field-template')->add_meta_query('dbmtc_for_type', $type_term_ids, 'IN', 'NUMERIC')->get_post_ids();
+				foreach($shared_field_ids as $field_id) {
+					$field_name = get_post_meta($field_id, 'dbmtc_key', true);
+					
+					if(!in_array($field_name, $keys)) {
+						$return_fields[$field_name] = $this->get_field($field_name);
+						$keys[] = $field_name;
+					}
+				}
+			}
+			
+			return $return_fields;
+		}
+		
 		public function get_field_value($key) {
 			$field_id = $this->get_field_id_if_exists($key);
 			
@@ -435,6 +464,35 @@
 			$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
 			
 			return $field->get_value();
+		}
+		
+		public function get_fields_values() {
+			$return_fields = array();
+			$keys = array();
+			
+			$field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message-group-field')->add_relations_with_children_from_post($this->get_id(), 'internal-message-groups')->get_post_ids();
+			foreach($field_ids as $field_id) {
+				$field_name = get_post_meta($field_id, 'dbmtc_key', true);
+				$return_fields[$field_name] = $this->get_field_value($field_name);
+				$keys[] = $field_name;
+			}
+			
+			$type_terms = get_the_terms($this->get_id(), 'dbm_type');
+			if($type_terms) {
+				$type_term_ids = wp_list_pluck($type_terms, 'term_id');
+				
+				$shared_field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('field-template')->add_meta_query('dbmtc_for_type', $type_term_ids, 'IN', 'NUMERIC')->get_post_ids();
+				foreach($shared_field_ids as $field_id) {
+					$field_name = get_post_meta($field_id, 'dbmtc_key', true);
+					
+					if(!in_array($field_name, $keys)) {
+						$return_fields[$field_name] = $this->get_field_value($field_name);
+						$keys[] = $field_name;
+					}
+				}
+			}
+			
+			return $return_fields;
 		}
 		
 		public function update_updated_date() {
