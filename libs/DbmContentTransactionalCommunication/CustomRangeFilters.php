@@ -163,30 +163,23 @@
 			$encoded_fields = array();
 			$keys = array();
 			
+			$message_group = dbmtc_get_internal_message_group($post_id);
+			$fields_ids = $message_group->get_fields_ids();
+			
 			$field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message-group-field')->add_relations_with_children_from_post($post_id, 'internal-message-groups')->get_post_ids();
-			foreach($field_ids as $field_id) {
+			foreach($fields_ids['single'] as $field_name => $field_id) {
 				$current_encoded_field = $this->_encode_field($field_id, $include_changes);
 				$encoded_fields[] = $current_encoded_field;
-				$keys[] = $current_encoded_field['key'];
 			}
 			
-			$type_terms = get_the_terms($post_id, 'dbm_type');
-			if($type_terms) {
-				$type_term_ids = wp_list_pluck($type_terms, 'term_id');
+			foreach($fields_ids['shared'] as $field_name => $field_id) {
+				$current_encoded_field = $this->_encode_field($field_id, $include_changes);
 				
-				$shared_field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('field-template')->add_meta_query('dbmtc_for_type', $type_term_ids, 'IN', 'NUMERIC')->get_post_ids();
-				foreach($shared_field_ids as $field_id) {
-					
-					$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
-					
-					if(!in_array($field->get_key(), $keys)) {
-						$field->set_group_id_for_template($post_id);
-					
-						$current_encoded_field = $this->_encode_field_from_template($field);
-						$encoded_fields[] = $current_encoded_field;
-						$keys[] = $current_encoded_field['key'];
-					}
-				}
+				$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
+				$field->set_group_id_for_template($post_id);
+				
+				$current_encoded_field = $this->_encode_field_from_template($field);
+				$encoded_fields[] = $current_encoded_field;
 			}
 			
 			return $encoded_fields;
