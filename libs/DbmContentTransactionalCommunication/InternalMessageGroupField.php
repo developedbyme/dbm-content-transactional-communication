@@ -36,6 +36,11 @@
 		
 		public function get_value() {
 			
+			$cached_value = $this->get_cached_value('value');
+			if($cached_value !== false) {
+				return $cached_value;
+			}
+			
 			$return_value = get_post_meta($this->id, 'dbmtc_value', true);
 			
 			$storage_type_term = $this->get_storage_type_term();
@@ -48,6 +53,8 @@
 			if($return_value === "") {
 				$return_value = apply_filters('dbmtc/default_field_value/'.$type, $return_value, $this);
 			}
+			
+			$this->set_cached_value('value', $return_value);
 			
 			return $return_value;
 		}
@@ -77,6 +84,7 @@
 			}
 			
 			$this->update_meta('dbmtc_value', $value);
+			$this->delete_cached_value('value');
 			
 			return $this;
 		}
@@ -279,6 +287,31 @@
 			);
 			
 			wp_update_post($args);
+		}
+		
+		public function get_cache_key_prefix() {
+			return 'dbmtc/img/'.$this->get_group_id().'/field/'.$this->get_id().'/';
+		}
+		
+		public function get_cache_key($key) {
+			return $this->get_cache_key_prefix().$key;
+		}
+		
+		public function get_cached_value($key) {
+			$cache_key = $this->get_cache_key($key);
+			return get_transient($cache_key);
+		}
+		
+		public function set_cached_value($key, $value) {
+			$cache_key = $this->get_cache_key($key);
+			set_transient($cache_key, $value, 4 * HOUR_IN_SECONDS);
+			
+			return $this;
+		}
+		
+		public function delete_cached_value($key) {
+			$cache_key = $this->get_cache_key($key);
+			delete_transient($cache_key);
 		}
 		
 		public static function test_import() {
