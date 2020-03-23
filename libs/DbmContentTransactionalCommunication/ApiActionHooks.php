@@ -36,6 +36,9 @@
 			
 			add_action('wprr/api_action/dbmtc/timedAction/tryToPerform', array($this, 'hook_timedAction_tryToPerform'), 10, 2);
 			add_action('wprr/api_action/dbmtc/timedAction/checkTimedActions', array($this, 'hook_timedAction_checkTimedActions'), 10, 2);
+			
+			add_action('wprr/api_action/dbmtc/sendEmail', array($this, 'hook_sendEmail'), 10, 2);
+			add_action('wprr/api_action/dbmtc/sendTestEmail', array($this, 'hook_sendTestEmail'), 10, 2);
 		}
 
 		public function hook_send_email_verification($data, &$response_data) {
@@ -523,6 +526,91 @@
 			
 			$timed_action = dbmtc_get_timed_action($id);
 			$timed_action->try_to_perform();
+		}
+		
+		public function hook_sendEmail($data, &$response_data) {
+			
+			//METODO: add filter to allow other roles
+			if(!current_user_can( 'administrator' )) {
+				throw new \Exception('Not permitted');
+			}
+			
+			$template_id = $data['emailTemplateId'];
+			$for_id = $data['forId'];
+			$for_type = isset($data['forType']) ? $data['forType'] : 'email';
+			$from = isset($data['from']) ? $data['from'] : dbmtc_get_default_from_email();
+			$message_type = isset($data['messageType']) ? $data['messageType'] : 'standard';
+			
+			if($template_id && $for_id) {
+				
+				$from_contact = dbmtc_get_manual_contact($from);
+				
+				$template = dbmtc_create_template_from_post($template_id);
+				
+				$to_contact = apply_filters('dbmtc/get_contact_for/'.$for_type, null, $for_id);
+				if(!$to_contact) {
+					throw new \Exception('No contact');
+				}
+				
+				$template->add_keywords_provider($from_contact->create_keywords_provider(), 'from');
+				$template->add_keywords_provider($to_contact->create_keywords_provider(), 'to');
+			
+				do_action('dbmtc/setup_template/'.$message_type, $template, $for_id);
+			
+				$content = $template->get_content();
+			
+				if(!$content['title'] && !$content['content']) {
+					throw new \Exception('No content');
+				}
+				
+				$response_data['sent'] = dbm_content_tc_send_email($content['title'], $content['content'], $to_contact->get_contact_details('email'), $from);
+				
+			}
+			else {
+				throw new \Exception('Missing parameters');
+			}
+		}
+		
+		public function hook_sendTestEmail($data, &$response_data) {
+			
+			//METODO: add filter to allow other roles
+			if(!current_user_can( 'administrator' )) {
+				throw new \Exception('Not permitted');
+			}
+			
+			$email = $data['email'];
+			$template_id = $data['emailTemplateId'];
+			$for_id = $data['forId'];
+			$for_type = isset($data['forType']) ? $data['forType'] : 'email';
+			$from = isset($data['from']) ? $data['from'] : dbmtc_get_default_from_email();
+			$message_type = isset($data['messageType']) ? $data['messageType'] : 'standard';
+			
+			if($template_id && $email) {
+				$template = dbmtc_create_template_from_post($template_id);
+				
+				$from_contact = dbmtc_get_manual_contact($from);
+			
+				$to_contact = apply_filters('dbmtc/get_contact_for/'.$for_type, null, $for_id);
+				if(!$to_contact) {
+					throw new \Exception('No to contact');
+				}
+			
+				$template->add_keywords_provider($from_contact->create_keywords_provider(), 'from');
+				$template->add_keywords_provider($to_contact->create_keywords_provider(), 'to');
+				
+				do_action('dbmtc/setup_template/'.$message_type, $template, $for_id);
+				
+				$content = $template->get_content();
+				
+				if(!$content['title'] && !$content['content']) {
+					throw new \Exception('No content');
+				}
+				
+				$response_data['sent'] = dbm_content_tc_send_email($content['title'], $content['content'], $email, $from);
+			}
+			else {
+				throw new \Exception('Missing parameters');
+			}
 		}
 		
 		public static function test_import() {

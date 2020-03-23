@@ -12,7 +12,18 @@
 			
 		}
 		
+		public function add_user_details($type, $value) {
+			$this->user_details[$type] = $value;
+			
+			return $this;
+		}
+		
 		public function get_user_details($type) {
+			
+			if(isset($this->user_details[$type])) {
+				return $this->user_details[$type];
+			}
+			
 			return null;
 		}
 		
@@ -40,6 +51,14 @@
 			}
 			
 			return $this->contact_detials[$type];
+		}
+		
+		public function set_name($first_name, $last_name) {
+			$this->add_user_details('firstName', $first_name);
+			$this->add_user_details('lastName', $last_name);
+			$this->add_user_details('name', $first_name.' '.$last_name);
+			
+			return $this;
 		}
 		
 		public function set_email($email) {

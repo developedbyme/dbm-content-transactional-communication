@@ -113,6 +113,12 @@
 			add_filter('dbmtc/send_method_for_verification/email', array($this, 'filter_send_method_for_verification_email'), 10, 2);
 			add_filter('dbmtc/default_wrapper/email', array($this, 'filter_default_wrapper_email'), 10, 1);
 			
+			add_filter('dbmtc/get_contact_for/manual', array($this, 'filter_get_contact_for_manual'), 10, 2);
+			add_filter('dbmtc/get_contact_for/user', array($this, 'filter_get_contact_for_user'), 10, 2);
+			add_filter('dbmtc/get_contact_for/emailMeta', array($this, 'filter_get_contact_for_emailMeta'), 10, 2);
+			
+			add_filter('dbm_content_tc/send_email', array($this, 'filter_sendEmail'), 1000, 7);
+			
 			add_filter('cron_schedules', array($this, 'filter_cron_schedules'), 10, 1);
 			
 		}
@@ -364,6 +370,41 @@
 			}
 			
 			return $wrapper_template;
+		}
+		
+		public function filter_get_contact_for_user($contact, $id) {
+			return dbmtc_get_user_contact($id);
+		}
+		
+		public function filter_get_contact_for_emailMeta($contact, $id) {
+			return dbmtc_get_manual_contact(get_post_meta($id, 'email', true));
+		}
+		
+		public function filter_get_contact_for_manual($contact, $id) {
+			return dbmtc_get_manual_contact($id);
+		}
+		
+		public function filter_sendEmail($sent, $title, $content, $to, $from, $tc_id, $additional_data) {
+			if($sent) {
+				return $sent;
+			}
+			
+			$headers = array(
+				'From: '.$from,
+				'Content-Type: text/html; charset=UTF-8'
+			);
+			
+			if(isset($additional_data['headers'])) {
+				foreach($additional_data['headers'] as $name => $header) {
+					$headers[] = $name.': '.$header;
+				}
+			}
+			
+			$sent = wp_mail($to, $title, $content, $headers);
+			
+			update_post_meta($tc_id, 'wp_mail_send_status', $sent);
+			
+			return $sent;
 		}
 		
 		public function filter_cron_schedules($schedules) {

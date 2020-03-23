@@ -47,7 +47,7 @@
 				return get_userdata($this->get_user_id())->display_name;
 			}
 			
-			return null;
+			return parent::get_user_details($type);
 		}
 		
 		//METODO: implement save_contact_details

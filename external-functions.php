@@ -424,6 +424,14 @@
 		return $contact;
 	}
 	
+	function dbmtc_get_manual_contact($email) {
+		
+		$contact = new \DbmContentTransactionalCommunication\Contact\Contact();
+		$contact->set_email($email);
+		
+		return $contact;
+	}
+	
 	function dbmtc_create_template($title, $content) {
 		$template = new \DbmContentTransactionalCommunication\Template\Template();
 		
@@ -473,5 +481,9 @@
 		}
 		
 		return $provider;
+	}
+	
+	function dbmtc_get_credentials_for_email($email) {
+		return apply_filters('dbmtc/credentials_for_email', array(), $email);
 	}
 ?>
