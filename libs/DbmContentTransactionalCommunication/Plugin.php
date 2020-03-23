@@ -103,6 +103,7 @@
 			add_filter('dbmtc/default_field_value/address', array($this, 'filter_default_field_value_address'), 10, 2);
 			add_filter('dbmtc/default_field_value/data-array', array($this, 'filter_default_field_value_data_array'), 10, 2);
 			add_filter('dbmtc/default_field_value/boolean', array($this, 'filter_default_field_value_data_boolean'), 10, 2);
+			add_filter('dbmtc/default_field_value/json', array($this, 'filter_default_field_value_data_json'), 10, 2);
 			add_filter('dbmtc/default_field_value/multiple-relation', array($this, 'filter_default_field_value_multiple_relation'), 10, 2);
 			
 			add_filter('dbmtc/encode_field/relation', array($this, 'hook_encode_field_relation'), 10, 2);
@@ -272,6 +273,10 @@
 		
 		public function filter_default_field_value_data_boolean($return_value, $field) {
 			return false;
+		}
+		
+		public function filter_default_field_value_data_json($return_value, $field) {
+			return null;
 		}
 		
 		public function filter_default_field_value_multiple_relation($return_value, $field) {
