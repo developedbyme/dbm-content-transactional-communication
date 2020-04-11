@@ -42,7 +42,7 @@
 				if(!$translations) {
 					$translations = array();
 				}
-				$this->set_cached_value('translations', $return_value);
+				$this->set_cached_value('translations', $translations);
 			}
 			
 			return $translations;
@@ -118,6 +118,14 @@
 			//METODO: sort if this is on a timeline
 			
 			$this->perform_set_value($value);
+			
+			return $this;
+		}
+		
+		public function set_translations($value) {
+			
+			$this->update_meta('dbmtc_value_translations', $value);
+			$this->delete_cached_value('translations');
 			
 			return $this;
 		}

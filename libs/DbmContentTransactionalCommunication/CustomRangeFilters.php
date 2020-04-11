@@ -133,6 +133,7 @@
 			
 			$return_object['key'] = $field->get_key();
 			$return_object['value'] = $field->get_value();
+			$return_object['translations'] = $field->get_translations();
 			if($include_changes) {
 				$return_object['pastChanges'] = $field->get_past_changes();
 				$return_object['futureChanges'] = $field->get_future_changes();

@@ -175,6 +175,7 @@
 			self::add_term('dbm_relation:internal-message-types/removed-from-field-timeline', 'Removed from field timeline');
 			self::add_term('dbm_relation:internal-message-types/added-item', 'Added item');
 			self::add_term('dbm_relation:internal-message-types/removed-item', 'Removed item');
+			self::add_term('dbm_relation:internal-message-types/translations-updated', 'Translations updated');
 			
 			self::add_term('dbm_relation:internal-message-status', 'Internal message status');
 			self::add_term('dbm_relation:internal-message-status/removed', 'Removed');

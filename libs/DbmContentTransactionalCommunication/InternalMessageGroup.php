@@ -350,6 +350,30 @@
 			return null;
 		}
 		
+		public function set_field_translations($key, $value) {
+			$field = $this->get_field($key);
+			if(!$field) {
+				return null;
+			}
+			
+			$original_value = $field->get_translations();
+			$field->set_translations($value);
+			
+			$user_id = get_current_user_id();
+			
+			$message = $this->create_message('internal-message-types/translations-updated', '', $user_id);
+			$message->update_meta('field', $key);
+			$message->update_meta('oldValue', $original_value);
+			$message->update_meta('newValue', $value);
+			
+			$this->delete_cached_value('field_values');
+			$this->delete_cached_value('field_ids');
+			
+			$this->update_updated_date();
+			
+			return $message;
+		}
+		
 		public function set_field_after($key, $value, $time) {
 			
 			$field = $this->get_field($key);

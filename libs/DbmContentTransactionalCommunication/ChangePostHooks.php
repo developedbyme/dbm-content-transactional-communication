@@ -22,7 +22,11 @@
 			$this->register_hook_for_type('dbmtc/commentChange', 'hook_dbmtc_commentChange');
 			$this->register_hook_for_type('dbmtc/commentAction', 'hook_dbmtc_commentAction');
 			$this->register_hook_for_type('dbmtc/comment', 'hook_dbmtc_comment');
+			
 			$this->register_hook_for_type('dbmtc/setFields', 'hook_dbmtc_setFields');
+			$this->register_hook_for_type('dbmtc/setField', 'hook_dbmtc_setField');
+			$this->register_hook_for_type('dbmtc/setFieldTranslations', 'hook_dbmtc_setFieldTranslations');
+			
 		}
 		
 		protected function update_message_meta($message, $meta) {
@@ -92,6 +96,34 @@
 				catch(\Exception $exception) {
 					$logger->add_log($exception->getMessage());
 				}
+			}
+		}
+		
+		public function hook_dbmtc_setField($data, $post_id, $logger) {
+			//var_dump('\DbmContentTransactionalCommunication\ChangePostHooks::hook_dbmtc_setField');
+			
+			$internal_message_group = dbmtc_get_internal_message_group($post_id);
+			$name = $data['field'];
+			
+			try {
+				$internal_message_group->set_field_if_different($name, $data['value']);
+			}
+			catch(\Exception $exception) {
+				$logger->add_log($exception->getMessage());
+			}
+		}
+		
+		public function hook_dbmtc_setFieldTranslations($data, $post_id, $logger) {
+			//var_dump('\DbmContentTransactionalCommunication\ChangePostHooks::hook_dbmtc_setFieldTranslations');
+			
+			$internal_message_group = dbmtc_get_internal_message_group($post_id);
+			$name = $data['field'];
+			
+			try {
+				$internal_message_group->set_field_translations($name, $data['value']);
+			}
+			catch(\Exception $exception) {
+				$logger->add_log($exception->getMessage());
 			}
 		}
 		
