@@ -34,6 +34,31 @@
 			return get_post_meta($this->id, 'dbmtc_key', true);
 		}
 		
+		public function get_translations() {
+			
+			$translations = $this->get_cached_value('translations');
+			if($translations === false) {
+				$translations = get_post_meta($this->id, 'dbmtc_value_translations', true);
+				if(!$translations) {
+					$translations = array();
+				}
+				$this->set_cached_value('translations', $return_value);
+			}
+			
+			return $translations;
+		}
+		
+		public function get_translated_value($language) {
+			$translations = $this->get_translations();
+			if(isset($translations[$language])) {
+				return $translations[$language];
+			}
+			
+			if(!$translations) {
+				return $this->get_value();
+			}
+		}
+		
 		public function get_value() {
 			
 			$cached_value = $this->get_cached_value('value');

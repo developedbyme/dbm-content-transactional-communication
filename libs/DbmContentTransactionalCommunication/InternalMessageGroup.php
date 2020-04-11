@@ -469,6 +469,18 @@
 			return $field->get_value();
 		}
 		
+		public function get_field_translation($key, $language) {
+			$field_id = $this->get_field_id_if_exists($key);
+			
+			if(!$field_id) {
+				return $this->get_field_value($key);
+			}
+			
+			$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
+			
+			return $field->get_translated_value($language);
+		}
+		
 		public function get_cache_key_prefix() {
 			return 'dbmtc/img/'.$this->get_id().'/';
 		}
