@@ -103,6 +103,8 @@
 			self::add_term('dbm_type:internal-message-group-field', 'Internal message group field');
 			self::add_term('dbm_type:field-template', 'Field template');
 			self::add_term('dbm_type:timed-action', 'Timed action');
+			self::add_term('dbm_type:link-group', 'Link group');
+			self::add_term('dbm_type:page-data', 'Page data');
 			
 			self::add_term('dbm_type:admin-grouping', 'Admin grouping');
 			self::add_term('dbm_type:admin-grouping/sent-communications', 'Sent communications');
@@ -112,6 +114,8 @@
 			self::add_term('dbm_type:admin-grouping/internal-message-group-fields', 'Internal message group fields');
 			self::add_term('dbm_type:admin-grouping/field-templates', 'Field templates');
 			self::add_term('dbm_type:admin-grouping/timed-actions', 'Timed actions');
+			self::add_term('dbm_type:admin-grouping/link-groups', 'Link groups');
+			self::add_term('dbm_type:admin-grouping/page-datas', 'Page datas');
 			
 			$sent_communications_group = self::create_page('sent-communications', 'Sent communications', 'dbm_data', 0);
 			self::add_terms_to_post(array('dbm_type:admin-grouping', 'dbm_type:admin-grouping/sent-communications'), $sent_communications_group);
@@ -130,6 +134,12 @@
 			
 			$current_group = self::create_page('field-templates', 'Field templates', 'dbm_data', 0);
 			self::add_terms_to_post(array('dbm_type:admin-grouping', 'dbm_type:admin-grouping/field-templates'), $current_group);
+			
+			$current_group = self::create_page('link-groups', 'Link groups', 'dbm_data', 0);
+			self::add_terms_to_post(array('dbm_type:admin-grouping', 'dbm_type:admin-grouping/link-groups'), $current_group);
+			
+			$current_group = self::create_page('page-datas', 'Page datas', 'dbm_data', 0);
+			self::add_terms_to_post(array('dbm_type:admin-grouping', 'dbm_type:admin-grouping/page-datas'), $current_group);
 			
 			self::add_term('dbm_type:address-verification', 'Address verification');
 			self::add_term('dbm_type:address-verification/password-reset-verification', 'Password reset verification');
@@ -213,9 +223,14 @@
 			self::add_term('dbm_relation:field-storage/relation-flag', 'Relation flag');
 			
 			self::add_term('dbm_relation:internal-message-groups', 'Internal message groups');
+			self::add_term('dbm_relation:page-datas', 'Page datas');
+			self::add_term('dbm_relation:link-groups', 'Link groups');
 			
 			$current_term_id = self::add_term('dbm_relation:global-pages', 'Global pages');
 			$current_term_id = self::add_term('dbm_relation:global-pages/view-internal-message', 'View internal message');
+			
+			dbmtc_setup_field_template('link-group', 'links', 'json', 'meta', array('dbmtc_meta_name' => 'dbm_links'));
+			dbmtc_setup_field_template('page-data', 'parameters', 'json', 'meta', array('dbmtc_meta_name' => 'dbm_page_data_parameters'));
 		}
 		
 		public static function test_import() {

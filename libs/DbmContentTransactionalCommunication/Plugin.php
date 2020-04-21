@@ -42,6 +42,8 @@
 			
 			if(function_exists('dbm_content_add_owned_relationship')) {
 				dbm_content_add_owned_relationship_with_auto_add('internal-message-group', 'internal-message-groups');
+				dbm_content_add_owned_relationship_with_auto_add('link-group', 'link-groups');
+				dbm_content_add_owned_relationship_with_auto_add('page-data', 'page-datas');
 			}
 		}
 		

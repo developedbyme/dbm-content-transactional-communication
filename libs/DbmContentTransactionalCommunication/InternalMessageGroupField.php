@@ -66,7 +66,7 @@
 				return $cached_value;
 			}
 			
-			$return_value = get_post_meta($this->id, 'dbmtc_value', true);
+			$return_value = $this->get_meta('dbmtc_value');
 			
 			$storage_type_term = $this->get_storage_type_term();
 			if($storage_type_term) {
@@ -79,7 +79,12 @@
 				$return_value = apply_filters('dbmtc/default_field_value/'.$type, $return_value, $this);
 			}
 			
-			$this->set_cached_value('value', $return_value);
+			if($return_value) {
+				$this->set_cached_value('value', $return_value);
+			}
+			else {
+				$this->delete_cached_value('value');
+			}
 			
 			return $return_value;
 		}

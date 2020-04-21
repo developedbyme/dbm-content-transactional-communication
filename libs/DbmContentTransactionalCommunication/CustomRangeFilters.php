@@ -23,6 +23,7 @@
 			add_filter('wprr/range_encoding/fields', array($this, 'filter_encode_fields'), 10, 3);
 			add_filter('wprr/range_encoding/fieldsWithChanges', array($this, 'filter_encode_fieldsWithChanges'), 10, 3);
 			add_filter('wprr/range_encoding/fieldValues', array($this, 'filter_encode_fieldValues'), 10, 3);
+			add_filter('wprr/range_encoding/linkGroup', array($this, 'filter_encode_linkGroup'), 10, 3);
 			
 			add_filter(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/change-comment', array($this, 'filter_encode_internal_message_group_change_comment'), 10, 2);
 			add_filter(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/user-assigned', array($this, 'filter_encode_internal_message_user_assigned'), 10, 2);
@@ -167,15 +168,13 @@
 			$message_group = dbmtc_get_internal_message_group($post_id);
 			$fields_ids = $message_group->get_fields_ids();
 			
-			$field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message-group-field')->add_relations_with_children_from_post($post_id, 'internal-message-groups')->get_post_ids();
+			//$field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message-group-field')->add_relations_with_children_from_post($post_id, 'internal-message-groups')->get_post_ids();
 			foreach($fields_ids['single'] as $field_name => $field_id) {
 				$current_encoded_field = $this->_encode_field($field_id, $include_changes);
 				$encoded_fields[] = $current_encoded_field;
 			}
 			
 			foreach($fields_ids['shared'] as $field_name => $field_id) {
-				$current_encoded_field = $this->_encode_field($field_id, $include_changes);
-				
 				$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
 				$field->set_group_id_for_template($post_id);
 				
@@ -206,6 +205,37 @@
 			foreach($fields as $field) {
 				$encoded_data[$field['key']] = $field['value'];
 			}
+			
+			return $encoded_data;
+		}
+		
+		protected function get_posts_from_link_group($links, &$return_array) {
+			foreach($links as $link) {
+				$url_parts = $link['urlParts'];
+				foreach($url_parts as $url_part) {
+					if($url_part['type'] === 'postUrl') {
+						$id = $url_part['value'];
+						if(!isset($return_array['post'.$id])) {
+							$return_array['post'.$id] = wprr_encode_post_link($id);
+						}
+					}
+				}
+				
+				$this->get_posts_from_link_group($link['childPaths'], $return_array);
+			}
+		}
+		
+		public function filter_encode_linkGroup($encoded_data, $post_id, $data) {
+			$message_group = dbmtc_get_internal_message_group($post_id);
+			
+			$links = $message_group->get_field_value('links');
+			
+			$encoded_data['links'] = $links;
+			
+			$posts = array();
+			$this->get_posts_from_link_group($links, $posts);
+			
+			$encoded_data['postsMap'] = $posts;
 			
 			return $encoded_data;
 		}
