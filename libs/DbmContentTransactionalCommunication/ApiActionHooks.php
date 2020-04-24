@@ -376,7 +376,7 @@
 			
 			$hash_salt = 'Tw?otIAwI%ourB-:@VeZ4tGLY0=Twh)1J Wwhxc!5AOg:*L$Ff@CAY+d-iW47Ztm';
 			//METODO: add filter around salt
-			$hash = md5($username_or_email.$hash_salt);
+			$hash = md5($data['user'].$hash_salt);
 			
 			$data_id = dbm_create_data('Reset password verification - '.$hash, 'address-verification', 'admin-grouping/address-verifications');
 			$data_dbm_post = dbm_get_post($data_id);
