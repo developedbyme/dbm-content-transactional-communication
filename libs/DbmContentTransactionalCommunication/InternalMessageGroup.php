@@ -307,7 +307,7 @@
 			return $field;
 		}
 		
-		public function set_field($key, $value) {
+		public function set_field($key, $value, $comment = '') {
 			$field = $this->get_field($key);
 			if(!$field) {
 				return null;
@@ -320,7 +320,7 @@
 			
 			$user_id = get_current_user_id();
 			
-			$message = $this->create_message('internal-message-types/field-changed', '', $user_id);
+			$message = $this->create_message('internal-message-types/field-changed', $comment, $user_id);
 			$message->update_meta('field', $key);
 			$message->update_meta('oldValue', $original_value);
 			$message->update_meta('newValue', $value);
@@ -336,7 +336,7 @@
 			return $message;
 		}
 		
-		public function set_field_if_different($key, $value) {
+		public function set_field_if_different($key, $value, $comment = '') {
 			$field = $this->get_field($key);
 			if(!$field) {
 				return null;
@@ -344,13 +344,13 @@
 			
 			$original_value = $field->get_value();
 			if(json_encode($original_value) !== json_encode($value)) {
-				return $this->set_field($key, $value);
+				return $this->set_field($key, $value, $comment);
 			}
 			
 			return null;
 		}
 		
-		public function set_field_translations($key, $value) {
+		public function set_field_translations($key, $value, $comment = '') {
 			$field = $this->get_field($key);
 			if(!$field) {
 				return null;
@@ -361,7 +361,7 @@
 			
 			$user_id = get_current_user_id();
 			
-			$message = $this->create_message('internal-message-types/translations-updated', '', $user_id);
+			$message = $this->create_message('internal-message-types/translations-updated', $comment, $user_id);
 			$message->update_meta('field', $key);
 			$message->update_meta('oldValue', $original_value);
 			$message->update_meta('newValue', $value);
@@ -374,7 +374,7 @@
 			return $message;
 		}
 		
-		public function set_field_after($key, $value, $time) {
+		public function set_field_after($key, $value, $time, $comment = '') {
 			
 			$field = $this->get_field($key);
 			if(!$field) {
@@ -383,7 +383,7 @@
 			
 			$user_id = get_current_user_id();
 			
-			$message = $this->create_message('added-to-field-timeline', '', $user_id);
+			$message = $this->create_message('added-to-field-timeline', $comment, $user_id);
 			$message->update_meta('field', $key);
 			$message->update_meta('addedValue', $value);
 			$message->update_meta('addedTime', $time);
@@ -514,6 +514,9 @@
 		}
 		
 		public function get_cached_value($key) {
+			
+			return false; //METODO: set this as dev settings
+			
 			$cache_key = $this->get_cache_key($key);
 			return get_transient($cache_key);
 		}
@@ -578,6 +581,8 @@
 				'single' => array(),
 				'shared' => array()
 			);
+			
+			$keys = array();
 			
 			$field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message-group-field')->add_relations_with_children_from_post($this->get_id(), 'internal-message-groups')->get_post_ids();
 			foreach($field_ids as $field_id) {

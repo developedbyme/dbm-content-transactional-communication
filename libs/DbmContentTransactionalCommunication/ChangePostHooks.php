@@ -89,9 +89,14 @@
 			$internal_message_group = dbmtc_get_internal_message_group($post_id);
 			
 			$fields = $data['value'];
+			$comment = '';
+			if(isset($data['comment']) && $data['comment']) {
+				$comment = $data['comment'];
+			}
+			
 			foreach($fields as $name => $value) {
 				try {
-					$internal_message_group->set_field_if_different($name, $value);
+					$internal_message_group->set_field_if_different($name, $value, $comment);
 				}
 				catch(\Exception $exception) {
 					$logger->add_log($exception->getMessage());
@@ -106,7 +111,11 @@
 			$name = $data['field'];
 			
 			try {
-				$internal_message_group->set_field_if_different($name, $data['value']);
+				$comment = '';
+				if(isset($data['comment']) && $data['comment']) {
+					$comment = $data['comment'];
+				}
+				$internal_message_group->set_field_if_different($name, $data['value'], $comment);
 			}
 			catch(\Exception $exception) {
 				$logger->add_log($exception->getMessage());
