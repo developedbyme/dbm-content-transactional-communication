@@ -119,6 +119,8 @@
 			add_filter('dbmtc/get_contact_for/user', array($this, 'filter_get_contact_for_user'), 10, 2);
 			add_filter('dbmtc/get_contact_for/emailMeta', array($this, 'filter_get_contact_for_emailMeta'), 10, 2);
 			
+			add_filter('wprr/taxonomy/dbm_relation/internal_terms', array($this, 'filter_wprr_dbm_relation_internal_terms'), 10, 1);
+			
 			add_filter('dbm_content_tc/send_email', array($this, 'filter_sendEmail'), 1000, 7);
 			
 			add_filter('cron_schedules', array($this, 'filter_cron_schedules'), 10, 1);
@@ -322,6 +324,13 @@
 			$return_value['selection'] = $current_meta ? $current_meta : 'default/default';
 			
 			return $return_value;
+		}
+		
+		public function filter_wprr_dbm_relation_internal_terms($internal_ids) {
+			
+			$internal_ids[] = dbm_get_relation_by_path('internal-message-groups')->term_id;
+			
+			return $internal_ids;
 		}
 		
 		public function filter_send_method_for_verification_email($data, $verification) {
