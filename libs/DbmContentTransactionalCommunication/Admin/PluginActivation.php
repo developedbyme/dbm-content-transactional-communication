@@ -196,6 +196,7 @@
 			self::add_term('dbm_relation:field-type/file', 'File');
 			self::add_term('dbm_relation:field-type/mobile-phone-number', 'Mobile phone number');
 			self::add_term('dbm_relation:field-type/relation', 'Relation');
+			self::add_term('dbm_relation:field-type/dbm-type', 'Dbm Type');
 			self::add_term('dbm_relation:field-type/multiple-relation', 'Multiple relation');
 			self::add_term('dbm_relation:field-type/post-relation', 'Post relation');
 			self::add_term('dbm_relation:field-type/address', 'Address');
@@ -231,6 +232,11 @@
 			
 			dbmtc_setup_field_template('link-group', 'links', 'json', 'meta', array('dbmtc_meta_name' => 'dbm_links'));
 			dbmtc_setup_field_template('page-data', 'parameters', 'json', 'meta', array('dbmtc_meta_name' => 'dbm_page_data_parameters'));
+			
+			dbmtc_setup_field_template('field-template', 'key', 'string', 'meta', array('dbmtc_meta_name' => 'dbmtc_key'));
+			dbmtc_setup_field_template('field-template', 'forType', 'dbm-type', 'meta', array('dbmtc_meta_name' => 'dbmtc_for_type'));
+			dbmtc_setup_field_template('field-template', 'type', 'relation', 'single-relation', array('dbmtc_relation_path' => 'field-type', 'subtree' => 'field-type'));
+			dbmtc_setup_field_template('field-template', 'storageType', 'relation', 'single-relation', array('dbmtc_relation_path' => 'field-storage', 'subtree' => 'field-storage'));
 		}
 		
 		public static function test_import() {
