@@ -230,6 +230,7 @@
 			$current_term_id = self::add_term('dbm_relation:global-pages', 'Global pages');
 			$current_term_id = self::add_term('dbm_relation:global-pages/view-internal-message', 'View internal message');
 			
+			dbmtc_setup_field_template('link-group', 'name', 'string', 'meta', array('dbmtc_meta_name' => 'dbm_name'));
 			dbmtc_setup_field_template('link-group', 'links', 'json', 'meta', array('dbmtc_meta_name' => 'dbm_links'));
 			dbmtc_setup_field_template('page-data', 'parameters', 'json', 'meta', array('dbmtc_meta_name' => 'dbm_page_data_parameters'));
 			

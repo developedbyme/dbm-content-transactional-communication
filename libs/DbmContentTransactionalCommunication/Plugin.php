@@ -35,6 +35,8 @@
 			add_action('dbmtc/send_verification/email', array($this, 'hook_dbmtc_send_verification_email'), $this->_default_hook_priority, 3);
 			add_action('dbmtc_check_timed_actions', array($this, 'hook_dbmtc_check_timed_actions'), $this->_default_hook_priority, 0);
 			add_action('dbmtc/timed_action/update_field_timeline', array($this, 'hook_dbmtc_timed_action_update_field_timeline'), $this->_default_hook_priority, 1);
+			
+			add_action('dbmtc/internal_message/update_name_after_field_change', array($this, 'hook_update_name_after_field_change'), 10, 2);
 		}
 		
 		public function hook_plugins_loaded() {
@@ -209,19 +211,32 @@
 		
 		public function hook_set_field_value_single_relation($field, $value) {
 			$path = $field->get_meta('dbmtc_relation_path');
+			$use_slug = (boolean)$field->get_meta('dbmtc_relation_use_slug');
 			$parent_term = dbm_get_relation_by_path($path);
+			
+			if($use_slug) {
+				$current_term = dbm_get_relation_by_path($path.'/'.$value);
+				$value = $current_term->term_id;
+			}
 			
 			dbm_replace_relations($field->get_group_id(), $parent_term, array((int)$value));
 		}
 		
 		public function filter_get_field_value_single_relation($return_value, $field) {
 			$path = $field->get_meta('dbmtc_relation_path');
+			$use_slug = (boolean)$field->get_meta('dbmtc_relation_use_slug');
 			
-			return dbm_get_single_post_relation($field->get_group_id(), $path);
+			$id = dbm_get_single_post_relation($field->get_group_id(), $path);
+			if($use_slug) {
+				return get_term_by('id', $id, 'dbm_relation')->slug;
+			}
+			
+			return $id;
 		}
 		
 		public function hook_copy_field_template_meta_single_relation($field, $template) {
 			$field->update_meta('dbmtc_relation_path', $template->get_meta('dbmtc_relation_path'));
+			$field->update_meta('dbmtc_relation_use_slug', $template->get_meta('dbmtc_relation_use_slug'));
 		}
 		
 		public function hook_set_field_value_multiple_relation($field, $value) {
@@ -443,6 +458,19 @@
 		public function hook_dbmtc_timed_action_update_field_timeline($timed_action) {
 			$internal_message_field = dbmtc_get_internal_message_group_field($timed_action->get_action_data()['field']);
 			$internal_message_field->update_to_next_value();
+		}
+		
+		public function hook_update_name_after_field_change($group, $field) {
+			if($field->get_key() === "name") {
+				if(dbm_has_post_type($group->get_id(), 'link-group')) {
+					$name = $field->get_value();
+					wp_update_post(array(
+						'ID' => $group->get_id(),
+						'post_title' => $name
+					));
+				}
+			}
+			
 		}
 		
 		public function activation_setup() {
