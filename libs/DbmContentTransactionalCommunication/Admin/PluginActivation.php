@@ -194,6 +194,7 @@
 			self::add_term('dbm_relation:field-type/string', 'String');
 			self::add_term('dbm_relation:field-type/image', 'Image');
 			self::add_term('dbm_relation:field-type/file', 'File');
+			self::add_term('dbm_relation:field-type/multiple-files', 'Multiple files');
 			self::add_term('dbm_relation:field-type/mobile-phone-number', 'Mobile phone number');
 			self::add_term('dbm_relation:field-type/relation', 'Relation');
 			self::add_term('dbm_relation:field-type/dbm-type', 'Dbm Type');

@@ -109,6 +109,7 @@
 			add_filter('dbmtc/default_field_value/boolean', array($this, 'filter_default_field_value_data_boolean'), 10, 2);
 			add_filter('dbmtc/default_field_value/json', array($this, 'filter_default_field_value_data_json'), 10, 2);
 			add_filter('dbmtc/default_field_value/multiple-relation', array($this, 'filter_default_field_value_multiple_relation'), 10, 2);
+			add_filter('dbmtc/default_field_value/multiple-files', array($this, 'filter_default_field_value_multiple_files'), 10, 2);
 			
 			add_filter('dbmtc/encode_field/relation', array($this, 'hook_encode_field_relation'), 10, 2);
 			add_filter('dbmtc/encode_field/multiple-relation', array($this, 'hook_encode_field_multiple_relation'), 10, 2);
@@ -306,6 +307,14 @@
 		
 		public function filter_default_field_value_multiple_relation($return_value, $field) {
 			//echo("filter_default_field_value_multiple_relation");
+			
+			$return_array = array();
+			
+			return $return_array;
+		}
+		
+		public function filter_default_field_value_multiple_files($return_value, $field) {
+			//echo("filter_default_field_value_multiple_files");
 			
 			$return_array = array();
 			

@@ -58,7 +58,7 @@
 			$field_type_id = dbm_get_single_post_relation($field_id, 'field-type');
 			$field_type = get_term_by('id', $field_type_id, 'dbm_relation')->slug;
 			
-			$is_valid_field = ($field_type === 'file' || $field_type === 'image');
+			$is_valid_field = ($field_type === 'file' || $field_type === 'image' || $field_type === 'multiple-files');
 			//METODO: add filter for valid field types
 			if(!$is_valid_field) {
 				return $this->output_error('Field doesn\'t support upload');
@@ -88,7 +88,15 @@
 				'url' => $wp_upload_dir['baseurl'].$path_to_file
 			);
 			
-			$group->set_field($field_name, $field_data);
+			if($field_type === 'multiple-files') {
+				$file_list = $group->get_field_value($field_name);
+				$file_list[] = $field_data;
+				$group->set_field($field_name, $file_list);
+				$file_list = $group->get_field_value($field_name);
+			}
+			else {
+				$group->set_field($field_name, $field_data);
+			}
 			
 			return $this->output_success($field_data);
 		}
