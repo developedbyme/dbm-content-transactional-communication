@@ -27,6 +27,7 @@
 			$this->register_hook_for_type('dbmtc/setField', 'hook_dbmtc_setField');
 			$this->register_hook_for_type('dbmtc/setFieldTranslations', 'hook_dbmtc_setFieldTranslations');
 			
+			$this->register_hook_for_type('dbmtc/removeFileFromField', 'hook_dbmtc_removeFileFromField');
 		}
 		
 		protected function update_message_meta($message, $meta) {
@@ -101,6 +102,53 @@
 				catch(\Exception $exception) {
 					$logger->add_log($exception->getMessage());
 				}
+			}
+		}
+		
+		public function hook_dbmtc_removeFileFromField($data, $post_id, $logger) {
+			//var_dump('\DbmContentTransactionalCommunication\ChangePostHooks::hook_dbmtc_removeFileFromField');
+			
+			$internal_message_group = dbmtc_get_internal_message_group($post_id);
+			$name = $data['field'];
+			
+			try {
+				$field = $internal_message_group->get_field($name);
+				$type = $field->get_type();
+				
+				switch($type) {
+					case 'image':
+					case 'file':
+					case 'multiple-files':
+						break;
+					default:
+						throw new \Exception('Field type '.$type.' doesn\'t support file handling');
+				}
+				
+				$comment = '';
+				if(isset($data['comment']) && $data['comment']) {
+					$comment = $data['comment'];
+				}
+				
+				$id_to_remove = $data['value'];
+				$field_value = $field->get_value();
+				
+				if($type === 'multiple-files') {
+					$new_field_value = array();
+					foreach($field_value as $file) {
+						if($file['id'] !== $id_to_remove) {
+							$new_field_value[] = $file;
+						}
+					}
+					$internal_message_group->set_field_if_different($name, $new_field_value, $comment);
+				}
+				else {
+					if($field_value['id'] !== $id_to_remove) {
+						$internal_message_group->set_field_if_different($name, null, $comment);
+					}
+				}
+			}
+			catch(\Exception $exception) {
+				$logger->add_log($exception->getMessage());
 			}
 		}
 		
