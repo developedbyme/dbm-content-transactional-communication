@@ -252,6 +252,7 @@
 				do_action('dbmtc/setup_default_field_storage', $field);
 				
 				$field->set_value($value);
+				$field->add_outgoing_relation_by_name($this->id, 'field-for');
 				
 				$status = $value ? 'complete' : 'none';
 				$field->set_status($status);
@@ -282,6 +283,7 @@
 				
 				$type = $template->get_type();
 				$field->set_type($type);
+				$field->add_outgoing_relation_by_name($this->id, 'field-for');
 				
 				$storage_type = $template->get_storage_type();
 				$field->set_storage_type($storage_type);

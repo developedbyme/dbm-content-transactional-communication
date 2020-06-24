@@ -105,6 +105,7 @@
 			self::add_term('dbm_type:timed-action', 'Timed action');
 			self::add_term('dbm_type:link-group', 'Link group');
 			self::add_term('dbm_type:page-data', 'Page data');
+			self::add_term('dbm_type:uploaded-file', 'Uploaded file');
 			
 			self::add_term('dbm_type:admin-grouping', 'Admin grouping');
 			self::add_term('dbm_type:admin-grouping/sent-communications', 'Sent communications');
@@ -116,6 +117,7 @@
 			self::add_term('dbm_type:admin-grouping/timed-actions', 'Timed actions');
 			self::add_term('dbm_type:admin-grouping/link-groups', 'Link groups');
 			self::add_term('dbm_type:admin-grouping/page-datas', 'Page datas');
+			self::add_term('dbm_type:admin-grouping/uploaded-files', 'Uploaded files');
 			
 			$sent_communications_group = self::create_page('sent-communications', 'Sent communications', 'dbm_data', 0);
 			self::add_terms_to_post(array('dbm_type:admin-grouping', 'dbm_type:admin-grouping/sent-communications'), $sent_communications_group);
@@ -140,6 +142,9 @@
 			
 			$current_group = self::create_page('page-datas', 'Page datas', 'dbm_data', 0);
 			self::add_terms_to_post(array('dbm_type:admin-grouping', 'dbm_type:admin-grouping/page-datas'), $current_group);
+			
+			$current_group = self::create_page('uploaded-files', 'Uploaded files', 'dbm_data', 0);
+			self::add_terms_to_post(array('dbm_type:admin-grouping', 'dbm_type:admin-grouping/uploaded-files'), $current_group);
 			
 			self::add_term('dbm_type:address-verification', 'Address verification');
 			self::add_term('dbm_type:address-verification/password-reset-verification', 'Password reset verification');
@@ -228,17 +233,25 @@
 			self::add_term('dbm_relation:page-datas', 'Page datas');
 			self::add_term('dbm_relation:link-groups', 'Link groups');
 			
+			self::add_term('dbm_type:object-relation', 'Object relation');
+			self::add_term('dbm_type:object-relation/field-for', 'Field for');
+			self::add_term('dbm_type:object-relation/uploaded-to', 'Uploaded to');
+			
 			$current_term_id = self::add_term('dbm_relation:global-pages', 'Global pages');
 			$current_term_id = self::add_term('dbm_relation:global-pages/view-internal-message', 'View internal message');
 			
 			dbmtc_setup_field_template('link-group', 'name', 'string', 'meta', array('dbmtc_meta_name' => 'dbm_name'));
 			dbmtc_setup_field_template('link-group', 'links', 'json', 'meta', array('dbmtc_meta_name' => 'dbm_links'));
+			
 			dbmtc_setup_field_template('page-data', 'parameters', 'json', 'meta', array('dbmtc_meta_name' => 'dbm_page_data_parameters'));
 			
 			dbmtc_setup_field_template('field-template', 'key', 'string', 'meta', array('dbmtc_meta_name' => 'dbmtc_key'));
 			dbmtc_setup_field_template('field-template', 'forType', 'dbm-type', 'meta', array('dbmtc_meta_name' => 'dbmtc_for_type'));
 			dbmtc_setup_field_template('field-template', 'type', 'relation', 'single-relation', array('dbmtc_relation_path' => 'field-type', 'subtree' => 'field-type'));
 			dbmtc_setup_field_template('field-template', 'storageType', 'relation', 'single-relation', array('dbmtc_relation_path' => 'field-storage', 'subtree' => 'field-storage'));
+			
+			dbmtc_setup_field_template('uploaded-file', 'fileName', 'string', 'meta', array('dbmtc_meta_name' => 'fileName'));
+			dbmtc_setup_field_template('uploaded-file', 'url', 'string', 'meta', array('dbmtc_meta_name' => 'url'));
 		}
 		
 		public static function test_import() {

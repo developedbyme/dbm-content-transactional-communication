@@ -1,19 +1,16 @@
 <?php
 	namespace DbmContentTransactionalCommunication;
 
-	class InternalMessageGroupField {
+	class InternalMessageGroupField extends \DbmContent\DbmPost {
 
-		protected $id = 0;
 		protected $group_id = 0;
 
 		function __construct($id) {
 			//echo("\DbmContentTransactionalCommunication\InternalMessageGroupField::__construct<br />");
 			
+			parent::__construct($id);
+			
 			$this->id = $id;
-		}
-		
-		public function get_id() {
-			return $this->id;
 		}
 		
 		public function get_group_id() {
@@ -336,6 +333,9 @@
 		}
 		
 		public function get_cached_value($key) {
+			
+			//return false; //METODO: set this as dev settings
+			
 			$cache_key = $this->get_cache_key($key);
 			return get_transient($cache_key);
 		}
