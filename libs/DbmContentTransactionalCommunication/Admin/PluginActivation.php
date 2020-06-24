@@ -236,6 +236,7 @@
 			self::add_term('dbm_type:object-relation', 'Object relation');
 			self::add_term('dbm_type:object-relation/field-for', 'Field for');
 			self::add_term('dbm_type:object-relation/uploaded-to', 'Uploaded to');
+			self::add_term('dbm_type:object-relation/message-in', 'Message in');
 			
 			$current_term_id = self::add_term('dbm_relation:global-pages', 'Global pages');
 			$current_term_id = self::add_term('dbm_relation:global-pages/view-internal-message', 'View internal message');

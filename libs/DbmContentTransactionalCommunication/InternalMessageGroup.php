@@ -209,6 +209,9 @@
 			
 			$this->relate_post_to_group($new_id);
 			
+			$dbm_post = dbm_get_post($new_id);
+			$dbm_post->add_outgoing_relation_by_name($this->id, 'message-in');
+			
 			dbm_add_post_relation($new_id, $type);
 			
 			$args = array(

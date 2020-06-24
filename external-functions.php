@@ -216,6 +216,9 @@
 			$parent_term = dbm_get_relation_by_path('internal-message-groups');
 		
 			dbm_replace_relations($new_id, $parent_term, array($group_term->term_id));
+			
+			$dbm_post = dbm_get_post($new_id);
+			$dbm_post->add_outgoing_relation_by_name($group_id, 'message-in');
 		}
 		
 		if($add_standard_settings) {
