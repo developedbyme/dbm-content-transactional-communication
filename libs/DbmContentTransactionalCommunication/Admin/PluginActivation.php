@@ -197,6 +197,7 @@
 			
 			self::add_term('dbm_relation:field-type', 'Field type');
 			self::add_term('dbm_relation:field-type/string', 'String');
+			self::add_term('dbm_relation:field-type/timestamp', 'Timestamp');
 			self::add_term('dbm_relation:field-type/image', 'Image');
 			self::add_term('dbm_relation:field-type/file', 'File');
 			self::add_term('dbm_relation:field-type/multiple-files', 'Multiple files');
@@ -253,6 +254,9 @@
 			
 			dbmtc_setup_field_template('uploaded-file', 'fileName', 'string', 'meta', array('dbmtc_meta_name' => 'fileName'));
 			dbmtc_setup_field_template('uploaded-file', 'url', 'string', 'meta', array('dbmtc_meta_name' => 'url'));
+			
+			dbmtc_setup_field_template('object-relation', 'startAt', 'timestamp', 'meta', array('dbmtc_meta_name' => 'startAt'));
+			dbmtc_setup_field_template('object-relation', 'endAt', 'timestamp', 'meta', array('dbmtc_meta_name' => 'endAt'));
 		}
 		
 		public static function test_import() {
