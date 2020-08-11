@@ -520,15 +520,13 @@
 		
 		public function get_cached_value($key) {
 			
-			return false; //METODO: set this as dev settings
-			
 			$cache_key = $this->get_cache_key($key);
 			return get_transient($cache_key);
 		}
 		
 		public function set_cached_value($key, $value) {
 			$cache_key = $this->get_cache_key($key);
-			set_transient($cache_key, $value, 4 * HOUR_IN_SECONDS);
+			set_transient($cache_key, $value, 48 * HOUR_IN_SECONDS);
 			
 			return $this;
 		}
@@ -577,7 +575,7 @@
 		
 		public function get_fields_ids() {
 			
-			$cached_value = $this->get_cached_value('field_ids');
+			$cached_value = false; //$this->get_cached_value('field_ids');
 			if($cached_value !== false) {
 				return $cached_value;
 			}

@@ -112,6 +112,8 @@
 			
 			$this->update_meta('dbmtc_value', $value);
 			$this->delete_cached_value('value');
+			$this->delete_cached_value('encodedItem');
+			dbmtc_get_internal_message_group($this->get_group_id())->delete_cached_value('encodedFields');
 			
 			return $this;
 		}
@@ -335,14 +337,18 @@
 		public function get_cached_value($key) {
 			
 			//return false; //METODO: set this as dev settings
+			wprr_performance_tracker()->start_meassure('InternalMessageGroupField get_cached_value');
 			
 			$cache_key = $this->get_cache_key($key);
-			return get_transient($cache_key);
+			$transient = get_transient($cache_key);
+			wprr_performance_tracker()->stop_meassure('InternalMessageGroupField get_cached_value');
+			
+			return $transient;
 		}
 		
 		public function set_cached_value($key, $value) {
 			$cache_key = $this->get_cache_key($key);
-			set_transient($cache_key, $value, 4 * HOUR_IN_SECONDS);
+			set_transient($cache_key, $value, 48 * HOUR_IN_SECONDS);
 			
 			return $this;
 		}

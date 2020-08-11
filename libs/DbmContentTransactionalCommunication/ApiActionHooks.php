@@ -540,6 +540,7 @@
 			$for_type = isset($data['forType']) ? $data['forType'] : 'email';
 			$from = isset($data['from']) ? $data['from'] : dbmtc_get_default_from_email();
 			$message_type = isset($data['messageType']) ? $data['messageType'] : 'standard';
+			$keywords = isset($data['keywords']) ? $data['keywords'] : array();
 			
 			if($template_id && $for_id) {
 				

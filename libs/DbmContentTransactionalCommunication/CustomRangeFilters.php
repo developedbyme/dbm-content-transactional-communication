@@ -132,18 +132,28 @@
 			
 			$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($post_id);
 			
-			$return_object['key'] = $field->get_key();
-			$return_object['value'] = $field->get_value();
-			$return_object['translations'] = $field->get_translations();
+			$cached_value = $field->get_cached_value('encodedItem');
+			if($cached_value) {
+				$return_object = $cached_value;
+			}
+			else {
+				wprr_performance_tracker()->start_meassure('_encode_field (uncached)');
+				$return_object['key'] = $field->get_key();
+				$return_object['value'] = $field->get_value();
+				$return_object['translations'] = $field->get_translations();
+				$return_object['type'] = wprr_encode_term($field->get_type_term());
+				$return_object['status'] = wprr_encode_term($field->get_status_term());
+			
+				$return_object = apply_filters('dbmtc/encode_field/'.$field->get_type(), $return_object, $field);
+				
+				$field->set_cached_value('encodedItem', $return_object);
+				wprr_performance_tracker()->stop_meassure('_encode_field (uncached)');
+			}
+			
 			if($include_changes) {
 				$return_object['pastChanges'] = $field->get_past_changes();
 				$return_object['futureChanges'] = $field->get_future_changes();
 			}
-			
-			$return_object['type'] = wprr_encode_term($field->get_type_term());
-			$return_object['status'] = wprr_encode_term($field->get_status_term());
-			
-			$return_object = apply_filters('dbmtc/encode_field/'.$field->get_type(), $return_object, $field);
 			
 			return $return_object;
 		}
@@ -169,17 +179,26 @@
 			$fields_ids = $message_group->get_fields_ids();
 			
 			//$field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message-group-field')->add_relations_with_children_from_post($post_id, 'internal-message-groups')->get_post_ids();
-			foreach($fields_ids['single'] as $field_name => $field_id) {
-				$current_encoded_field = $this->_encode_field($field_id, $include_changes);
-				$encoded_fields[] = $current_encoded_field;
-			}
 			
-			foreach($fields_ids['shared'] as $field_name => $field_id) {
-				$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
-				$field->set_group_id_for_template($post_id);
+			$cached_value = $message_group->get_cached_value('encodedFields');
+			if($cached_value) {
+				$encoded_fields = $cached_value;
+			}
+			else {
+				foreach($fields_ids['single'] as $field_name => $field_id) {
+					$current_encoded_field = $this->_encode_field($field_id, $include_changes);
+					$encoded_fields[] = $current_encoded_field;
+				}
+			
+				foreach($fields_ids['shared'] as $field_name => $field_id) {
+					$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
+					$field->set_group_id_for_template($post_id);
 				
-				$current_encoded_field = $this->_encode_field_from_template($field);
-				$encoded_fields[] = $current_encoded_field;
+					$current_encoded_field = $this->_encode_field_from_template($field);
+					$encoded_fields[] = $current_encoded_field;
+				}
+				
+				$message_group->set_cached_value('encodedFields', $encoded_fields);
 			}
 			
 			return $encoded_fields;
@@ -187,7 +206,9 @@
 		
 		public function filter_encode_fields($encoded_data, $post_id, $data) {
 			
+			wprr_performance_tracker()->start_meassure('filter_encode_fields');
 			$encoded_data['fields'] = $this->get_fields($post_id);
+			wprr_performance_tracker()->stop_meassure('filter_encode_fields');
 			
 			return $encoded_data;
 		}
