@@ -520,8 +520,14 @@
 		
 		public function get_cached_value($key) {
 			
+			wprr_performance_tracker()->start_meassure('InternalMessageGroup get_cached_value');
+			
 			$cache_key = $this->get_cache_key($key);
-			return get_transient($cache_key);
+			$transient = get_transient($cache_key);
+			
+			wprr_performance_tracker()->stop_meassure('InternalMessageGroup get_cached_value');
+			
+			return $transient
 		}
 		
 		public function set_cached_value($key, $value) {
