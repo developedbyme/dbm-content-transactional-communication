@@ -527,7 +527,7 @@
 			
 			wprr_performance_tracker()->stop_meassure('InternalMessageGroup get_cached_value');
 			
-			return $transient
+			return $transient;
 		}
 		
 		public function set_cached_value($key, $value) {
