@@ -233,7 +233,14 @@
 			
 			$id = dbm_get_single_post_relation($field->get_group_id(), $path);
 			if($use_slug) {
-				return get_term_by('id', $id, 'dbm_relation')->slug;
+				if(!$id) {
+					return null;
+				}
+				$term = get_term_by('id', $id, 'dbm_relation');
+				if(!$term) {
+					return null;
+				}
+				return $term->slug;
 			}
 			
 			return $id;
