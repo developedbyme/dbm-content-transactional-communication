@@ -583,6 +583,7 @@
 		}
 		
 		public function get_fields_ids() {
+			wprr_performance_tracker()->start_meassure('InternalMessageGroup get_fields_ids');
 			
 			$cached_value = false; //$this->get_cached_value('field_ids');
 			if($cached_value !== false) {
@@ -619,6 +620,8 @@
 			}
 			
 			$this->set_cached_value('field_ids', $return_fields);
+			
+			wprr_performance_tracker()->stop_meassure('InternalMessageGroup get_fields_ids');
 			
 			return $return_fields;
 		}
