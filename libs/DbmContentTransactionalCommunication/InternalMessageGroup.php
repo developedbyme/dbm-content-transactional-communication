@@ -523,7 +523,9 @@
 			wprr_performance_tracker()->start_meassure('InternalMessageGroup get_cached_value');
 			
 			$cache_key = $this->get_cache_key($key);
-			$transient = get_transient($cache_key);
+			//$transient = get_transient($cache_key);
+			
+			$transient = get_post_meta($this->get_id(), $cache_key, true);
 			
 			wprr_performance_tracker()->stop_meassure('InternalMessageGroup get_cached_value');
 			
@@ -532,7 +534,8 @@
 		
 		public function set_cached_value($key, $value) {
 			$cache_key = $this->get_cache_key($key);
-			set_transient($cache_key, $value, 48 * HOUR_IN_SECONDS);
+			//set_transient($cache_key, $value, 48 * HOUR_IN_SECONDS);
+			update_post_meta($this->get_id(), $cache_key, $value);
 			
 			return $this;
 		}
