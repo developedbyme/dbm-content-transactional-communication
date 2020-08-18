@@ -142,7 +142,7 @@
 					$internal_message_group->set_field_if_different($name, $new_field_value, $comment);
 				}
 				else {
-					if($field_value['id'] !== $id_to_remove) {
+					if($field_value['id'] === $id_to_remove) {
 						$internal_message_group->set_field_if_different($name, null, $comment);
 					}
 				}
