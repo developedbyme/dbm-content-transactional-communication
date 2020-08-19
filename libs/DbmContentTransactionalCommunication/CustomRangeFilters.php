@@ -176,7 +176,6 @@
 			$keys = array();
 			
 			$message_group = dbmtc_get_internal_message_group($post_id);
-			$fields_ids = $message_group->get_fields_ids();
 			
 			//$field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message-group-field')->add_relations_with_children_from_post($post_id, 'internal-message-groups')->get_post_ids();
 			
@@ -185,6 +184,10 @@
 				$encoded_fields = $cached_value;
 			}
 			else {
+				$fields_ids = $message_group->get_fields_ids();
+				
+				wprr_performance_tracker()->start_meassure('Range get_fields encode');
+				
 				foreach($fields_ids['single'] as $field_name => $field_id) {
 					$current_encoded_field = $this->_encode_field($field_id, $include_changes);
 					$encoded_fields[] = $current_encoded_field;
@@ -198,7 +201,11 @@
 					$encoded_fields[] = $current_encoded_field;
 				}
 				
+				wprr_performance_tracker()->stop_meassure('Range get_fields encode');
+				
+				wprr_performance_tracker()->start_meassure('Range get_fields set cache');
 				$message_group->set_cached_value('encodedFields', $encoded_fields);
+				wprr_performance_tracker()->stop_meassure('Range get_fields set cache');
 			}
 			
 			return $encoded_fields;
