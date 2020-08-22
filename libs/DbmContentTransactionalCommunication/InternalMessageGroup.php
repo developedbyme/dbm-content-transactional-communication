@@ -542,7 +542,9 @@
 		
 		public function delete_cached_value($key) {
 			$cache_key = $this->get_cache_key($key);
-			delete_transient($cache_key);
+			//delete_transient($cache_key);
+			
+			delete_post_meta($this->get_id(), $cache_key);
 		}
 		
 		public function get_fields_values() {
