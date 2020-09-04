@@ -39,15 +39,17 @@
 				$original_name = $file['name'];
 			
 				$wp_filetype = wp_check_filetype($original_name, null );
+				
+				$group_id = $data['group'];
+				$field_name = $data['field'];
+				
+				$supported_extensions = apply_filters('dbmtc/supported_extensions', array('pdf', 'word', 'jpg', 'jpeg', 'png', 'gif', 'txt', 'json', 'xlsx', 'xls', 'rtf'), $group_id, $field_name);
 			
-				if($wp_filetype['ext'] === 'php' || $wp_filetype['ext'] === 'cgi') {
+				if($wp_filetype['ext'] === 'php' || $wp_filetype['ext'] === 'cgi' || !in_array(strtolower($wp_filetype['ext']), $supported_extensions)) {
 					return $this->output_error('Unsupported format');
 				}
 			
 				$wp_upload_dir = wp_upload_dir(null, false);
-			
-				$group_id = $data['group'];
-				$field_name = $data['field'];
 			
 				$group = dbmtc_get_internal_message_group($group_id);
 				$field_id = $group->get_field($field_name)->get_id();
