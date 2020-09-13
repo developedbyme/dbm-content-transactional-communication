@@ -210,6 +210,7 @@
 			self::add_term('dbm_relation:field-type/name', 'Name');
 			self::add_term('dbm_relation:field-type/data-array', 'Data array');
 			self::add_term('dbm_relation:field-type/date', 'Date');
+			self::add_term('dbm_relation:field-type/date-time', 'Date time');
 			self::add_term('dbm_relation:field-type/boolean', 'Boolean');
 			self::add_term('dbm_relation:field-type/json', 'Json');
 			self::add_term('dbm_relation:field-type/number', 'Number');
