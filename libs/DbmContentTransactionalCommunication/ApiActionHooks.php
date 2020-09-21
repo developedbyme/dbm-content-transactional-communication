@@ -537,7 +537,7 @@
 			
 			$template_id = $data['emailTemplateId'];
 			$for_id = $data['forId'];
-			$for_type = isset($data['forType']) ? $data['forType'] : 'email';
+			$for_type = isset($data['forType']) ? $data['forType'] : 'manual';
 			$from = isset($data['from']) ? $data['from'] : dbmtc_get_default_from_email();
 			$message_type = isset($data['messageType']) ? $data['messageType'] : 'standard';
 			$keywords = isset($data['keywords']) ? $data['keywords'] : array();
@@ -582,7 +582,7 @@
 			$email = $data['email'];
 			$template_id = $data['emailTemplateId'];
 			$for_id = $data['forId'];
-			$for_type = isset($data['forType']) ? $data['forType'] : 'email';
+			$for_type = isset($data['forType']) ? $data['forType'] : 'manual';
 			$from = isset($data['from']) ? $data['from'] : dbmtc_get_default_from_email();
 			$message_type = isset($data['messageType']) ? $data['messageType'] : 'standard';
 			

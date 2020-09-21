@@ -251,6 +251,10 @@
 	}
 	
 	function dbmtc_get_internal_message_group($post_id) {
+		return dbmtc_get_group($post_id);
+	}
+	
+	function dbmtc_get_group($post_id) {
 		$internal_message_group = new \DbmContentTransactionalCommunication\InternalMessageGroup($post_id);
 		
 		return $internal_message_group;
@@ -435,6 +439,21 @@
 		return $contact;
 	}
 	
+	function dbmtc_get_contact_from_fields($group_id, $email_field_name = 'email', $name_field_name = 'name') {
+		
+		$group = dbmtc_get_group($group_id);
+		
+		$contact = new \DbmContentTransactionalCommunication\Contact\Contact();
+		$contact->set_email($group->get_field_value($email_field_name));
+		if($name_field_name) {
+			$name = $group->get_field_value($name_field_name);
+			$contact->set_name($name['firstName'], $name['lastName']);
+		}
+		
+		
+		return $contact;
+	}
+	
 	function dbmtc_create_template($title, $content) {
 		$template = new \DbmContentTransactionalCommunication\Template\Template();
 		
@@ -484,6 +503,37 @@
 		}
 		
 		return $provider;
+	}
+	
+	function dbmtc_send_email_from_template($template_id, $for_id, $for_type = 'manual', $from = null, $message_type = 'standard', $keywords = array()) {
+		if(!$from) {
+			$from = dbmtc_get_default_from_email();
+		}
+			
+		$from_contact = dbmtc_get_manual_contact($from);
+		
+		$template = dbmtc_create_template_from_post($template_id);
+		
+		$to_contact = apply_filters('dbmtc/get_contact_for/'.$for_type, null, $for_id);
+		if(!$to_contact) {
+			throw new \Exception('No contact');
+		}
+		
+		$template->add_keywords_provider($from_contact->create_keywords_provider(), 'from');
+		$template->add_keywords_provider($to_contact->create_keywords_provider(), 'to');
+	
+		do_action('dbmtc/setup_template/'.$message_type, $template, $for_id);
+		
+		//METODO: add manual keywords
+	
+		$content = $template->get_content();
+	
+		if(!$content['title'] && !$content['content']) {
+			throw new \Exception('No content');
+		}
+		
+		return dbm_content_tc_send_email($content['title'], $content['content'], $to_contact->get_contact_details('email'), $from);
+		
 	}
 	
 	function dbmtc_get_credentials_for_email($email) {

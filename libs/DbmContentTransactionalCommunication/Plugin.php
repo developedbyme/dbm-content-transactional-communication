@@ -122,6 +122,7 @@
 			add_filter('dbmtc/send_method_for_verification/email', array($this, 'filter_send_method_for_verification_email'), 10, 2);
 			add_filter('dbmtc/default_wrapper/email', array($this, 'filter_default_wrapper_email'), 10, 1);
 			
+			add_filter('dbmtc/get_contact_for/contact', array($this, 'filter_get_contact_for_contact'), 10, 2);
 			add_filter('dbmtc/get_contact_for/manual', array($this, 'filter_get_contact_for_manual'), 10, 2);
 			add_filter('dbmtc/get_contact_for/user', array($this, 'filter_get_contact_for_user'), 10, 2);
 			add_filter('dbmtc/get_contact_for/emailMeta', array($this, 'filter_get_contact_for_emailMeta'), 10, 2);
@@ -416,6 +417,10 @@
 			}
 			
 			return $wrapper_template;
+		}
+		
+		public function filter_get_contact_for_contact($contact, $id) {
+			return $id;
 		}
 		
 		public function filter_get_contact_for_user($contact, $id) {

@@ -548,9 +548,10 @@
 		}
 		
 		public function get_fields_values() {
+			//echo('get_fields_values');
 			
 			$cached_value = $this->get_cached_value('field_values');
-			if($cached_value !== false) {
+			if($cached_value !== false && $cached_value !== "") {
 				return $cached_value;
 			}
 			
