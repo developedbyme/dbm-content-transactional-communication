@@ -254,22 +254,44 @@
 		return dbmtc_get_group($post_id);
 	}
 	
+	global $dbmtc_items;
+	$dbmtc_items = array();
+	
 	function dbmtc_get_group($post_id) {
-		$internal_message_group = new \DbmContentTransactionalCommunication\InternalMessageGroup($post_id);
 		
-		return $internal_message_group;
+		global $dbmtc_items;
+		$item_id = 'group_'.$post_id;
+		if(!isset($dbmtc_items[$item_id])) {
+			$internal_message_group = new \DbmContentTransactionalCommunication\InternalMessageGroup($post_id);
+		
+			$dbmtc_items[$item_id] = $internal_message_group;
+		}
+		
+		return $dbmtc_items[$item_id];
 	}
 	
 	function dbmtc_get_internal_message($post_id) {
-		$internal_message = new \DbmContentTransactionalCommunication\InternalMessage($post_id);
+		global $dbmtc_items;
+		$item_id = 'message_'.$post_id;
+		if(!isset($dbmtc_items[$item_id])) {
+			$internal_message = new \DbmContentTransactionalCommunication\InternalMessage($post_id);
+			
+			$dbmtc_items[$item_id] = $internal_message;
+		}
 		
-		return $internal_message;
+		return $dbmtc_items[$item_id];
 	}
 	
 	function dbmtc_get_internal_message_group_field($post_id) {
-		$internal_message_field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($post_id);
+		global $dbmtc_items;
+		$item_id = 'field_'.$post_id;
+		if(!isset($dbmtc_items[$item_id])) {
+			$internal_message_field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($post_id);
+			
+			$dbmtc_items[$item_id] = $internal_message_field;
+		}
 		
-		return $internal_message_field;
+		return $dbmtc_items[$item_id];
 	}
 	
 	function dbmtc_send_email_template($template_slug, $to, $from = null, $replacements = array(), $additional_data = array()) {
