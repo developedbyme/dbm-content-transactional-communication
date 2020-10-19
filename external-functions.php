@@ -400,6 +400,8 @@
 		$new_timed_action->set_action_status('waiting');
 		$new_timed_action->make_private();
 		
+		//METODO: clear cache
+		
 		return $new_timed_action;
 	}
 	

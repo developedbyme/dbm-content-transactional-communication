@@ -263,8 +263,18 @@
 			$setup_manager = dbm_setup_get_manager();
 			
 			$current_type = $setup_manager->create_data_type('timed-action')->set_name('Timed action');
+			$current_type->add_field("name")->setup_meta_storage();
 			$current_type->add_field("time")->set_type('timestamp')->setup_meta_storage();
 			$current_type->add_field("status")->setup_single_relation_storage('timed-action-status');
+			$current_type->add_field("action")->setup_meta_storage();
+			$current_type->add_field("actionData")->set_type('json')->setup_meta_storage();
+			
+			$current_type = $setup_manager->create_data_type('interval-action')->set_name('Interval action');
+			$current_type->add_field("name")->setup_meta_storage();
+			$current_type->add_field("time")->set_type('timestamp')->setup_meta_storage();
+			$current_type->add_field("interval")->set_type('json')->setup_meta_storage();
+			$current_type->add_field("action")->setup_meta_storage();
+			$current_type->add_field("actionData")->set_type('json')->setup_meta_storage();
 			
 			$setup_manager->save_all();
 		}

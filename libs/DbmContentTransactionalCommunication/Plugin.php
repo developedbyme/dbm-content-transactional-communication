@@ -473,10 +473,16 @@
 			
 			$time = time();
 			
-			$timed_actions = dbm_new_query('dbm_data')->set_field('post_status', array('publish', 'private'))->add_type_by_path('timed-action')->add_relation_by_path('timed-action-status/waiting')->add_meta_query('dbmtc_time', $time, '<=', 'NUMERIC')->get_post_ids();
+			$timed_actions = dbm_new_query('dbm_data')->set_field('post_status', array('publish', 'private'))->add_type_by_path('timed-action')->add_relation_by_path('timed-action-status/waiting')->add_meta_query('time', $time, '<=', 'NUMERIC')->get_post_ids();
 			foreach($timed_actions as $timed_action_id) {
 				$timed_action = dbmtc_get_timed_action($timed_action_id);
 				$timed_action->try_to_perform();
+			}
+			
+			$interval_actions = dbm_new_query('dbm_data')->set_field('post_status', array('publish', 'private'))->add_type_by_path('interval-action')->add_meta_query('time', $time, '<=', 'NUMERIC')->get_post_ids();
+			foreach($interval_actions as $interval_action_id) {
+				$interval_action = dbmtc_get_timed_action($interval_action_id);
+				$interval_action->try_to_perform();
 			}
 		}
 		
