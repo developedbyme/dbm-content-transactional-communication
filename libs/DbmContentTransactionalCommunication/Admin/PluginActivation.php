@@ -261,6 +261,9 @@
 			dbmtc_setup_field_template('object-relation', 'startAt', 'timestamp', 'meta', array('dbmtc_meta_name' => 'startAt'));
 			dbmtc_setup_field_template('object-relation', 'endAt', 'timestamp', 'meta', array('dbmtc_meta_name' => 'endAt'));
 			
+			dbmtc_setup_field_template('object-user-relation', 'startAt', 'timestamp', 'meta', array('dbmtc_meta_name' => 'startAt'));
+			dbmtc_setup_field_template('object-user-relation', 'endAt', 'timestamp', 'meta', array('dbmtc_meta_name' => 'endAt'));
+			
 			$setup_manager = dbm_setup_get_manager();
 			
 			$current_type = $setup_manager->create_data_type('timed-action')->set_name('Timed action');
