@@ -202,6 +202,7 @@
 			self::add_term('dbm_relation:field-type/file', 'File');
 			self::add_term('dbm_relation:field-type/multiple-files', 'Multiple files');
 			self::add_term('dbm_relation:field-type/mobile-phone-number', 'Mobile phone number');
+			self::add_term('dbm_relation:field-type/email', 'Email');
 			self::add_term('dbm_relation:field-type/relation', 'Relation');
 			self::add_term('dbm_relation:field-type/dbm-type', 'Dbm Type');
 			self::add_term('dbm_relation:field-type/multiple-relation', 'Multiple relation');
