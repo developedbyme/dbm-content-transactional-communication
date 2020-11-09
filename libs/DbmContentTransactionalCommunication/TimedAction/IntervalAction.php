@@ -1,11 +1,11 @@
 <?php
-	namespace DbmContentTransactionalCommunication\TimedAction;
+	namespace DbmContentTransactionalCommunication\IntervalAction;
 	
-	// \DbmContentTransactionalCommunication\TimedAction\TimedAction
-	class TimedAction extends \DbmContent\DbmPost {
+	// \DbmContentTransactionalCommunication\IntervalAction\IntervalAction
+	class IntervalAction extends \DbmContent\DbmPost {
 		
 		function __construct($id) {
-			//echo("\DbmContentTransactionalCommunication\TimedAction\TimedAction::__construct<br />");
+			//echo("\DbmContentTransactionalCommunication\IntervalAction\IntervalAction::__construct<br />");
 			parent::__construct($id);
 		}
 		
@@ -15,16 +15,6 @@
 		
 		public function get_action() {
 			return $this->get_meta('action');
-		}
-		
-		public function get_action_data() {
-			return $this->get_meta('actionData');
-		}
-		
-		public function set_action_status($status) {
-			$this->set_single_relation_by_name('timed-action-status/'.$status);
-			
-			return $this;
 		}
 		
 		public function set_time($time) {
@@ -48,7 +38,7 @@
 		protected function perform() {
 			$action = $this->get_action();
 			
-			$this->set_action_status('completed');
+			//MTODO: update next time
 			
 			$this->add_meta('dbmtc_performed_at', time());
 			do_action('dbmtc/timed_action/'.$action, $this);
@@ -60,10 +50,8 @@
 			
 			$current_time = time();
 			
-			$status = get_term_by('id', $this->get_single_relation('timed-action-status'), 'dbm_relation');
-			if($status->slug === 'waiting' && $current_time >= $this->get_time()) {
-				$this->perform();
-			}
+			
+			$this->perform();
 			
 			return $this;
 		}
@@ -85,7 +73,7 @@
 		}
 		
 		public static function test_import() {
-			echo("Imported \DbmContentTransactionalCommunication\TimedAction\TimedAction<br />");
+			echo("Imported \DbmContentTransactionalCommunication\IntervalAction\IntervalAction<br />");
 		}
 	}
 ?>
