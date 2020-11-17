@@ -4,12 +4,19 @@
 	// \DbmContentTransactionalCommunication\Contact\Contact
 	class Contact {
 		
+		protected $post_id = 0;
 		protected $user_details = array();
 		protected $contact_detials = array();
 		
 		function __construct() {
 			//echo("\DbmContentTransactionalCommunication\Contact\Contact::__construct<br />");
 			
+		}
+		
+		public function set_post_id($post_id) {
+			$this->post_id = $post_id;
+			
+			return $this;
 		}
 		
 		public function add_user_details($type, $value) {

@@ -427,7 +427,21 @@
 		return $contact;
 	}
 	
+	function dbmtc_get_contact_for($id, $type = 'manual') {
+		$contact = apply_filters('dbmtc/get_contact_for/'.$type, null, $id);
+		
+		return $contact;
+	}
+	
+	function dbmtc_create_contact() {
+		$contact = new \DbmContentTransactionalCommunication\Contact\Contact();
+		
+		return $contact;
+	}
+	
 	function dbmtc_get_manual_contact($email) {
+		
+		//METODO: check for valid email
 		
 		$contact = new \DbmContentTransactionalCommunication\Contact\Contact();
 		$contact->set_email($email);
@@ -443,12 +457,34 @@
 		return $template;
 	}
 	
-	function dbmtc_create_template_from_post($post) {
+	function dbmtc_create_template_from_post($post_id) {
 		$template = new \DbmContentTransactionalCommunication\Template\Template();
 		
-		$template->setup_from_post($post);
+		$template->setup_from_post($post_id);
 		
 		return $template;
+	}
+	
+	function dbmtc_send_template_as_email($template, $to_contact, $from_contact = null) {
+		
+		if(!$from_contact) {
+			$from_contact = dbmtc_get_manual_contact(dbmtc_get_default_from_email());
+		}
+		
+		$template->add_keywords_provider($from_contact->create_keywords_provider(), 'from');
+		$template->add_keywords_provider($to_contact->create_keywords_provider(), 'to');
+		
+		$content = $template->get_content();
+	
+		if(!$content['title'] && !$content['content']) {
+			throw new \Exception('No content');
+		}
+		
+		$communication_id = dbm_content_tc_send_email($content['title'], $content['content'], $to_contact->get_contact_details('email'), $from_contact->get_contact_details('email'));
+		
+		//METODO: link up sendout
+		
+		return $communication_id;
 	}
 	
 	function dbmtc_create_static_keywords_replacements($keywords = null) {
