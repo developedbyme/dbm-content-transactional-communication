@@ -15,9 +15,18 @@
 		
 		public function get_group_id() {
 			if(!$this->group_id) {
-				$post_types = array_keys(get_post_types(array(), 'names'));
-				$group_id = dbm_new_query('all')->set_filter_suppression(1)->set_field('post_type', $post_types)->set_field('post_status', array('publish', 'pending', 'draft', 'future', 'private', 'inherit'))->add_type_by_path('internal-message-group')->add_relations_with_children_from_post($this->id, 'internal-message-groups')->get_post_id();
-				$this->group_id = $group_id;
+				
+				$relation_ids = $this->resolve_outgoing_relations($this->get_encoded_outgoing_relations_by_type('field-for', null));
+				if(!empty($relation_ids)) {
+					$this->group_id = $relation_ids[0];
+				}
+				
+				if(!$this->group_id) {
+					//MENOTE: this way will be removed
+					$post_types = array_keys(get_post_types(array(), 'names'));
+					$group_id = dbm_new_query('all')->set_filter_suppression(1)->set_field('post_type', $post_types)->set_field('post_status', array('publish', 'pending', 'draft', 'future', 'private', 'inherit'))->add_type_by_path('internal-message-group')->add_relations_with_children_from_post($this->id, 'internal-message-groups')->get_post_id();
+					$this->group_id = $group_id;
+				}
 			}
 			
 			return $this->group_id;
@@ -59,7 +68,7 @@
 		public function get_value() {
 			
 			$cached_value = $this->get_cached_value('value');
-			if($cached_value !== false) {
+			if($cached_value !== false && false) {
 				return $cached_value;
 			}
 			
@@ -105,6 +114,7 @@
 		}
 		
 		public function perform_set_value($value) {
+			
 			$storage_type_term = $this->get_storage_type_term();
 			if($storage_type_term) {
 				do_action('dbmtc/set_field_value/'.$storage_type_term->slug, $this, $value);

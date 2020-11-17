@@ -47,11 +47,12 @@
 		public function filter_query_messagesInGroup($query_args, $data) {
 			//echo("\DbmContentTransactionalCommunication\CustomRangeFilters::filter_query_messagesInGroup<br />");
 			
-			$group = (int)$data['group'];
+			$group_id = (int)$data['group'];
 			
 			$dbm_query = dbm_new_query($query_args);
-			$dbm_query->add_type_by_path('internal-message');
-			$dbm_query->add_relations_with_children_from_post($group, 'internal-message-groups');
+			
+			$group = dbmtc_get_group($group_id);
+			$dbm_query->set_argument('post__in', $group->get_message_ids());
 			
 			return $dbm_query->get_query_args();
 		}
@@ -176,8 +177,6 @@
 			$keys = array();
 			
 			$message_group = dbmtc_get_internal_message_group($post_id);
-			
-			//$field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message-group-field')->add_relations_with_children_from_post($post_id, 'internal-message-groups')->get_post_ids();
 			
 			$cached_value = $message_group->get_cached_value('encodedFields');
 			if($cached_value) {
@@ -311,7 +310,8 @@
 		
 		public function filter_encode_messagesInGroup($encoded_data, $post_id, $data) {
 			
-			$message_ids = dbm_new_query('dbm_data')->add_type_by_path('internal-message')->set_argument('post_status', 'private')->set_argument('order', 'ASC')->add_relations_from_post($post_id, 'internal-message-groups')->get_post_ids();
+			$group = dbmtc_get_group($post_id);
+			$message_ids = $group->get_message_ids();
 			
 			$encoded_messages = array();
 			foreach($message_ids as $message_id) {
@@ -354,7 +354,8 @@
 		
 		public function filter_encode_messagesCount($encoded_data, $post_id, $data) {
 			
-			$message_ids = dbm_new_query('dbm_data')->add_type_by_path('internal-message')->set_argument('post_status', 'private')->set_argument('order', 'ASC')->add_relations_from_post($post_id, 'internal-message-groups')->get_post_ids();
+			$group = dbmtc_get_group($post_id);
+			$message_ids = $group->get_message_ids();
 			$encoded_data['numberOfMessages'] = count($message_ids);
 			
 			return $encoded_data;

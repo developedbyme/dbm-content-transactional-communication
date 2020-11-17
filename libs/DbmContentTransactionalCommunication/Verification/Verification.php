@@ -40,6 +40,13 @@
 			return $this->get_meta('verification_code');
 		}
 		
+		public function get_hash_for($value) {
+			$salt = 'Tw?otIAwI%ourB-:@VeZ4tGLY0=Twh)1J Wwhxc!5AOg:*L$Ff@CAY+d-iW47Ztm';
+			$hash = apply_filters('dbmtc/verification/generate_hash', md5($value.$salt), $value, $salt, $this);
+			
+			return $hash;
+		}
+		
 		public function verify($value, $code) {
 			
 			$salt = 'Tw?otIAwI%ourB-:@VeZ4tGLY0=Twh)1J Wwhxc!5AOg:*L$Ff@CAY+d-iW47Ztm';
@@ -47,6 +54,18 @@
 			
 			if($this->get_meta('verification_hash') === $hash && $this->get_meta('verification_code') === $code) {
 				$this->update_meta('verified', true);
+				return true;
+			}
+			
+			return false;
+		}
+		
+		public function is_verified_for($value) {
+			
+			$salt = 'Tw?otIAwI%ourB-:@VeZ4tGLY0=Twh)1J Wwhxc!5AOg:*L$Ff@CAY+d-iW47Ztm';
+			$hash = apply_filters('dbmtc/verification/generate_hash', md5($value.$salt), $value, $salt, $this);
+			
+			if($this->get_meta('verification_hash') === $hash && (int)$this->get_meta('verified')) {
 				return true;
 			}
 			

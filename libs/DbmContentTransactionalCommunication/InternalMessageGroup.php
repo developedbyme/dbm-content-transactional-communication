@@ -74,7 +74,7 @@
 		}
 		
 		public function get_field_id($key) {
-			return dbm_new_query('dbm_data')->set_argument('post_status', 'private')->add_type_by_path('internal-message-group-field')->add_relations_with_children_from_post($this->id, 'internal-message-groups')->add_meta_query('dbmtc_key', $key)->get_post_id();
+			return $this->get_field_id_if_exists($key);
 		}
 		
 		public function assign_user($user_id, $body = '', $by_user = 0) {
@@ -207,7 +207,7 @@
 			
 			$new_id = dbm_create_data($group_post->post_title, 'internal-message', 'admin-grouping/internal-messages');
 			
-			$this->relate_post_to_group($new_id);
+			//$this->relate_post_to_group($new_id);
 			
 			$dbm_post = dbm_get_post($new_id);
 			$dbm_post->add_outgoing_relation_by_name($this->id, 'message-in');
@@ -245,7 +245,7 @@
 				$group_post = get_post($this->id);
 				
 				$field_id = dbm_create_data($group_post->post_title.' - '.$key, 'internal-message-group-field', 'admin-grouping/internal-message-group-fields');
-				$this->relate_post_to_group($field_id);
+				//$this->relate_post_to_group($field_id);
 				update_post_meta($field_id, 'dbmtc_key', $key);
 				
 				$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
@@ -279,7 +279,7 @@
 				$group_post = get_post($this->id);
 				
 				$field_id = dbm_create_data($group_post->post_title.' - '.$key, 'internal-message-group-field', 'admin-grouping/internal-message-group-fields');
-				$this->relate_post_to_group($field_id);
+				//$this->relate_post_to_group($field_id);
 				update_post_meta($field_id, 'dbmtc_key', $key);
 				
 				$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
@@ -334,6 +334,7 @@
 			
 			$this->delete_cached_value('field_values');
 			$this->delete_cached_value('field_ids');
+			$this->delete_cached_value('encodedFields');
 			
 			$this->update_updated_date();
 			$this->update_name_after_field_change($field);
@@ -407,9 +408,15 @@
 		
 		public function get_field_id_if_exists($key) {
 			
-			$local_id = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message-group-field')->add_relations_with_children_from_post($this->id, 'internal-message-groups')->add_meta_query('dbmtc_key', $key)->get_post_id();
+			$all_field_ids = $this->get_existing_field_ids();
+			foreach($all_field_ids as $field_id) {
+				$current_key = get_post_meta($field_id, 'dbmtc_key', true);
+				if($current_key === $key) {
+					return $field_id;
+				}
+			}
 			
-			return $local_id;
+			return 0;
 		}
 		
 		public function get_field_template_if_exists($key) {
@@ -454,7 +461,7 @@
 			$return_fields = array();
 			$keys = array();
 			
-			$field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message-group-field')->add_relations_with_children_from_post($this->get_id(), 'internal-message-groups')->get_post_ids();
+			$field_ids = $this->get_existing_field_ids();
 			foreach($field_ids as $field_id) {
 				$field_name = get_post_meta($field_id, 'dbmtc_key', true);
 				$return_fields[$field_name] = $this->get_field($field_name);
@@ -548,16 +555,17 @@
 		}
 		
 		public function get_fields_values() {
+			//echo('get_fields_values');
 			
 			$cached_value = $this->get_cached_value('field_values');
-			if($cached_value !== false) {
+			if($cached_value !== false && $cached_value !== "") {
 				return $cached_value;
 			}
 			
 			$return_fields = array();
 			$keys = array();
 			
-			$field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message-group-field')->add_relations_with_children_from_post($this->get_id(), 'internal-message-groups')->get_post_ids();
+			$field_ids = $this->get_existing_field_ids();
 			foreach($field_ids as $field_id) {
 				$field_name = get_post_meta($field_id, 'dbmtc_key', true);
 				$return_fields[$field_name] = $this->get_field_value($field_name);
@@ -584,6 +592,26 @@
 			return $return_fields;
 		}
 		
+		public function get_message_ids() {
+			$return_array = $this->object_relation_query('in:message-in:internal-message');
+			
+			//MENOTE: relations will be removed soon
+			$field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message')->add_relations_with_children_from_post($this->get_id(), 'internal-message-groups')->get_post_ids();
+			$return_array = array_unique(array_merge($return_array, $field_ids));
+			
+			return $return_array;
+		}
+		
+		public function get_existing_field_ids() {
+			$return_array = $this->object_relation_query('in:field-for:internal-message-group-field');
+			
+			//MENOTE: relations will be removed soon
+			$field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message-group-field')->add_relations_with_children_from_post($this->get_id(), 'internal-message-groups')->get_post_ids();
+			$return_array = array_unique(array_merge($return_array, $field_ids));
+			
+			return $return_array;
+		}
+		
 		public function get_fields_ids() {
 			wprr_performance_tracker()->start_meassure('InternalMessageGroup get_fields_ids');
 			
@@ -599,7 +627,7 @@
 			
 			$keys = array();
 			
-			$field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message-group-field')->add_relations_with_children_from_post($this->get_id(), 'internal-message-groups')->get_post_ids();
+			$field_ids = $this->get_existing_field_ids();
 			foreach($field_ids as $field_id) {
 				$field_name = get_post_meta($field_id, 'dbmtc_key', true);
 				$return_fields['single'][$field_name] = $field_id;

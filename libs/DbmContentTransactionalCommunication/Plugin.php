@@ -122,6 +122,7 @@
 			add_filter('dbmtc/send_method_for_verification/email', array($this, 'filter_send_method_for_verification_email'), 10, 2);
 			add_filter('dbmtc/default_wrapper/email', array($this, 'filter_default_wrapper_email'), 10, 1);
 			
+			add_filter('dbmtc/get_contact_for/contact', array($this, 'filter_get_contact_for_contact'), 10, 2);
 			add_filter('dbmtc/get_contact_for/manual', array($this, 'filter_get_contact_for_manual'), 10, 2);
 			add_filter('dbmtc/get_contact_for/user', array($this, 'filter_get_contact_for_user'), 10, 2);
 			add_filter('dbmtc/get_contact_for/emailMeta', array($this, 'filter_get_contact_for_emailMeta'), 10, 2);
@@ -418,6 +419,10 @@
 			return $wrapper_template;
 		}
 		
+		public function filter_get_contact_for_contact($contact, $id) {
+			return $id;
+		}
+		
 		public function filter_get_contact_for_user($contact, $id) {
 			return dbmtc_get_user_contact($id);
 		}
@@ -468,10 +473,16 @@
 			
 			$time = time();
 			
-			$timed_actions = dbm_new_query('dbm_data')->set_field('post_status', array('publish', 'private'))->add_type_by_path('timed-action')->add_relation_by_path('timed-action-status/waiting')->add_meta_query('dbmtc_time', $time, '<=', 'NUMERIC')->get_post_ids();
+			$timed_actions = dbm_new_query('dbm_data')->set_field('post_status', array('publish', 'private'))->add_type_by_path('timed-action')->add_relation_by_path('timed-action-status/waiting')->add_meta_query('time', $time, '<=', 'NUMERIC')->get_post_ids();
 			foreach($timed_actions as $timed_action_id) {
 				$timed_action = dbmtc_get_timed_action($timed_action_id);
 				$timed_action->try_to_perform();
+			}
+			
+			$interval_actions = dbm_new_query('dbm_data')->set_field('post_status', array('publish', 'private'))->add_type_by_path('interval-action')->add_meta_query('time', $time, '<=', 'NUMERIC')->get_post_ids();
+			foreach($interval_actions as $interval_action_id) {
+				$interval_action = dbmtc_get_timed_action($interval_action_id);
+				$interval_action->try_to_perform();
 			}
 		}
 		
