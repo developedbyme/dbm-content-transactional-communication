@@ -525,7 +525,7 @@
 		
 		$communication_id = dbm_content_tc_send_email($content['title'], $content['content'], $to_contact->get_contact_details('email'), $from_contact->get_contact_details('email'));
 		
-		//METODO: link up sendout
+		$to_contact->link_to_communication($communication_id);
 		
 		return $communication_id;
 	}

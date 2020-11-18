@@ -102,6 +102,15 @@
 			return $provider;
 		}
 		
+		public function link_to_communication($communication_id) {
+			if($this->post_id) {
+				$post = dbm_get_post($this->post_id);
+				$post->add_incoming_relation_by_name($communication_id, 'to');
+			}
+			
+			return $this;
+		}
+		
 		public static function test_import() {
 			echo("Imported \DbmContentTransactionalCommunication\Contact\Contact<br />");
 		}
