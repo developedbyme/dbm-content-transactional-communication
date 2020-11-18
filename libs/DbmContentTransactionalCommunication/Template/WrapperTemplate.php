@@ -46,7 +46,7 @@
 			
 			$return_object = array('title' => $title, 'content' => $wrapped_content);
 			
-			$this->wrapper_keywords_provider = null;
+			//$this->wrapper_keywords_provider = null;
 			
 			return $return_object;
 		}
