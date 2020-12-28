@@ -28,6 +28,8 @@
 			$this->register_hook_for_type('dbmtc/setFieldTranslations', 'hook_dbmtc_setFieldTranslations');
 			
 			$this->register_hook_for_type('dbmtc/removeFileFromField', 'hook_dbmtc_removeFileFromField');
+			
+			$this->register_hook_for_type('dbm/clearCache', 'change_clearCache');
 		}
 		
 		protected function update_message_meta($message, $meta) {
@@ -182,6 +184,13 @@
 			catch(\Exception $exception) {
 				$logger->add_log($exception->getMessage());
 			}
+		}
+		
+		public function change_clearCache($data, $post_id, $logger) {
+			//echo("change_clearCache");
+			
+			$post = dbmtc_get_group($post_id);
+			$post->clear_cache();
 		}
 		
 		public static function test_import() {

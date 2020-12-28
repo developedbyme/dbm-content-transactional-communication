@@ -684,6 +684,14 @@
 			return $provider;
 		}
 		
+		public function clear_cache() {
+			parent::clear_cache();
+			
+			$this->delete_cached_value('field_values');
+			$this->delete_cached_value('field_ids');
+			$this->delete_cached_value('encodedFields');
+		}
+		
 		public static function test_import() {
 			echo("Imported \DbmContentTransactionalCommunication\InternalMessageGroup<br />");
 		}
