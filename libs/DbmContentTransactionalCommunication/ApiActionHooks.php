@@ -664,6 +664,7 @@
 					throw new \Exception('No contact');
 				}
 				
+				$template->add_keywords_provider(dbmtc_create_static_keywords_replacements($keywords), 'input');
 				$template->add_keywords_provider($from_contact->create_keywords_provider(), 'from');
 				$template->add_keywords_provider($to_contact->create_keywords_provider(), 'to');
 			
@@ -674,7 +675,6 @@
 				if(!$content['title'] && !$content['content']) {
 					throw new \Exception('No content');
 				}
-				
 				$response_data['sent'] = dbm_content_tc_send_email($content['title'], $content['content'], $to_contact->get_contact_details('email'), $from);
 				
 			}
@@ -696,6 +696,7 @@
 			$for_type = isset($data['forType']) ? $data['forType'] : 'manual';
 			$from = isset($data['from']) ? $data['from'] : dbmtc_get_default_from_email();
 			$message_type = isset($data['messageType']) ? $data['messageType'] : 'standard';
+			$keywords = isset($data['keywords']) ? $data['keywords'] : array();
 			
 			if($template_id && $email) {
 				$template = dbmtc_create_template_from_post($template_id);
@@ -706,7 +707,8 @@
 				if(!$to_contact) {
 					throw new \Exception('No to contact');
 				}
-			
+				
+				$template->add_keywords_provider(dbmtc_create_static_keywords_replacements($keywords), 'input');
 				$template->add_keywords_provider($from_contact->create_keywords_provider(), 'from');
 				$template->add_keywords_provider($to_contact->create_keywords_provider(), 'to');
 				
