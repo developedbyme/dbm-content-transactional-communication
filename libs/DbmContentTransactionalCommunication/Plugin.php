@@ -125,6 +125,7 @@
 			add_filter('dbmtc/get_contact_for/contact', array($this, 'filter_get_contact_for_contact'), 10, 2);
 			add_filter('dbmtc/get_contact_for/manual', array($this, 'filter_get_contact_for_manual'), 10, 2);
 			add_filter('dbmtc/get_contact_for/user', array($this, 'filter_get_contact_for_user'), 10, 2);
+			add_filter('dbmtc/get_contact_for/order', array($this, 'filter_get_contact_for_order'), 10, 2);
 			add_filter('dbmtc/get_contact_for/emailMeta', array($this, 'filter_get_contact_for_emailMeta'), 10, 2);
 			
 			add_filter('wprr/taxonomy/dbm_relation/internal_terms', array($this, 'filter_wprr_dbm_relation_internal_terms'), 10, 1);
@@ -425,6 +426,17 @@
 		
 		public function filter_get_contact_for_user($contact, $id) {
 			return dbmtc_get_user_contact($id);
+		}
+		
+		public function filter_get_contact_for_order($contact, $id) {
+			
+			$contact = dbmtc_create_contact();
+			$order = new \WC_Order($id);
+			$contact->set_post_id($id);
+			$contact->set_email($order->get_billing_email());
+			$contact->set_name($order->get_billing_first_name(), $order->get_billing_last_name());
+			
+			return $contact;
 		}
 		
 		public function filter_get_contact_for_emailMeta($contact, $id) {
