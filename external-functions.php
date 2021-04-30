@@ -231,6 +231,7 @@
 	}
 	
 	function dbm_content_tc_notify_for_new_message($message_id) {
+		//var_dump("dbm_content_tc_notify_for_new_message");
 		
 		$message = dbmtc_get_internal_message($message_id);
 		$message->notify();
@@ -381,6 +382,17 @@
 	
 	function dbmtc_get_default_from_email() {
 		return apply_filters('dbm_content_tc/default_from_email', get_option('admin_email'));
+	}
+	
+	function dbmtc_get_default_from_email_for_internal_message($internal_message_id) {
+		//var_dump('dbmtc_get_default_from_email_for_internal_message');
+		
+		$return_value = apply_filters('dbm_content_tc/default_from_email_for_internal_message', null, $internal_message_id);
+		if($return_value) {
+			return $return_value;
+		}
+		
+		return dbmtc_get_default_from_email();
 	}
 	
 	function dbmtc_get_default_from_phone_number() {

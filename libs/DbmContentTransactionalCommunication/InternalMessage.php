@@ -90,7 +90,7 @@
 						continue;
 					}
 			
-					$communications[] = dbm_content_tc_send_email($content['title'], $content['content'], $email, dbmtc_get_default_from_email());
+					$communications[] = dbm_content_tc_send_email($content['title'], $content['content'], $email, dbmtc_get_default_from_email_for_internal_message());
 				}
 			}
 		
