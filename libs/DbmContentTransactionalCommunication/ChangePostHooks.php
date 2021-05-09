@@ -157,6 +157,8 @@
 		public function hook_dbmtc_setField($data, $post_id, $logger) {
 			//var_dump('\DbmContentTransactionalCommunication\ChangePostHooks::hook_dbmtc_setField');
 			
+			wprr_performance_tracker()->start_meassure('ChangePostHooks hook_dbmtc_setField');
+			
 			$internal_message_group = dbmtc_get_internal_message_group($post_id);
 			$name = $data['field'];
 			
@@ -170,6 +172,8 @@
 			catch(\Exception $exception) {
 				$logger->add_log($exception->getMessage());
 			}
+			
+			wprr_performance_tracker()->stop_meassure('ChangePostHooks hook_dbmtc_setField');
 		}
 		
 		public function hook_dbmtc_setFieldTranslations($data, $post_id, $logger) {

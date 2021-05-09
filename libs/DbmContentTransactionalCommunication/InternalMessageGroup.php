@@ -343,17 +343,21 @@
 		}
 		
 		public function set_field_if_different($key, $value, $comment = '') {
+			
+			wprr_performance_tracker()->start_meassure('InternalMessageGroupField set_field_if_different');
+			
+			$return_value = null;
+			
 			$field = $this->get_field($key);
-			if(!$field) {
-				return null;
+			if($field) {
+				$original_value = $field->get_value();
+				if(json_encode($original_value) !== json_encode($value)) {
+					$return_value = $this->set_field($key, $value, $comment);
+				}
 			}
 			
-			$original_value = $field->get_value();
-			if(json_encode($original_value) !== json_encode($value)) {
-				return $this->set_field($key, $value, $comment);
-			}
-			
-			return null;
+			wprr_performance_tracker()->stop_meassure('InternalMessageGroupField set_field_if_different');
+			return $return_value;
 		}
 		
 		public function set_field_translations($key, $value, $comment = '') {
@@ -439,20 +443,28 @@
 		
 		public function get_field($key) {
 			
+			wprr_performance_tracker()->start_meassure('InternalMessageGroupField get_field');
+			
 			$field_id = $this->get_field_id_if_exists($key);
 			
 			if(!$field_id) {
 				
 				$template = $this->get_field_template_if_exists($key);
 				if($template) {
-					return $this->create_field_from_template($key, $template);
+					$field = $this->create_field_from_template($key, $template);
+						
+					wprr_performance_tracker()->stop_meassure('InternalMessageGroupField get_field');
+					return $field;
 				}
 				
+				wprr_performance_tracker()->stop_meassure('InternalMessageGroupField get_field');
 				throw(new \Exception('No field for key '.$key));
 				return null;
 			}
 			
 			$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
+			
+			wprr_performance_tracker()->stop_meassure('InternalMessageGroupField get_field');
 			
 			return $field;
 		}
