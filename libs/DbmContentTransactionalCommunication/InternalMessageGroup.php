@@ -64,13 +64,21 @@
 		}
 		
 		public function get_updated_date() {
+			wprr_performance_tracker()->start_meassure('InternalMessageGroupField get_updated_date');
+			
+			$return_value = '';
 			$meta_value = get_post_meta($this->id, 'updated_date', true);
 			
 			if($meta_value) {
-				return $meta_value;
+				$return_value = $meta_value;
+			}
+			else {
+				$return_value = $this->get_started_date();
 			}
 			
-			return $this->get_started_date();
+			wprr_performance_tracker()->stop_meassure('InternalMessageGroupField get_updated_date');
+			
+			return $return_value; 
 		}
 		
 		public function get_field_id($key) {
@@ -313,8 +321,12 @@
 		}
 		
 		public function set_field($key, $value, $comment = '') {
+			
+			wprr_performance_tracker()->start_meassure('InternalMessageGroupField set_field');
+			
 			$field = $this->get_field($key);
 			if(!$field) {
+				wprr_performance_tracker()->stop_meassure('InternalMessageGroupField set_field');
 				return null;
 			}
 			
@@ -338,6 +350,8 @@
 			
 			$this->update_updated_date();
 			$this->update_name_after_field_change($field);
+			
+			wprr_performance_tracker()->stop_meassure('InternalMessageGroupField set_field');
 			
 			return $message;
 		}
@@ -669,11 +683,15 @@
 		}
 		
 		public function update_updated_date() {
+			wprr_performance_tracker()->start_meassure('InternalMessageGroupField update_updated_date');
 			update_post_meta($this->id, 'updated_date', date('Y-m-d\TH:i:s'));
+			wprr_performance_tracker()->stop_meassure('InternalMessageGroupField update_updated_date');
 		}
 		
 		public function update_name_after_field_change($field) {
+			wprr_performance_tracker()->start_meassure('InternalMessageGroupField update_name_after_field_change');
 			do_action('dbmtc/internal_message/update_name_after_field_change', $this, $field);
+			wprr_performance_tracker()->stop_meassure('InternalMessageGroupField update_name_after_field_change');
 		}
 		
 		public function get_view_url() {
