@@ -266,6 +266,26 @@
 			
 			$setup_manager = dbm_setup_get_manager();
 			
+			$current_type = $setup_manager->create_data_type('type/send-status')->set_name('Send status');
+			
+			$current_type = $setup_manager->create_data_type('action')->set_name('Action');
+			
+			$current_type = $setup_manager->create_data_type('type/action-status')->set_name('Action status');
+			$current_type = $setup_manager->create_data_type('type/action-type')->set_name('Action type');
+			
+			$current_type = $setup_manager->create_data_type('incoming-webhook-event')->set_name('Incoming webhook event');
+			$current_type->add_field("payload")->set_type('json')->setup_meta_storage();
+			
+			$current_type = $setup_manager->create_data_type('request')->set_name('Request');
+			$current_type->add_field("url")->setup_meta_storage();
+			$current_type->add_field("headers")->set_type('json')->setup_meta_storage();
+			$current_type->add_field("body")->set_type('json')->setup_meta_storage();
+			$current_type->add_field("responseCode")->setup_meta_storage();
+			$current_type->add_field("response")->set_type('json')->setup_meta_storage();
+			
+			$current_type = $setup_manager->create_data_type('type/request-method')->set_name('Request method');
+			$current_type = $setup_manager->create_data_type('type/request-status')->set_name('Request status');
+			
 			$current_type = $setup_manager->create_data_type('timed-action')->set_name('Timed action');
 			$current_type->add_field("name")->setup_meta_storage();
 			$current_type->add_field("time")->set_type('timestamp')->setup_meta_storage();

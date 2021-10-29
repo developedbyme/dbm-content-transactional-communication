@@ -31,6 +31,8 @@
 			add_filter(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/request-for-data', array($this, 'filter_encode_internal_message_request_for_data'), 10, 2);
 			add_filter(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/field-changed', array($this, 'filter_encode_internal_message_field_changed'), 10, 2);
 			add_filter(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/verify-mobile-phone-field', array($this, 'filter_encode_internal_message_verify_mobile_phone_field'), 10, 2);
+			
+			add_filter('wprr/global-item/processActions', array($this, 'filter_global_processActions'), 10, 3);
 		}
 		
 		public function filter_query_groupsWithUser($query_args, $data) {
@@ -439,6 +441,48 @@
 			$encoded_data['field'] = get_post_meta($message_id, 'field', true);
 			
 			return $encoded_data;
+		}
+		
+		public function filter_global_processActions($return_object, $item_name, $data) {
+			
+			$readyToProcess_id = dbm_new_query('dbm_data')->include_only_type('type/action-status')->add_meta_query('identifier', 'readyToProcess')->get_post_id();
+			$processing_id = dbm_new_query('dbm_data')->include_only_type('type/action-status')->add_meta_query('identifier', 'processing')->get_post_id();
+			$done_id = dbm_new_query('dbm_data')->include_only_type('type/action-status')->add_meta_query('identifier', 'done')->get_post_id();
+			$noAction_id = dbm_new_query('dbm_data')->include_only_type('type/action-status')->add_meta_query('identifier', 'noAction')->get_post_id();
+			
+			$type_group = dbmtc_get_group($readyToProcess_id);
+			
+			$max_length = 10;
+			
+			$ids = $type_group->object_relation_query('out:for:action');
+			$remaining_items_to_process = max(0, count($ids)-$max_length);
+			$return_object['remaining'] = $remaining_items_to_process;
+			$ids = array_slice($ids, 0, $max_length);
+			$return_object['handled'] = $ids;
+			
+			$actions = array_map(function($id) {return dbmtc_get_group($id);}, $ids);
+			
+			foreach($actions as $action) {
+				$action->end_incoming_relations_from_type('for', 'type/action-status');
+				$action->add_incoming_relation_by_name($processing_id, 'for');
+			}
+			
+			foreach($actions as $action) {
+				$action_type = $action->get_single_object_relation_field_value('in:for:type/action-type', 'identifier');
+				$hook_name = 'dbmtc/process_action/'.$action_type;
+				
+				if(has_action($hook_name)) {
+					do_action($hook_name, $action->get_id());
+					
+					$action->add_incoming_relation_by_name($done_id, 'for');
+				}
+				else {
+					$action->add_incoming_relation_by_name($noAction_id, 'for');
+				}
+				
+			}
+			
+			return $return_object;
 		}
 		
 		public static function test_import() {
