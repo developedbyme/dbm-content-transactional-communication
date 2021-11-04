@@ -747,17 +747,7 @@
 			$group->set_field('payload', $payload);
 			$group->make_private();
 			
-			$action_id = dbm_create_data('Handle webhook event '.$post_id, 'action');
-			$action_group = dbmtc_get_group($action_id);
-			
-			$action_group->add_outgoing_relation_by_name($post_id, 'from');
-			$action_group->make_private();
-			
-			$type_id = dbm_new_query('dbm_data')->include_only_type('type/action-type')->add_meta_query('identifier', 'handleIncomingWebhook')->get_post_id();
-			$action_group->add_incoming_relation_by_name($type_id, 'for');
-			
-			$type_id = dbm_new_query('dbm_data')->include_only_type('type/action-status')->add_meta_query('identifier', 'readyToProcess')->get_post_id();
-			$action_group->add_incoming_relation_by_name($type_id, 'for');
+			$action_id = dbmtc_add_action_to_process('incomingWebhook', array($post_id));
 			
 			$response_data['id'] = $post_id;
 			$response_data['actionId'] = $action_id;

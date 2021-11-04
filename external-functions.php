@@ -605,7 +605,174 @@
 		}
 		
 		return dbm_content_tc_send_email($content['title'], $content['content'], $to_contact->get_contact_details('email'), $from);
+	}
+	
+	function dbmtc_get_or_create_type($type, $identifier) {
+		$type_id = dbm_new_query('dbm_data')->include_private()->include_only_type($type)->add_meta_query('identifier', $identifier)->get_post_id();
 		
+		if(!$type_id) {
+			$type_id = dbm_create_data($type.' '.$identifier, $type);
+			$group = dbmtc_get_group($type_id);
+			
+			$group->add_type_by_name('type');
+			$group->set_field('identifier', $identifier);
+			$group->set_field('name', $identifier);
+			$group->publish();
+		}
+		
+		return $type_id;
+	}
+	
+	function dbmtc_create_tag($tag) {
+		return dbmtc_create_type('type/tag', $tag);
+	}
+	
+	function dbmtc_tag_item($id, $tag) {
+		$type_id = dbmtc_get_or_create_type('type/tag', $tag);
+		
+		$post = dbmtc_get_group($id);
+		$added_tags = $post->object_relation_query('in:for:type/tag');
+		
+		if(!in_array($type_id, $added_tags)) {
+			$tag_relation = dbmtc_get_group($post->add_incoming_relation_by_name($type_id, 'for'));
+			$tag_relation->update_meta('startAt', time());
+			
+			dbmtc_add_action_to_process('tagAdded', array($id, $type_id), array('item' => $id, 'tag' => $tag));
+		}
+	}
+	
+	function dbmtc_untag_item($id, $tag) {
+		$type_id = dbmtc_get_or_create_type('type/tag', $tag);
+		
+		$post = dbmtc_get_group($id);
+		
+		$has_relation = false;
+		$relations = $post->get_encoded_incoming_relations_by_type('for', 'type/tag');
+		
+		foreach($relations as $relation_data) {
+			if($relation_data['fromId'] === $type_id) {
+				$relation = dbmtc_get_group($relation_data['id']);
+				$relation->set_field('endAt', time());
+				$has_relation = true;
+			}
+		}
+		var_dump($relations, $type_id, $has_relation);
+		
+		if($has_relation) {
+			dbmtc_add_action_to_process('tagRemoved', array($id, $type_id), array('item' => $id, 'tag' => $tag));
+		}
+	}
+	
+	function dbmtc_add_action_to_process($type, $from_ids = null, $data = null) {
+		$action_type_id = dbmtc_get_or_create_type('type/action-type', $type);
+		
+		$action_id = dbm_create_data('Action: '.$type, 'action');
+		
+		$action_group = dbmtc_get_group($action_id);
+		
+		if($data) {
+			$action_group->add_type_by_name('value-item');
+			$action_group->set_field('value', $data);
+		}
+		
+		if($from_ids) {
+			if(!is_array($from_ids)) {
+				$from_ids = array($from_ids);
+			}
+			
+			foreach($from_ids as $from_id) {
+				$action_group->add_outgoing_relation_by_name($from_id, 'from');
+			}
+		}
+		
+		$action_group->make_private();
+		
+		$action_group->add_incoming_relation_by_name($action_type_id, 'for');
+		
+		$type_id = dbmtc_get_or_create_type('type/action-status', 'readyToProcess');
+		$status_relation = dbmtc_get_group($action_group->add_incoming_relation_by_name($type_id, 'for'));
+		
+		$status_relation->update_meta('startAt', time());
+		
+		return $action_id;
+	}
+	
+	function dbmtc_create_request($url, $body = null, $method = 'GET', $headers = array(), $curl_options = array()) {
+		$send_status_id = dbmtc_get_or_create_type('type/send-status', 'waiting');
+		$method_id = dbmtc_get_or_create_type('type/request-method', $method);
+		
+		$request_id = dbm_create_data('Request', 'request');
+		$request = dbmtc_get_group($request_id);
+		
+		$request->set_field('url', $url);
+		$request->set_field('body', $body);
+		$request->set_field('headers', $headers);
+		$request->set_field('curlOptions', $curl_options);
+		
+		$request->add_incoming_relation_by_name($send_status_id, 'for');
+		$request->add_incoming_relation_by_name($method_id, 'for');
+		
+		$request->make_private();
+		
+		return $request_id;
+	}
+	
+	function dbmtc_send_request($id) {
+		$request = dbmtc_get_group($id);
+		
+		
+		$current_status = $request->get_single_object_relation_field_value('in:for:type/send-status', 'identifier');
+		
+		if($current_status === "waiting") {
+			$sending_status_id = dbmtc_get_or_create_type('type/send-status', 'sending');
+			$request->end_incoming_relations_from_type('for', 'type/send-status');
+			$request->add_incoming_relation_by_name($sending_status_id, 'for', time());
+			
+			$url = $request->get_field_value('url');
+			$body = $request->get_field_value('body');
+			$headers = $request->get_field_value('headers');
+			$curl_options = $request->get_field_value('curlOptions');
+			$method = $request->get_single_object_relation_field_value('in:for:type/request-method', 'identifier');
+			
+			$ch = curl_init($url);
+			
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+			
+			curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+			foreach($curl_options as $curl_option) {
+				curl_setopt($ch, $curl_option['key'], $curl_option['value']);
+			}
+			
+			curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+			
+			if($body) {
+				if(is_string($body)) {
+					curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
+				}
+				else {
+					curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($body));
+				}
+			}
+			
+			try {
+				$result = curl_exec($ch);
+				$status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+				curl_close($ch);
+				
+				$request->set_field('response', $result);
+				$request->set_field('responseCode', $status_code);
+				
+				$sent_status_id = dbmtc_get_or_create_type('type/send-status', 'sent');
+				$request->end_incoming_relations_from_type('for', 'type/send-status');
+				$request->add_incoming_relation_by_name($sent_status_id, 'for', time());
+			}
+			catch(\Exception $e) {
+				$error_status_id = dbmtc_get_or_create_type('type/send-status', 'error');
+				$request->end_incoming_relations_from_type('for', 'type/send-status');
+				$request->add_incoming_relation_by_name($error_status_id, 'for', time());
+			}
+		}
 	}
 	
 	function dbmtc_get_credentials_for_email($email) {

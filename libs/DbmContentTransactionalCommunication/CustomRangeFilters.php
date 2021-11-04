@@ -445,10 +445,10 @@
 		
 		public function filter_global_processActions($return_object, $item_name, $data) {
 			
-			$readyToProcess_id = dbm_new_query('dbm_data')->include_only_type('type/action-status')->add_meta_query('identifier', 'readyToProcess')->get_post_id();
-			$processing_id = dbm_new_query('dbm_data')->include_only_type('type/action-status')->add_meta_query('identifier', 'processing')->get_post_id();
-			$done_id = dbm_new_query('dbm_data')->include_only_type('type/action-status')->add_meta_query('identifier', 'done')->get_post_id();
-			$noAction_id = dbm_new_query('dbm_data')->include_only_type('type/action-status')->add_meta_query('identifier', 'noAction')->get_post_id();
+			$readyToProcess_id = dbmtc_get_or_create_type('type/action-status', 'readyToProcess');
+			$processing_id = dbmtc_get_or_create_type('type/action-status', 'processing');
+			$done_id = dbmtc_get_or_create_type('type/action-status', 'done');
+			$noAction_id = dbmtc_get_or_create_type('type/action-status', 'noAction');
 			
 			$type_group = dbmtc_get_group($readyToProcess_id);
 			
@@ -464,7 +464,7 @@
 			
 			foreach($actions as $action) {
 				$action->end_incoming_relations_from_type('for', 'type/action-status');
-				$action->add_incoming_relation_by_name($processing_id, 'for');
+				$action->add_incoming_relation_by_name($processing_id, 'for', time());
 			}
 			
 			foreach($actions as $action) {
@@ -474,10 +474,12 @@
 				if(has_action($hook_name)) {
 					do_action($hook_name, $action->get_id());
 					
-					$action->add_incoming_relation_by_name($done_id, 'for');
+					$action->end_incoming_relations_from_type('for', 'type/action-status');
+					$action->add_incoming_relation_by_name($done_id, 'for', time());
 				}
 				else {
-					$action->add_incoming_relation_by_name($noAction_id, 'for');
+					$action->end_incoming_relations_from_type('for', 'type/action-status');
+					$action->add_incoming_relation_by_name($noAction_id, 'for', time());
 				}
 				
 			}
