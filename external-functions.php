@@ -656,7 +656,6 @@
 				$has_relation = true;
 			}
 		}
-		var_dump($relations, $type_id, $has_relation);
 		
 		if($has_relation) {
 			dbmtc_add_action_to_process('tagRemoved', array($id, $type_id), array('item' => $id, 'tag' => $tag));
