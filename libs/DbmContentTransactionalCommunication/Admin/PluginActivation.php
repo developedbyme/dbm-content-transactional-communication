@@ -274,6 +274,10 @@
 			$current_type = $setup_manager->create_data_type('type/action-status')->set_name('Action status');
 			$current_type = $setup_manager->create_data_type('type/action-type')->set_name('Action type');
 			
+			$current_type = $setup_manager->create_data_type('trigger')->set_name('Trigger');
+			
+			$current_type = $setup_manager->create_data_type('type/trigger-type')->set_name('Trigger type');
+			
 			$current_type = $setup_manager->create_data_type('incoming-webhook-event')->set_name('Incoming webhook event');
 			$current_type->add_field("payload")->set_type('json')->setup_meta_storage();
 			
