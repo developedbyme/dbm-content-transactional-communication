@@ -662,6 +662,60 @@
 		}
 	}
 	
+	function dbmtc_add_single_trigger($post_id, $type, $valid_for = -1) {
+		
+		$has_trigger = false;
+		
+		$post = dbmtc_get_group($post_id);
+		$trigger_ids = $post->object_relation_query('in:for:trigger');
+		foreach($trigger_ids as $trigger_id) {
+			$trigger_post = dbmtc_get_group($trigger_id);
+			if($trigger_post->get_single_object_relation_field_value('in:for:type/trigger-type', 'identifier') === $type) {
+				$has_trigger = true;
+				var_dump($trigger_post->get_id());
+				break;
+			}
+		}
+		
+		var_dump($has_trigger);
+		
+		if(!$has_trigger) {
+			$type_id = dbmtc_get_or_create_type('type/trigger-type', $type);
+			$tigger = dbmtc_get_group(dbm_create_data('Trigger '.$type.' for '.$post_id, 'trigger'));
+			$tigger->add_incoming_relation_by_name($type_id, 'for');
+			
+			$tigger_relation = dbmtc_get_group($post->add_incoming_relation_by_name($tigger->get_id(), 'for'));
+		
+			$tigger_relation->update_meta('startAt', time());
+			
+			if($valid_for > 0) {
+				$tigger_relation->update_meta('endAt', time()+$valid_for);
+			}
+			
+			dbmtc_add_action_to_process('handleTrigger/'.$type, array($tigger->get_id()));
+		}
+	}
+	
+	function dbmtc_remove_trigger($post_id, $type) {
+		$post = dbmtc_get_group($post_id);
+		
+		$trigger_relations_ids = $post->get_incoming_relations('for', 'trigger');
+		
+		var_dump($trigger_relations_ids);
+		
+		foreach($trigger_relations_ids as $trigger_relations_id) {
+			$relation_post = dbmtc_get_group($trigger_relations_id);
+			$trigger_post = dbmtc_get_group($relation_post->get_meta('fromId'));
+			if($trigger_post->get_single_object_relation_field_value('in:for:type/trigger-type', 'identifier') === $type) {
+				$relation_post->update_meta('endAt', time());
+				$relation_post->clear_cache();
+				$trigger_post->clear_cache();
+			}
+		}
+		
+		$post->clear_cache();
+	}
+	
 	function dbmtc_add_action_to_process($type, $from_ids = null, $data = null) {
 		$action_type_id = dbmtc_get_or_create_type('type/action-type', $type);
 		
