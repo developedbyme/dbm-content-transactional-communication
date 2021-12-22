@@ -672,12 +672,9 @@
 			$trigger_post = dbmtc_get_group($trigger_id);
 			if($trigger_post->get_single_object_relation_field_value('in:for:type/trigger-type', 'identifier') === $type) {
 				$has_trigger = true;
-				var_dump($trigger_post->get_id());
 				break;
 			}
 		}
-		
-		var_dump($has_trigger);
 		
 		if(!$has_trigger) {
 			$type_id = dbmtc_get_or_create_type('type/trigger-type', $type);
@@ -700,8 +697,6 @@
 		$post = dbmtc_get_group($post_id);
 		
 		$trigger_relations_ids = $post->get_incoming_relations('for', 'trigger');
-		
-		var_dump($trigger_relations_ids);
 		
 		foreach($trigger_relations_ids as $trigger_relations_id) {
 			$relation_post = dbmtc_get_group($trigger_relations_id);
