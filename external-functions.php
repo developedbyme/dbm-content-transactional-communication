@@ -689,6 +689,8 @@
 				$tigger_relation->update_meta('endAt', time()+$valid_for);
 			}
 			
+			$tigger->make_private();
+			
 			dbmtc_add_action_to_process('handleTrigger/'.$type, array($tigger->get_id()));
 		}
 	}
