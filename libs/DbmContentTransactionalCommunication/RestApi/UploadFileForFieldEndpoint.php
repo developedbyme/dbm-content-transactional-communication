@@ -44,8 +44,12 @@
 				$field_name = $data['field'];
 				
 				$supported_extensions = apply_filters('dbmtc/supported_extensions', array('pdf', 'word', 'jpg', 'jpeg', 'png', 'gif', 'txt', 'json', 'xlsx', 'xls', 'rtf'), $group_id, $field_name);
-			
-				if($wp_filetype['ext'] === 'php' || $wp_filetype['ext'] === 'cgi' || !in_array(strtolower($wp_filetype['ext']), $supported_extensions)) {
+				
+				$extension = strtolower($wp_filetype['ext']);
+				$is_suppoerted = in_array($extension, $supported_extensions);
+				$is_suppoerted = apply_filters('dbmtc/supported_extension', $is_suppoerted, $extension, $group_id, $field_name);
+				
+				if($extension === 'php' || $extension === 'cgi' || !$is_suppoerted) {
 					return $this->output_error('Unsupported format');
 				}
 			
