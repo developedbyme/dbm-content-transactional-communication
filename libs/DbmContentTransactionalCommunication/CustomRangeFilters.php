@@ -455,6 +455,7 @@
 			$max_length = 10;
 			
 			$ids = $type_group->object_relation_query('out:for:action');
+			sort($ids);
 			$remaining_items_to_process = max(0, count($ids)-$max_length);
 			$return_object['remaining'] = $remaining_items_to_process;
 			$ids = array_slice($ids, 0, $max_length);
