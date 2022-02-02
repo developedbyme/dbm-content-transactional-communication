@@ -278,6 +278,11 @@
 			
 			$current_type = $setup_manager->create_data_type('type/trigger-type')->set_name('Trigger type');
 			
+			$current_type = $setup_manager->create_data_type('task')->set_name('Task');
+			
+			$current_type = $setup_manager->create_data_type('type/task-status')->set_name('Task status');
+			$current_type = $setup_manager->create_data_type('type/task-type')->set_name('Task type');
+			
 			$current_type = $setup_manager->create_data_type('incoming-webhook-event')->set_name('Incoming webhook event');
 			$current_type->add_field("payload")->set_type('json')->setup_meta_storage();
 			
