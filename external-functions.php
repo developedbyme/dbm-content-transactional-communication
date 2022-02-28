@@ -695,6 +695,21 @@
 		}
 	}
 	
+	function dbmtc_has_trigger($post_id, $type) {
+		
+		$post = dbmtc_get_group($post_id);
+		$trigger_ids = $post->object_relation_query('in:for:trigger');
+		foreach($trigger_ids as $trigger_id) {
+			$trigger_post = dbmtc_get_group($trigger_id);
+			if($trigger_post->get_single_object_relation_field_value('in:for:type/trigger-type', 'identifier') === $type) {
+				$has_trigger = true;
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	function dbmtc_remove_trigger($post_id, $type) {
 		$post = dbmtc_get_group($post_id);
 		
