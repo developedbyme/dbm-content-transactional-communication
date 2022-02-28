@@ -456,8 +456,17 @@
 			
 			$max_length = 10;
 			
+			wprr_performance_tracker()->start_meassure('CustomRangeHooks filter_global_processActions data get ids');
+			$data_api = wprr_get_data_api();
+			$data_post = $data_api->wordpress()->get_post($readyToProcess_id);
+			$data_posts = $data_post->object_relation_query('out:for:action');
+			$ids = array_map(function($post) {return $post->get_id();}, $data_posts);
+			var_dump($ids);
+			wprr_performance_tracker()->stop_meassure('CustomRangeHooks filter_global_processActions data get ids');
+			
 			wprr_performance_tracker()->start_meassure('CustomRangeHooks filter_global_processActions get ids');
 			$ids = $type_group->object_relation_query('out:for:action');
+			var_dump($ids);
 			wprr_performance_tracker()->stop_meassure('CustomRangeHooks filter_global_processActions get ids');
 			
 			sort($ids);
