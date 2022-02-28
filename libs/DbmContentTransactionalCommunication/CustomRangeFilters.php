@@ -445,6 +445,8 @@
 		
 		public function filter_global_processActions($return_object, $item_name, $data) {
 			
+			wprr_performance_tracker()->start_meassure('CustomRangeHooks filter_global_processActions');
+			
 			$readyToProcess_id = dbmtc_get_or_create_type('type/action-status', 'readyToProcess');
 			$processing_id = dbmtc_get_or_create_type('type/action-status', 'processing');
 			$done_id = dbmtc_get_or_create_type('type/action-status', 'done');
@@ -454,7 +456,10 @@
 			
 			$max_length = 10;
 			
+			wprr_performance_tracker()->start_meassure('CustomRangeHooks filter_global_processActions get ids');
 			$ids = $type_group->object_relation_query('out:for:action');
+			wprr_performance_tracker()->stop_meassure('CustomRangeHooks filter_global_processActions get ids');
+			
 			sort($ids);
 			$remaining_items_to_process = max(0, count($ids)-$max_length);
 			$return_object['remaining'] = $remaining_items_to_process;
@@ -484,6 +489,8 @@
 				}
 				
 			}
+			
+			wprr_performance_tracker()->stop_meassure('CustomRangeHooks filter_global_processActions');
 			
 			return $return_object;
 		}
