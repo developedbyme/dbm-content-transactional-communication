@@ -32,6 +32,9 @@
 			$this->register_hook_for_type('dbmtc/tag', 'hook_dbmtc_tag');
 			$this->register_hook_for_type('dbmtc/untag', 'hook_dbmtc_untag');
 			
+			$this->register_hook_for_type('dbmtc/addSingleTrigger', 'hook_dbmtc_addSingleTrigger');
+			$this->register_hook_for_type('dbmtc/addTrigger', 'hook_dbmtc_addTrigger');
+			
 			$this->register_hook_for_type('dbm/clearCache', 'change_clearCache');
 		}
 		
@@ -211,6 +214,36 @@
 			dbmtc_untag_item($post_id, $data['value']);
 			
 			wprr_performance_tracker()->stop_meassure('ChangePostHooks hook_dbmtc_untag');
+		}
+		
+		public function hook_dbmtc_addTrigger($data, $post_id, $logger) {
+			//var_dump('\DbmContentTransactionalCommunication\ChangePostHooks::hook_dbmtc_addTrigger');
+			
+			wprr_performance_tracker()->start_meassure('ChangePostHooks hook_dbmtc_addTrigger');
+			
+			$valid_for = -1;
+			if(isset($data['validFor'])) {
+				$valid_for = $data['validFor'];
+			}
+			
+			dbmtc_add_trigger($post_id, $data['value'], $valid_for);
+			
+			wprr_performance_tracker()->stop_meassure('ChangePostHooks hook_dbmtc_addTrigger');
+		}
+		
+		public function hook_dbmtc_addSingleTrigger($data, $post_id, $logger) {
+			//var_dump('\DbmContentTransactionalCommunication\ChangePostHooks::hook_dbmtc_addSingleTrigger');
+			
+			wprr_performance_tracker()->start_meassure('ChangePostHooks hook_dbmtc_addSingleTrigger');
+			
+			$valid_for = -1;
+			if(isset($data['validFor'])) {
+				$valid_for = $data['validFor'];
+			}
+			
+			dbmtc_add_single_trigger($post_id, $data['value'], $valid_for);
+			
+			wprr_performance_tracker()->stop_meassure('ChangePostHooks hook_dbmtc_addSingleTrigger');
 		}
 		
 		public function change_clearCache($data, $post_id, $logger) {

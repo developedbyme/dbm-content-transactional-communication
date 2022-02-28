@@ -662,6 +662,27 @@
 		}
 	}
 	
+	function dbmtc_add_trigger($post_id, $type, $valid_for = -1) {
+		
+		$post = dbmtc_get_group($post_id);
+		
+		$type_id = dbmtc_get_or_create_type('type/trigger-type', $type);
+		$tigger = dbmtc_get_group(dbm_create_data('Trigger '.$type.' for '.$post_id, 'trigger'));
+		$tigger->add_incoming_relation_by_name($type_id, 'for');
+		
+		$tigger_relation = dbmtc_get_group($post->add_incoming_relation_by_name($tigger->get_id(), 'for'));
+	
+		$tigger_relation->update_meta('startAt', time());
+		
+		if($valid_for > 0) {
+			$tigger_relation->update_meta('endAt', time()+$valid_for);
+		}
+		
+		$tigger->make_private();
+		
+		dbmtc_add_action_to_process('handleTrigger/'.$type, array($tigger->get_id()));
+	}
+	
 	function dbmtc_add_single_trigger($post_id, $type, $valid_for = -1) {
 		
 		$has_trigger = false;
