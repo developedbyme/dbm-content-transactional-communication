@@ -25,6 +25,7 @@
 			
 			$this->register_hook_for_type('dbmtc/setFields', 'hook_dbmtc_setFields');
 			$this->register_hook_for_type('dbmtc/setField', 'hook_dbmtc_setField');
+			$this->register_hook_for_type('dbmtc/copyField', 'hook_dbmtc_copyField');
 			$this->register_hook_for_type('dbmtc/setFieldTranslations', 'hook_dbmtc_setFieldTranslations');
 			
 			$this->register_hook_for_type('dbmtc/removeFileFromField', 'hook_dbmtc_removeFileFromField');
@@ -152,6 +153,30 @@
 			catch(\Exception $exception) {
 				$logger->add_log($exception->getMessage());
 			}
+		}
+		
+		public function hook_dbmtc_copyField($data, $post_id, $logger) {
+			//var_dump('\DbmContentTransactionalCommunication\ChangePostHooks::hook_dbmtc_copyField');
+			
+			wprr_performance_tracker()->start_meassure('ChangePostHooks hook_dbmtc_copyField');
+			
+			$internal_message_group = dbmtc_get_internal_message_group($post_id);
+			$name = $data['field'];
+			$from = $data['value'];
+			
+			try {
+				$comment = '';
+				if(isset($data['comment']) && $data['comment']) {
+					$comment = $data['comment'];
+				}
+				$value = dbmtc_get_group($from)->get_field_value($name);
+				$internal_message_group->set_field_if_different($name, $value, $comment);
+			}
+			catch(\Exception $exception) {
+				$logger->add_log($exception->getMessage());
+			}
+			
+			wprr_performance_tracker()->stop_meassure('ChangePostHooks hook_dbmtc_copyField');
 		}
 		
 		public function hook_dbmtc_setField($data, $post_id, $logger) {
