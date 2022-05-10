@@ -783,6 +783,29 @@
 		return $action_id;
 	}
 	
+	function dbmtc_process_action($action_id) {
+		
+		$action = dbmtc_get_group($action_id);
+			
+		$action->end_incoming_relations_from_type('for', 'type/action-status');
+		
+		$action_type = $action->get_single_object_relation_field_value('in:for:type/action-type', 'identifier');
+		$hook_name = 'dbmtc/process_action/'.$action_type;
+		
+		if(has_action($hook_name)) {
+			do_action($hook_name, $action->get_id());
+			
+			$done_id = dbmtc_get_or_create_type('type/action-status', 'done');
+			$action->end_incoming_relations_from_type('for', 'type/action-status');
+			$action->add_incoming_relation_by_name($done_id, 'for', time());
+		}
+		else {
+			$noAction_id = dbmtc_get_or_create_type('type/action-status', 'noAction');
+			$action->end_incoming_relations_from_type('for', 'type/action-status');
+			$action->add_incoming_relation_by_name($noAction_id, 'for', time());
+		}
+	}
+	
 	function dbmtc_create_request($url, $body = null, $method = 'GET', $headers = array(), $curl_options = array()) {
 		$send_status_id = dbmtc_get_or_create_type('type/send-status', 'waiting');
 		$method_id = dbmtc_get_or_create_type('type/request-method', $method);
