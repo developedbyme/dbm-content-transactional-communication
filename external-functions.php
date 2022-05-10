@@ -749,7 +749,7 @@
 		$post->clear_cache();
 	}
 	
-	function dbmtc_add_action_to_process($type, $from_ids = null, $data = null) {
+	function dbmtc_add_action_to_process($type, $from_ids = null, $data = null, $time = null) {
 		$action_type_id = dbmtc_get_or_create_type('type/action-type', $type);
 		
 		$action_id = dbm_create_data('Action: '.$type, 'action');
@@ -777,6 +777,10 @@
 		
 		$type_id = dbmtc_get_or_create_type('type/action-status', 'readyToProcess');
 		$status_relation = dbmtc_get_group($action_group->add_incoming_relation_by_name($type_id, 'for'));
+		
+		if(!$time) {
+			$time = time();
+		}
 		
 		$status_relation->update_meta('startAt', time());
 		
