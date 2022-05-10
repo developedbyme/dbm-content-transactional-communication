@@ -782,7 +782,7 @@
 			$time = time();
 		}
 		
-		$status_relation->update_meta('startAt', time());
+		$status_relation->update_meta('startAt', $time);
 		
 		return $action_id;
 	}
