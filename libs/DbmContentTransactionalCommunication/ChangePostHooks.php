@@ -37,6 +37,8 @@
 			$this->register_hook_for_type('dbmtc/addTrigger', 'hook_dbmtc_addTrigger');
 			
 			$this->register_hook_for_type('dbm/clearCache', 'change_clearCache');
+			
+			$this->register_hook_for_type('dbmtc/processAction', 'change_dbmtc_processAction');
 		}
 		
 		protected function update_message_meta($message, $meta) {
@@ -276,6 +278,12 @@
 			
 			$post = dbmtc_get_group($post_id);
 			$post->clear_cache();
+		}
+		
+		public function change_dbmtc_processAction($data, $post_id, $logger) {
+			//echo("change_dbmtc_processAction");
+			
+			dbmtc_process_action($post_id);
 		}
 		
 		public static function test_import() {
