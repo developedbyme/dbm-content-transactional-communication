@@ -561,6 +561,15 @@
 		return $provider;
 	}
 	
+	function dbmtc_create_wc_subscription_keywords_provider($subscription_or_id) {
+		$provider = new \DbmContentTransactionalCommunication\Template\WcSubscriptionKeywordsProvider();
+		
+		$order = wcs_get_subscription($subscription_or_id);
+		$provider->set_order($order);
+		
+		return $provider;
+	}
+	
 	function dbmtc_create_filter_keywords_provider($filter_name = null, $data = null, $triggering_keywords = null) {
 		$provider = new \DbmContentTransactionalCommunication\Template\FilterKeywordsProvider();
 		
