@@ -507,10 +507,9 @@
 			if($field->get_key() === "name") {
 				if(dbm_has_post_type($group->get_id(), 'link-group')) {
 					$name = $field->get_value();
-					wp_update_post(array(
-						'ID' => $group->get_id(),
-						'post_title' => $name
-					));
+					
+					global $wpdb;
+					$wpdb->update( $wpdb->posts, array('post_title' => $name), array('ID' => $group->get_id()));
 				}
 			}
 			

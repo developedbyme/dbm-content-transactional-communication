@@ -131,7 +131,11 @@
 		public function set_value($value) {
 			//METODO: sort if this is on a timeline
 			
+			wprr_performance_tracker()->start_meassure('InternalMessageGroupField set_value');
+			
 			$this->perform_set_value($value);
+			
+			wprr_performance_tracker()->stop_meassure('InternalMessageGroupField set_value');
 			
 			return $this;
 		}
@@ -327,15 +331,6 @@
 			return null;
 		}
 		
-		public function make_private() {
-			$args = array(
-				'ID' => $this->id,
-				'post_status' => 'private'
-			);
-			
-			wp_update_post($args);
-		}
-		
 		public function get_cache_key_prefix() {
 			return 'dbmtc/img/'.$this->get_group_id().'/field/'.$this->get_id().'/';
 		}
@@ -357,15 +352,20 @@
 		}
 		
 		public function set_cached_value($key, $value) {
+			wprr_performance_tracker()->start_meassure('InternalMessageGroupField set_cached_value');
 			$cache_key = $this->get_cache_key($key);
 			set_transient($cache_key, $value, 48 * HOUR_IN_SECONDS);
+			
+			wprr_performance_tracker()->stop_meassure('InternalMessageGroupField set_cached_value');
 			
 			return $this;
 		}
 		
 		public function delete_cached_value($key) {
+			wprr_performance_tracker()->start_meassure('InternalMessageGroupField delete_cached_value');
 			$cache_key = $this->get_cache_key($key);
 			delete_transient($cache_key);
+			wprr_performance_tracker()->stop_meassure('InternalMessageGroupField delete_cached_value');
 		}
 		
 		public static function test_import() {
