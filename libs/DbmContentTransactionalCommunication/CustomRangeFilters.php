@@ -502,6 +502,7 @@
 					$action->add_incoming_relation_by_name($noAction_id, 'for', time());
 				}
 				
+				$action->update_meta('needsToProcess', false);
 			}
 			
 			wprr_performance_tracker()->stop_meassure('CustomRangeHooks filter_global_processActions');
