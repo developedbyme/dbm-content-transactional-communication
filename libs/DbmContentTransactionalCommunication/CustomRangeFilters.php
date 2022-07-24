@@ -461,10 +461,22 @@
 			$max_length = 10;
 			
 			wprr_performance_tracker()->start_meassure('CustomRangeHooks filter_global_processActions data get ids');
-			$data_api = wprr_get_data_api();
-			$data_post = $data_api->wordpress()->get_post($readyToProcess_id);
-			$data_posts = $data_post->object_relation_query('out:for:action');
-			$ids = array_map(function($post) {return $post->get_id();}, $data_posts);
+			$query = $data_api->database()->new_select_query()->set_post_type('dbm_data')->include_private()->term_query_by_path('dbm_type', 'action')->meta_query('needsToProcess', '1');
+			
+			$all_ids = $query->get_ids();
+			$ids = array();
+			
+			$status_post = $data_api->wordpress()->get_post($readyToProcess_id);
+			
+			foreach($all_ids as $id) {
+				$post = $data_api->wordpress()->get_post($id);
+				
+				$statuses = $post->object_relation_query('in:for:type/action-status');
+				
+				if(in_array($status_post, $statuses)) {
+					$ids[] = $id;
+				}
+			}
 			wprr_performance_tracker()->stop_meassure('CustomRangeHooks filter_global_processActions data get ids');
 			
 			//wprr_performance_tracker()->start_meassure('CustomRangeHooks filter_global_processActions get ids');
