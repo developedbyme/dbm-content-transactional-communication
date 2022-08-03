@@ -784,6 +784,7 @@
 		
 		$action_group->add_incoming_relation_by_name($action_type_id, 'for');
 		
+		$action_group->update_meta('needsToProcess', true);
 		$type_id = dbmtc_get_or_create_type('type/action-status', 'readyToProcess');
 		$status_relation = dbmtc_get_group($action_group->add_incoming_relation_by_name($type_id, 'for'));
 		
@@ -820,6 +821,8 @@
 			$action->end_incoming_relations_from_type('for', 'type/action-status');
 			$action->add_incoming_relation_by_name($noAction_id, 'for', time());
 		}
+		
+		$action->update_meta('needsToProcess', false);
 	}
 	
 	function dbmtc_create_request($url, $body = null, $method = 'GET', $headers = array(), $curl_options = array()) {

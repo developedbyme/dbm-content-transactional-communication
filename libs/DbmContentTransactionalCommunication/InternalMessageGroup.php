@@ -64,7 +64,7 @@
 		}
 		
 		public function get_updated_date() {
-			wprr_performance_tracker()->start_meassure('InternalMessageGroupField get_updated_date');
+			wprr_performance_tracker()->start_meassure('InternalMessageGroup get_updated_date');
 			
 			$return_value = '';
 			$meta_value = get_post_meta($this->id, 'updated_date', true);
@@ -76,7 +76,7 @@
 				$return_value = $this->get_started_date();
 			}
 			
-			wprr_performance_tracker()->stop_meassure('InternalMessageGroupField get_updated_date');
+			wprr_performance_tracker()->stop_meassure('InternalMessageGroup get_updated_date');
 			
 			return $return_value; 
 		}
@@ -211,6 +211,8 @@
 		public function create_message($type, $body, $from_user) {
 			//echo("\DbmContentTransactionalCommunication\InternalMessageGroup::create_message<br />");
 			
+			wprr_performance_tracker()->start_meassure('InternalMessageGroup create_message');
+			
 			$group_post = get_post($this->id);
 			
 			$new_id = dbm_create_data($group_post->post_title, 'internal-message', 'admin-grouping/internal-messages');
@@ -222,18 +224,18 @@
 			
 			dbm_add_post_relation($new_id, $type);
 			
-			$args = array(
-				'ID' => $new_id,
+			global $wpdb;
+			$wpdb->update($wpdb->posts, array(
 				'post_content' => $body,
 				'post_author' => $from_user,
 				'post_status' => 'private'
-			);
-			
-			wp_update_post($args);
+			), array('ID' => $new_id));
 			
 			$message = dbmtc_get_internal_message($new_id);
 			
 			$this->update_updated_date();
+			
+			wprr_performance_tracker()->stop_meassure('InternalMessageGroup create_message');
 			
 			return $message;
 		}
@@ -281,11 +283,15 @@
 		}
 		
 		public function create_field_from_template($key, $template) {
+			
+			wprr_performance_tracker()->start_meassure('InternalMessageGroup create_field_from_template');
+			
 			$field_id = $this->get_field_id_if_exists($key);
 			if(!$field_id) {
 				
 				$group_post = get_post($this->id);
 				
+				wprr_performance_tracker()->start_meassure('InternalMessageGroup create_field_from_template create');
 				$field_id = dbm_create_data($group_post->post_title.' - '.$key, 'internal-message-group-field', 'admin-grouping/internal-message-group-fields');
 				//$this->relate_post_to_group($field_id);
 				update_post_meta($field_id, 'dbmtc_key', $key);
@@ -299,17 +305,29 @@
 				$storage_type = $template->get_storage_type();
 				$field->set_storage_type($storage_type);
 				
+				wprr_performance_tracker()->stop_meassure('InternalMessageGroup create_field_from_template create');
+				
+				wprr_performance_tracker()->start_meassure('InternalMessageGroup create_field_from_template hooks');
+				
 				do_action('dbmtc/copy_field_template_meta/'.$storage_type, $field, $template);
 				do_action('dbmtc/copy_field_template_meta/type/'.$type, $field, $template);
 				do_action('dbmtc/setup_default_field_storage', $field);
 				
+				wprr_performance_tracker()->stop_meassure('InternalMessageGroup create_field_from_template hooks');
+				
+				wprr_performance_tracker()->start_meassure('InternalMessageGroup create_field_from_template set initial value');
 				$value = $template->get_value();
 				$field->set_value($value);
+				wprr_performance_tracker()->stop_meassure('InternalMessageGroup create_field_from_template set initial value');
 				
+				wprr_performance_tracker()->start_meassure('InternalMessageGroup create_field_from_template set status');
 				$status = $value ? 'complete' : 'none';
 				$field->set_status($status);
+				wprr_performance_tracker()->stop_meassure('InternalMessageGroup create_field_from_template set status');
 				
+				wprr_performance_tracker()->start_meassure('InternalMessageGroup create_field_from_template make private');
 				$field->make_private();
+				wprr_performance_tracker()->stop_meassure('InternalMessageGroup create_field_from_template make private');
 				
 				$this->update_updated_date();
 			}
@@ -317,16 +335,18 @@
 				$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
 			}
 			
+			wprr_performance_tracker()->stop_meassure('InternalMessageGroup create_field_from_template');
+			
 			return $field;
 		}
 		
 		public function set_field($key, $value, $comment = '') {
 			
-			wprr_performance_tracker()->start_meassure('InternalMessageGroupField set_field');
+			wprr_performance_tracker()->start_meassure('InternalMessageGroup set_field');
 			
 			$field = $this->get_field($key);
 			if(!$field) {
-				wprr_performance_tracker()->stop_meassure('InternalMessageGroupField set_field');
+				wprr_performance_tracker()->stop_meassure('InternalMessageGroup set_field');
 				return null;
 			}
 			
@@ -351,14 +371,14 @@
 			$this->update_updated_date();
 			$this->update_name_after_field_change($field);
 			
-			wprr_performance_tracker()->stop_meassure('InternalMessageGroupField set_field');
+			wprr_performance_tracker()->stop_meassure('InternalMessageGroup set_field');
 			
 			return $message;
 		}
 		
 		public function set_field_if_different($key, $value, $comment = '') {
 			
-			wprr_performance_tracker()->start_meassure('InternalMessageGroupField set_field_if_different');
+			wprr_performance_tracker()->start_meassure('InternalMessageGroup set_field_if_different');
 			
 			$return_value = null;
 			
@@ -370,7 +390,7 @@
 				}
 			}
 			
-			wprr_performance_tracker()->stop_meassure('InternalMessageGroupField set_field_if_different');
+			wprr_performance_tracker()->stop_meassure('InternalMessageGroup set_field_if_different');
 			return $return_value;
 		}
 		
@@ -426,18 +446,26 @@
 		
 		public function get_field_id_if_exists($key) {
 			
+			wprr_performance_tracker()->start_meassure('InternalMessageGroup get_field_id_if_exists');
+			
 			$all_field_ids = $this->get_existing_field_ids();
 			foreach($all_field_ids as $field_id) {
 				$current_key = get_post_meta($field_id, 'dbmtc_key', true);
 				if($current_key === $key) {
+					wprr_performance_tracker()->stop_meassure('InternalMessageGroup get_field_id_if_exists');
 					return $field_id;
 				}
 			}
+			
+			wprr_performance_tracker()->stop_meassure('InternalMessageGroup get_field_id_if_exists');
 			
 			return 0;
 		}
 		
 		public function get_field_template_if_exists($key) {
+			
+			wprr_performance_tracker()->start_meassure('InternalMessageGroup get_field_template_if_exists');
+			
 			$type_terms = get_the_terms($this->id, 'dbm_type');
 			if($type_terms) {
 				$type_term_ids = wp_list_pluck($type_terms, 'term_id');
@@ -448,16 +476,20 @@
 					$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($shared_id);
 					$field->set_group_id_for_template($this->id);
 					
+					wprr_performance_tracker()->stop_meassure('InternalMessageGroup get_field_template_if_exists');
+					
 					return $field;
 				}
 			}
+			
+			wprr_performance_tracker()->stop_meassure('InternalMessageGroup get_field_template_if_exists');
 			
 			return null;
 		}
 		
 		public function get_field($key) {
 			
-			wprr_performance_tracker()->start_meassure('InternalMessageGroupField get_field');
+			wprr_performance_tracker()->start_meassure('InternalMessageGroup get_field');
 			
 			$field_id = $this->get_field_id_if_exists($key);
 			
@@ -467,18 +499,18 @@
 				if($template) {
 					$field = $this->create_field_from_template($key, $template);
 						
-					wprr_performance_tracker()->stop_meassure('InternalMessageGroupField get_field');
+					wprr_performance_tracker()->stop_meassure('InternalMessageGroup get_field');
 					return $field;
 				}
 				
-				wprr_performance_tracker()->stop_meassure('InternalMessageGroupField get_field');
+				wprr_performance_tracker()->stop_meassure('InternalMessageGroup get_field');
 				throw(new \Exception('No field for key '.$key));
 				return null;
 			}
 			
 			$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
 			
-			wprr_performance_tracker()->stop_meassure('InternalMessageGroupField get_field');
+			wprr_performance_tracker()->stop_meassure('InternalMessageGroup get_field');
 			
 			return $field;
 		}
@@ -683,15 +715,15 @@
 		}
 		
 		public function update_updated_date() {
-			wprr_performance_tracker()->start_meassure('InternalMessageGroupField update_updated_date');
+			wprr_performance_tracker()->start_meassure('InternalMessageGroup update_updated_date');
 			update_post_meta($this->id, 'updated_date', date('Y-m-d\TH:i:s'));
-			wprr_performance_tracker()->stop_meassure('InternalMessageGroupField update_updated_date');
+			wprr_performance_tracker()->stop_meassure('InternalMessageGroup update_updated_date');
 		}
 		
 		public function update_name_after_field_change($field) {
-			wprr_performance_tracker()->start_meassure('InternalMessageGroupField update_name_after_field_change');
+			wprr_performance_tracker()->start_meassure('InternalMessageGroup update_name_after_field_change');
 			do_action('dbmtc/internal_message/update_name_after_field_change', $this, $field);
-			wprr_performance_tracker()->stop_meassure('InternalMessageGroupField update_name_after_field_change');
+			wprr_performance_tracker()->stop_meassure('InternalMessageGroup update_name_after_field_change');
 		}
 		
 		public function get_view_url() {
