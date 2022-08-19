@@ -617,7 +617,9 @@
 	}
 	
 	function dbmtc_get_or_create_type($type, $identifier) {
-		$type_id = dbm_new_query('dbm_data')->include_private()->include_only_type($type)->add_meta_query('identifier', $identifier)->get_post_id();
+		
+		$data_api = wprr_get_data_api();
+		$type_id = $data_api->database()->new_select_query()->skip_storage()->set_post_type('dbm_data')->include_private()->term_query_by_path('dbm_type', $type)->meta_query('identifier', $identifier)->get_id();
 		
 		if(!$type_id) {
 			$type_id = dbm_create_data($type.' '.$identifier, $type);

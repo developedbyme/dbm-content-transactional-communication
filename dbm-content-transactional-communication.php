@@ -3,7 +3,7 @@
 	Plugin Name: DBM content transactional communication
 	Plugin URI: http://developedbyme.com
 	Description: Transactional communication functionality for DBM content
-	Version: 1.1.0
+	Version: 1.2.0
 	Author: Mattias Ekenedahl
 	Author URI: http://developedbyme.com
 	License: MIT
@@ -16,7 +16,7 @@
 |  General features and setup actions
 '---------------------------------------------------------------------- */
 
-define("DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_VERSION", "1.1.0");
+define("DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_VERSION", "1.2.0");
 define("DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN", "dbm-content-transactional-communication");
 define("DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_TEXTDOMAIN", "dbm-content-transactional-communication");
 define("DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_MAIN_FILE", __FILE__);
