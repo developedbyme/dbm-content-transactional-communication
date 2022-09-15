@@ -296,6 +296,8 @@
 			
 			$current_type = $setup_manager->create_data_type('type/request-method')->set_name('Request method');
 			
+			$current_type = $setup_manager->create_data_type('type/verication-status')->set_name('Verification status');
+			
 			$current_type = $setup_manager->create_data_type('timed-action')->set_name('Timed action');
 			$current_type->add_field("name")->setup_meta_storage();
 			$current_type->add_field("time")->set_type('timestamp')->setup_meta_storage();

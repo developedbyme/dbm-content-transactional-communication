@@ -146,20 +146,49 @@
 			
 			$result = false;
 			
-			$user = $data['user'];
+			$user = $this->get_user($data['user']);
+			$user_id = $user->ID;
+			
 			$data_id = $data['verificationId'];
 			$code = $data['verificationCode'];
 			
 			$hash_salt = 'Tw?otIAwI%ourB-:@VeZ4tGLY0=Twh)1J Wwhxc!5AOg:*L$Ff@CAY+d-iW47Ztm';
 			//METODO: add filter around salt
-			$hash = md5($user.$hash_salt);
+			$hash = md5($user_id.$hash_salt);
 			
 			$stored_hash = get_post_meta($data_id, 'verification_hash', true);
 			$stored_code = get_post_meta($data_id, 'verification_code', true);
 			
 			if($stored_hash === $hash && $stored_code === $code) {
-				update_post_meta($data_id, 'verified', true);
-				$result = true;
+				
+				$post = dbmtc_get_group($data_id);
+				$current_status = $post->get_single_object_relation_field_value("in:for:type/verication-status", "identifier");
+				
+				if($current_status === 'unverified') {
+					update_post_meta($data_id, 'verified', true);
+					$result = true;
+				
+					$verified_id = dbmtc_get_or_create_type('type/verication-status', 'verified');
+					$expired_id = dbmtc_get_or_create_type('type/verication-status', 'expired');
+				
+					$start_time = time();
+					$minutes_until_expired = 5;
+					$end_time = $start_time+60*$minutes_until_expired;
+				
+					$post->end_incoming_relations_from_type('for', 'type/verication-status');
+					$type_relation = dbmtc_get_group($post->add_incoming_relation_by_name($verified_id, 'for'));
+					$type_relation->update_meta('startAt', $start_time);
+					$type_relation->update_meta('endAt', $end_time);
+			
+					$type_relation = dbmtc_get_group($post->add_incoming_relation_by_name($expired_id, 'for'));
+					$type_relation->update_meta('startAt', $end_time);
+				}
+				else if($current_status === 'verified') {
+					$result = true;
+				}
+				else {
+					throw new \Exception('Can\'t verify with status '.$current_status);
+				}
 			}
 			
 			$response_data['verified'] = $result;
@@ -170,35 +199,56 @@
 			
 			$result = false;
 			
-			$user = $data['user'];
+			$user = $this->get_user($data['user']);
+			$user_id = $user->ID;
 			$data_id = $data['verificationId'];
 			
 			$hash_salt = 'Tw?otIAwI%ourB-:@VeZ4tGLY0=Twh)1J Wwhxc!5AOg:*L$Ff@CAY+d-iW47Ztm';
 			//METODO: add filter around salt
-			$hash = md5($user.$hash_salt);
+			$hash = md5($user_id.$hash_salt);
 			
 			$stored_hash = get_post_meta($data_id, 'verification_hash', true);
 			
 			if($stored_hash === $hash) {
-				$password = $data['password'];
 				
-				$user_id = (int)get_post_meta($data_id, 'user_id', true);
+				$post = dbmtc_get_group($data_id);
+				$current_status = $post->get_single_object_relation_field_value("in:for:type/verication-status", "identifier");
 				
-				wp_set_password($password, $user_id);
+				if($current_status === "verified") {
+					$password = $data['password'];
 				
-				$response_data['authenticated'] = true;
-				$response_data['userId'] = $user_id;
+					$user_id = (int)get_post_meta($data_id, 'user_id', true);
 				
-				$encoder = new \Wprr\WprrEncoder();
+					wp_set_password($password, $user_id);
 				
-				$user = get_user_by('id', $user_id);
-				$response_data['user'] = $encoder->encode_user_with_private_data($user);
-				$response_data['roles'] = $user->roles;
+					$response_data['authenticated'] = true;
+					$response_data['userId'] = $user_id;
 				
-				$nonce_data = dbm_custom_login_perform_login($user);
+					$encoder = new \Wprr\WprrEncoder();
 				
-				$response_data['restNonce'] = $nonce_data['restNonce'];
-				$response_data['restNonceGeneratedAt'] = $nonce_data['restNonceGeneratedAt'];
+					$user = get_user_by('id', $user_id);
+					$response_data['user'] = $encoder->encode_user_with_private_data($user);
+					$response_data['roles'] = $user->roles;
+				
+					$nonce_data = dbm_custom_login_perform_login($user);
+				
+					$response_data['restNonce'] = $nonce_data['restNonce'];
+					$response_data['restNonceGeneratedAt'] = $nonce_data['restNonceGeneratedAt'];
+				
+					$used_id = dbmtc_get_or_create_type('type/verication-status', 'used');
+				
+					$start_time = time();
+				
+					$post->end_incoming_relations_from_type('for', 'type/verication-status');
+					$type_relation = dbmtc_get_group($post->add_incoming_relation_by_name($used_id, 'for'));
+					$type_relation->update_meta('startAt', $start_time);
+				}
+				else {
+					throw new \Exception('Can\'t reset with status '.$current_status);
+				}
+			}
+			else {
+				throw new \Exception('Not correct user');
 			}
 		}
 		
@@ -373,6 +423,12 @@
 		}
 		
 		protected function get_user($username_or_email) {
+			if(is_int($username_or_email)) {
+				$user = get_user_by('id', $username_or_email);
+				
+				return $user;
+			}
+			
 			$user = get_user_by('login', $username_or_email);
 			
 			if(!$user) {
@@ -489,11 +545,27 @@
 			
 			$hash_salt = 'Tw?otIAwI%ourB-:@VeZ4tGLY0=Twh)1J Wwhxc!5AOg:*L$Ff@CAY+d-iW47Ztm';
 			//METODO: add filter around salt
-			$hash = md5($data['user'].$hash_salt);
+			$hash = md5($user_id.$hash_salt);
 			
 			$data_id = dbm_create_data('Reset password verification - '.$hash, 'address-verification', 'admin-grouping/address-verifications');
 			$data_dbm_post = dbm_get_post($data_id);
 			$data_dbm_post->add_type_by_name('address-verification/'.'password-reset-verification');
+			
+			$unverified_id = dbmtc_get_or_create_type('type/verication-status', 'unverified');
+			$expired_id = dbmtc_get_or_create_type('type/verication-status', 'expired');
+		
+			$post = dbmtc_get_group($data_id);
+			
+			$start_time = time();
+			$minutes_until_expired = 10;
+			$end_time = $start_time+60*$minutes_until_expired;
+			
+			$type_relation = dbmtc_get_group($post->add_incoming_relation_by_name($unverified_id, 'for'));
+			$type_relation->update_meta('startAt', $start_time);
+			$type_relation->update_meta('endAt', $end_time);
+			
+			$type_relation = dbmtc_get_group($post->add_incoming_relation_by_name($expired_id, 'for'));
+			$type_relation->update_meta('startAt', $end_time);
 			
 			$response_data['verificationId'] = $data_id;
 			$response_data['sent'] = array();
