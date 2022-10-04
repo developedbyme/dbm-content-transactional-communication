@@ -32,7 +32,6 @@
 			add_filter(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/field-changed', array($this, 'filter_encode_internal_message_field_changed'), 10, 2);
 			add_filter(DBM_CONTENT_TRANSACTIONAL_COMMUNICATION_DOMAIN.'/encode-internal-message/verify-mobile-phone-field', array($this, 'filter_encode_internal_message_verify_mobile_phone_field'), 10, 2);
 			
-			add_filter('wprr/global-item/processActions', array($this, 'filter_global_processActions'), 10, 3);
 		}
 		
 		public function filter_query_groupsWithUser($query_args, $data) {
@@ -441,86 +440,6 @@
 			$encoded_data['field'] = get_post_meta($message_id, 'field', true);
 			
 			return $encoded_data;
-		}
-		
-		public function filter_global_processActions($return_object, $item_name, $data) {
-			
-			ignore_user_abort(true);
-			set_time_limit(0);
-			
-			wprr_performance_tracker()->start_meassure('CustomRangeHooks filter_global_processActions');
-			
-			$readyToProcess_id = dbmtc_get_or_create_type('type/action-status', 'readyToProcess');
-			$queued_id = dbmtc_get_or_create_type('type/action-status', 'queued');
-			$processing_id = dbmtc_get_or_create_type('type/action-status', 'processing');
-			$done_id = dbmtc_get_or_create_type('type/action-status', 'done');
-			$noAction_id = dbmtc_get_or_create_type('type/action-status', 'noAction');
-			
-			$type_group = dbmtc_get_group($readyToProcess_id);
-			
-			$max_length = 10;
-			
-			wprr_performance_tracker()->start_meassure('CustomRangeHooks filter_global_processActions data get ids');
-			$data_api = wprr_get_data_api();
-			$query = $data_api->database()->new_select_query()->set_post_type('dbm_data')->include_private()->term_query_by_path('dbm_type', 'action')->meta_query('needsToProcess', '1');
-			
-			$all_ids = $query->get_ids();
-			$ids = array();
-			
-			$status_post = $data_api->wordpress()->get_post($readyToProcess_id);
-			
-			foreach($all_ids as $id) {
-				$post = $data_api->wordpress()->get_post($id);
-				
-				$statuses = $post->object_relation_query('in:for:type/action-status');
-				
-				if(in_array($status_post, $statuses)) {
-					$ids[] = $id;
-				}
-			}
-			wprr_performance_tracker()->stop_meassure('CustomRangeHooks filter_global_processActions data get ids');
-			
-			//wprr_performance_tracker()->start_meassure('CustomRangeHooks filter_global_processActions get ids');
-			//$ids = $type_group->object_relation_query('out:for:action');
-			//wprr_performance_tracker()->stop_meassure('CustomRangeHooks filter_global_processActions get ids');
-			
-			sort($ids);
-			$remaining_items_to_process = max(0, count($ids)-$max_length);
-			$return_object['remaining'] = $remaining_items_to_process;
-			$ids = array_slice($ids, 0, $max_length);
-			$return_object['handled'] = $ids;
-			
-			$actions = array_map(function($id) {return dbmtc_get_group($id);}, $ids);
-			
-			foreach($actions as $action) {
-				$action->end_incoming_relations_from_type('for', 'type/action-status');
-				$action->add_incoming_relation_by_name($queued_id, 'for', time());
-			}
-			
-			foreach($actions as $action) {
-				$action_type = $action->get_single_object_relation_field_value('in:for:type/action-type', 'identifier');
-				$hook_name = 'dbmtc/process_action/'.$action_type;
-				
-				$action->end_incoming_relations_from_type('for', 'type/action-status');
-				$action->add_incoming_relation_by_name($processing_id, 'for', time());
-				
-				if(has_action($hook_name)) {
-					do_action($hook_name, $action->get_id());
-					
-					$action->end_incoming_relations_from_type('for', 'type/action-status');
-					$action->add_incoming_relation_by_name($done_id, 'for', time());
-				}
-				else {
-					$action->end_incoming_relations_from_type('for', 'type/action-status');
-					$action->add_incoming_relation_by_name($noAction_id, 'for', time());
-				}
-				
-				$action->update_meta('needsToProcess', false);
-			}
-			
-			wprr_performance_tracker()->stop_meassure('CustomRangeHooks filter_global_processActions');
-			
-			return $return_object;
 		}
 		
 		public static function test_import() {

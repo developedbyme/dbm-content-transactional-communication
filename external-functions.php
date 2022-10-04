@@ -799,6 +799,50 @@
 		return $action_id;
 	}
 	
+	function dbmtc_add_action_with_dependencies($type, $dependency_group_id, $from_ids = null, $data = null, $timeout = 86400) {
+		$action_type_id = dbmtc_get_or_create_type('type/action-type', $type);
+		
+		$action_id = dbm_create_data('Action: '.$type, 'action');
+		
+		$action_group = dbmtc_get_group($action_id);
+		
+		if($data) {
+			$action_group->add_type_by_name('value-item');
+			$action_group->set_field('value', $data);
+		}
+		
+		if($from_ids) {
+			if(!is_array($from_ids)) {
+				$from_ids = array($from_ids);
+			}
+			
+			foreach($from_ids as $from_id) {
+				$action_group->add_outgoing_relation_by_name($from_id, 'from');
+			}
+		}
+		
+		$action_group->make_private();
+		
+		$action_group->add_incoming_relation_by_name($action_type_id, 'for');
+		$action_group->add_incoming_relation_by_name($dependency_group_id, 'for');
+		
+		$action_group->update_meta('needsToProcess', true);
+		$type_id = dbmtc_get_or_create_type('type/action-status', 'waitingForDependencies');
+		$status_relation = dbmtc_get_group($action_group->add_incoming_relation_by_name($type_id, 'for'));
+		
+		$start_time = time();
+		$end_time = $start_time+$timeout;
+		$status_relation->update_meta('startAt', $start_time);
+		$status_relation->update_meta('endAt', $end_time);
+		
+		$type_id = dbmtc_get_or_create_type('type/action-status', 'dependenciesTimedOut');
+		$status_relation = dbmtc_get_group($action_group->add_incoming_relation_by_name($type_id, 'for'));
+		
+		$status_relation->update_meta('startAt', $end_time);
+		
+		return $action_id;
+	}
+	
 	function dbmtc_process_action($action_id) {
 		
 		$action = dbmtc_get_group($action_id);

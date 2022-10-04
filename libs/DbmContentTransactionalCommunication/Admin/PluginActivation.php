@@ -271,6 +271,9 @@
 			
 			$current_type = $setup_manager->create_data_type('action')->set_name('Action');
 			
+			$current_type = $setup_manager->create_data_type('group')->set_name('Group');
+			$current_type = $setup_manager->create_data_type('group/dependencies')->set_name('Dependencies');
+			
 			$current_type = $setup_manager->create_data_type('type/action-status')->set_name('Action status');
 			$current_type = $setup_manager->create_data_type('type/action-type')->set_name('Action type');
 			

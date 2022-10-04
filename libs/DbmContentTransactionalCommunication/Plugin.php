@@ -56,6 +56,7 @@
 			
 			$this->add_additional_hook(new \DbmContentTransactionalCommunication\ChangePostHooks());
 			$this->add_additional_hook(new \DbmContentTransactionalCommunication\ApiActionHooks());
+			$this->add_additional_hook(new \DbmContentTransactionalCommunication\CronJobs());
 			
 			$this->ranges = new \DbmContentTransactionalCommunication\CustomRangeFilters();
 			$this->add_additional_hook($this->ranges);
