@@ -154,11 +154,8 @@
 				$dependencies = $post->object_relation_query('in:for:group/dependencies,in:in:action');
 				$is_completed = !empty($dependencies);
 				
-				var_dump(array_map(function($post) {return $post->get_id();}, $dependencies));
 				foreach($dependencies as $dependency) {
 					$statuses = $dependency->object_relation_query('in:for:type/action-status');
-					var_dump(array_map(function($post) {return $post->get_id();}, $statuses));
-					var_dump($dependency->get_id(), $done_post->get_id(), $noAction_post->get_id());
 					if(!(in_array($done_post, $statuses) || in_array($noAction_post, $statuses))) {
 						$is_completed = false;
 						break;
