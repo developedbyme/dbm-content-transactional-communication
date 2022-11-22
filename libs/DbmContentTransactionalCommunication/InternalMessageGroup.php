@@ -274,6 +274,8 @@
 				
 				$this->update_updated_date();
 				$this->update_name_after_field_change($field);
+				
+				wprr_get_data_api()->wordpress()->get_post($this->get_id())->clear_object_relation_cache();
 			}
 			else {
 				$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
@@ -330,6 +332,8 @@
 				wprr_performance_tracker()->stop_meassure('InternalMessageGroup create_field_from_template make private');
 				
 				$this->update_updated_date();
+				
+				wprr_get_data_api()->wordpress()->get_post($this->get_id())->clear_object_relation_cache();
 			}
 			else {
 				$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
@@ -377,6 +381,8 @@
 		}
 		
 		public function set_field_if_different($key, $value, $comment = '') {
+			//var_dump("set_field_if_different");
+			//var_dump($key);
 			
 			wprr_performance_tracker()->start_meassure('InternalMessageGroup set_field_if_different');
 			
@@ -488,6 +494,8 @@
 		}
 		
 		public function get_field($key) {
+			//var_dump("get_field");
+			//var_dump($key);
 			
 			wprr_performance_tracker()->start_meassure('InternalMessageGroup get_field');
 			
@@ -497,6 +505,7 @@
 				
 				$template = $this->get_field_template_if_exists($key);
 				if($template) {
+					
 					$field = $this->create_field_from_template($key, $template);
 						
 					wprr_performance_tracker()->stop_meassure('InternalMessageGroup get_field');
@@ -661,7 +670,9 @@
 		}
 		
 		public function get_existing_field_ids() {
+			//var_dump("get_existing_field_ids");
 			$return_array = $this->object_relation_query('in:field-for:internal-message-group-field');
+			//var_dump($return_array);
 			
 			//MENOTE: relations will be removed soon
 			$field_ids = dbm_new_query('dbm_data')->set_argument('post_status', array('publish', 'private'))->add_type_by_path('internal-message-group-field')->add_relations_with_children_from_post($this->get_id(), 'internal-message-groups')->get_post_ids();
