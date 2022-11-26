@@ -315,6 +315,10 @@
 			$current_type->add_field("action")->setup_meta_storage();
 			$current_type->add_field("actionData")->set_type('json')->setup_meta_storage();
 			
+			$current_type = $setup_manager->create_data_type('type/form-name')->set_name('Form name');
+			
+			$current_type = $setup_manager->create_data_type('form-submission')->set_name('Form submission');
+			
 			$setup_manager->save_all();
 		}
 		
