@@ -319,6 +319,12 @@
 			
 			$current_type = $setup_manager->create_data_type('form-submission')->set_name('Form submission');
 			
+			$current_type = $setup_manager->create_data_type('group/import-group')->set_name('Import group');
+			
+			$current_type = $setup_manager->create_data_type('import-item')->set_name('Import item');
+			
+			$current_type = $setup_manager->create_data_type('type/import-type')->set_name('Import type');
+			
 			$setup_manager->save_all();
 		}
 		
