@@ -845,6 +845,8 @@
 	
 	function dbmtc_process_action($action_id) {
 		
+		wprr_performance_tracker()->start_meassure('dbmtc_process_action');
+		
 		$action = dbmtc_get_group($action_id);
 			
 		$action->end_incoming_relations_from_type('for', 'type/action-status');
@@ -869,6 +871,8 @@
 		}
 		
 		$action->update_meta('needsToProcess', false);
+		
+		wprr_performance_tracker()->stop_meassure('dbmtc_process_action');
 	}
 	
 	function dbmtc_create_request($url, $body = null, $method = 'GET', $headers = array(), $curl_options = array()) {
