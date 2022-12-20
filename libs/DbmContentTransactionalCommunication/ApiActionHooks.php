@@ -45,6 +45,8 @@
 			add_action('wprr/api_action/dbmtc/sendTestEmail', array($this, 'hook_sendTestEmail'), 10, 2);
 			
 			add_action('wprr/api_action/incomingWebhookEvent', array($this, 'hook_incomingWebhookEvent'), 10, 2);
+			
+			add_action('wprr/api_action/submitForm', array($this, 'hook_submitForm'), 10, 2);
 		}
 
 		public function hook_send_email_verification($data, &$response_data) {
@@ -823,6 +825,87 @@
 			
 			$response_data['id'] = $post_id;
 			$response_data['actionId'] = $action_id;
+		}
+		
+		public function hook_submitForm($data, &$response_data) {
+			
+			
+			
+			$form_name = $_GET['form'];
+			if(!$form_name) {
+				throw new \Exception('No form name');
+			}
+			$name_id = dbmtc_get_or_create_type('type/form-name', $form_name);
+			
+			$current_user = get_current_user_id();
+			
+			$post_id = dbm_create_data('Form submission '.$form_name.' by '.$current_user.' at '.date('Y-m-d H:i:s'), 'form-submission');
+			$group = dbmtc_get_group($post_id);
+			$group->add_type_by_name('value-item');
+			
+			if($current_user) {
+				$group->add_user_relation($current_user, 'by');
+			}
+			
+			$form_data = $data->get_params();
+			unset($form_data['action_name']);
+			unset($form_data['form']);
+			
+			$wp_upload_dir = wp_upload_dir(null, false);
+			
+			$files = $data->get_file_params();
+			foreach($files as $field_name => $file) {
+				$original_name = $file['name'];
+				
+				$wp_filetype = wp_check_filetype($original_name, null);
+				
+				$file_name = time().'-'.uniqid().'.'.$wp_filetype['ext'];
+				$path_to_file = '/dbmtc/groups/'.$group_id.'/'.$field_name.'/'.$file_name;
+				
+				$moved = $this->create_folders_and_move_file($wp_upload_dir['basedir'].$path_to_file, $file['tmp_name']);
+				
+				if(!$moved) {
+					return $this->output_error('Could not move uploaded file');
+				}
+				
+				$url = $wp_upload_dir['baseurl'].$path_to_file;
+				
+				$uploaded_file_group = dbmtc_get_group(dbm_create_data($original_name, 'uploaded-file', 'uploaded-files'));
+				$uploaded_file_group->add_type_by_name('identifiable-item');
+				$uploaded_file_group->set_field('identifier', $field_name);
+				$uploaded_file_group->set_field('fileName', $original_name);
+				$uploaded_file_group->set_field('url', $url);
+				$uploaded_file_group->add_outgoing_relation_by_name($group->get_id(), 'uploaded-to');
+				$uploaded_file_group->change_status('private');
+				
+			}
+			
+			$group->set_field('value', $form_data);
+			$group->make_private();
+			
+			$action_id = dbmtc_add_action_to_process('handleFormSubmission/'.$form_name, array($post_id));
+			
+			if(isset($_GET['handleDirect']) && $_GET['handleDirect'] == '1') {
+				dbmtc_process_action();
+			}
+			
+			$response_data['id'] = $post_id;
+			$response_data['actionId'] = $action_id;
+		}
+		
+		protected function create_folders_and_move_file($full_path, $temp_path) {
+			
+			$parts = explode('/', $full_path);
+			$file = array_pop($parts);
+			$dir = '';
+			
+			foreach($parts as $part) {
+				if(!is_dir($dir .= "/$part")) {
+					mkdir($dir);
+				}
+			}
+			
+			return move_uploaded_file($temp_path, $full_path);
 		}
 		
 		public static function test_import() {

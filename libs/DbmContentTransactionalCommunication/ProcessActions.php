@@ -22,7 +22,7 @@
 			//echo("\DP\ProcessActions::register<br />");
 			
 			$this->register_hook_for_type('setStatus');
-			
+			$this->register_hook_for_type('importItem');
 		}
 		
 		public function hook_setStatus($action_id) {
@@ -40,6 +40,16 @@
 					$action->update_meta('processLog', 'No status set');
 				}
 			}
+		}
+		
+		public function hook_importItem($action_id) {
+			$action = dbmtc_get_group($action_id);
+			$import_item = dbmtc_get_group($action->object_relation_query('out:from:import-item')[0]);
+			
+			$type = $import_item->get_single_object_relation_field_value('in:for:type/import-type', 'identifier');
+			
+			do_action('dbmtc/import/handle_action/'.$type, $import_item, $action);
+			
 		}
 		
 		public static function test_import() {
