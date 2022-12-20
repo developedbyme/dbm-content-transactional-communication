@@ -267,8 +267,8 @@
 				$field->set_value($value);
 				$field->add_outgoing_relation_by_name($this->id, 'field-for');
 				
-				$status = $value ? 'complete' : 'none';
-				$field->set_status($status);
+				//$status = $value ? 'complete' : 'none';
+				//$field->set_status($status);
 				
 				$field->make_private();
 				
@@ -319,13 +319,16 @@
 				
 				wprr_performance_tracker()->start_meassure('InternalMessageGroup create_field_from_template set initial value');
 				$value = $template->get_value();
-				$field->set_value($value);
+				//$field->set_value($value);
+				$field->update_meta('dbmtc_value', $value);
 				wprr_performance_tracker()->stop_meassure('InternalMessageGroup create_field_from_template set initial value');
 				
+				/*
 				wprr_performance_tracker()->start_meassure('InternalMessageGroup create_field_from_template set status');
 				$status = $value ? 'complete' : 'none';
 				$field->set_status($status);
 				wprr_performance_tracker()->stop_meassure('InternalMessageGroup create_field_from_template set status');
+				*/
 				
 				wprr_performance_tracker()->start_meassure('InternalMessageGroup create_field_from_template make private');
 				$field->make_private();
@@ -357,14 +360,18 @@
 			$original_value = $field->get_value();
 			$field->set_value($value);
 			
-			$field->set_status('complete');
+			//$field->set_status('complete');
 			
 			$user_id = get_current_user_id();
 			
-			$message = $this->create_message('internal-message-types/field-changed', $comment, $user_id);
-			$message->update_meta('field', $key);
-			$message->update_meta('oldValue', $original_value);
-			$message->update_meta('newValue', $value);
+			$message = null;
+			
+			if($original_value) {
+				$message = $this->create_message('internal-message-types/field-changed', $comment, $user_id);
+				$message->update_meta('field', $key);
+				$message->update_meta('oldValue', $original_value);
+				$message->update_meta('newValue', $value);
+			}
 			
 			do_action('dbmtc/internal_message/group_field_set', $this, $key, $value, $user_id, $message);
 			
