@@ -848,17 +848,23 @@
 		wprr_performance_tracker()->start_meassure('dbmtc_process_action');
 		
 		$action = dbmtc_get_group($action_id);
-			
+		
+		wprr_performance_tracker()->start_meassure('dbmtc_process_action status processing');
+		
 		$action->end_incoming_relations_from_type('for', 'type/action-status');
 		
 		$processing_id = dbmtc_get_or_create_type('type/action-status', 'processing');
 		$action->add_incoming_relation_by_name($processing_id, 'for', time());
 		
+		wprr_performance_tracker()->stop_meassure('dbmtc_process_action status processing');
+		
 		$action_type = $action->get_single_object_relation_field_value('in:for:type/action-type', 'identifier');
 		$hook_name = 'dbmtc/process_action/'.$action_type;
 		
 		if(has_action($hook_name)) {
+			wprr_performance_tracker()->start_meassure('dbmtc_process_action do_action');
 			do_action($hook_name, $action->get_id());
+			wprr_performance_tracker()->stop_meassure('dbmtc_process_action do_action');
 			
 			$done_id = dbmtc_get_or_create_type('type/action-status', 'done');
 			$action->end_incoming_relations_from_type('for', 'type/action-status');
