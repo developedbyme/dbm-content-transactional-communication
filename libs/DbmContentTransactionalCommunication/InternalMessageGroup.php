@@ -300,12 +300,19 @@
 				
 				$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
 				
+				wprr_performance_tracker()->start_meassure('InternalMessageGroup create_field_from_template create set_type');
 				$type = $template->get_type();
 				$field->set_type($type);
-				$field->add_outgoing_relation_by_name($this->id, 'field-for');
+				wprr_performance_tracker()->stop_meassure('InternalMessageGroup create_field_from_template create set_type');
 				
+				wprr_performance_tracker()->start_meassure('InternalMessageGroup create_field_from_template create add_outgoing_relation_by_name');
+				$field->add_outgoing_relation_by_name($this->id, 'field-for');
+				wprr_performance_tracker()->stop_meassure('InternalMessageGroup create_field_from_template create add_outgoing_relation_by_name');
+				
+				wprr_performance_tracker()->start_meassure('InternalMessageGroup create_field_from_template create set_storage_type');
 				$storage_type = $template->get_storage_type();
 				$field->set_storage_type($storage_type);
+				wprr_performance_tracker()->stop_meassure('InternalMessageGroup create_field_from_template create set_storage_type');
 				
 				wprr_performance_tracker()->stop_meassure('InternalMessageGroup create_field_from_template create');
 				
