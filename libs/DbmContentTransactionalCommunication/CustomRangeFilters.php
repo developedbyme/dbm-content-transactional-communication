@@ -152,11 +152,6 @@
 				wprr_performance_tracker()->stop_meassure('_encode_field (uncached)');
 			}
 			
-			if($include_changes) {
-				$return_object['pastChanges'] = $field->get_past_changes();
-				$return_object['futureChanges'] = $field->get_future_changes();
-			}
-			
 			return $return_object;
 		}
 		

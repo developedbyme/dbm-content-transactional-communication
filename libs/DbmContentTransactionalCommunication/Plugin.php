@@ -36,7 +36,6 @@
 			add_action('dbmtc/send_verification/text-message', array($this, 'hook_dbmtc_send_verification_text_message'), $this->_default_hook_priority, 3);
 			add_action('dbmtc/send_verification/email', array($this, 'hook_dbmtc_send_verification_email'), $this->_default_hook_priority, 3);
 			add_action('dbmtc_check_timed_actions', array($this, 'hook_dbmtc_check_timed_actions'), $this->_default_hook_priority, 0);
-			add_action('dbmtc/timed_action/update_field_timeline', array($this, 'hook_dbmtc_timed_action_update_field_timeline'), $this->_default_hook_priority, 1);
 			
 			add_action('dbmtc/internal_message/update_name_after_field_change', array($this, 'hook_update_name_after_field_change'), 10, 2);
 		}
@@ -498,11 +497,6 @@
 				$interval_action = dbmtc_get_timed_action($interval_action_id);
 				$interval_action->try_to_perform();
 			}
-		}
-		
-		public function hook_dbmtc_timed_action_update_field_timeline($timed_action) {
-			$internal_message_field = dbmtc_get_internal_message_group_field($timed_action->get_action_data()['field']);
-			$internal_message_field->update_to_next_value();
 		}
 		
 		public function hook_update_name_after_field_change($group, $field) {
