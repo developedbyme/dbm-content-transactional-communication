@@ -804,8 +804,6 @@
 		
 		public function hook_submitForm($data, &$response_data) {
 			
-			
-			
 			$form_name = $_GET['form'];
 			if(!$form_name) {
 				throw new \Exception('No form name');
@@ -817,6 +815,8 @@
 			$post_id = dbm_create_data('Form submission '.$form_name.' by '.$current_user.' at '.date('Y-m-d H:i:s'), 'form-submission');
 			$group = dbmtc_get_group($post_id);
 			$group->add_type_by_name('value-item');
+			
+			$group->add_incoming_relation_by_name($name_id, 'for');
 			
 			if($current_user) {
 				$group->add_user_relation($current_user, 'by');
