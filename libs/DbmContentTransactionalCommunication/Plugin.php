@@ -219,12 +219,20 @@
 		
 		public function hook_set_field_value_single_relation($field, $value) {
 			$path = $field->get_meta('dbmtc_relation_path');
-			$use_slug = (boolean)$field->get_meta('dbmtc_relation_use_slug');
 			$parent_term = dbm_get_relation_by_path($path);
 			
-			if($use_slug) {
-				$current_term = dbm_get_relation_by_path($path.'/'.$value);
-				$value = $current_term->term_id;
+			if(is_string($value)) {
+				if(str_contains($value, ':')) {
+					$data_api = wprr_get_data_api();
+					$value = $data_api->wordpress()->get_taxonomy_term($value)->get_id();
+				}
+				else {
+					$use_slug = (boolean)$field->get_meta('dbmtc_relation_use_slug');
+					if($use_slug) {
+						$current_term = dbm_get_relation_by_path($path.'/'.$value);
+						$value = $current_term->term_id;
+					}
+				}
 			}
 			
 			dbm_replace_relations($field->get_group_id(), $parent_term, array((int)$value));
