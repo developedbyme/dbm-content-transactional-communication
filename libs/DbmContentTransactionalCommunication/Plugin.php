@@ -266,6 +266,8 @@
 			$path = $field->get_meta('dbmtc_relation_path');
 			$parent_term = dbm_get_relation_by_path($path);
 			
+			//METODO: add support to set with full paths
+			
 			dbm_replace_relations($field->get_group_id(), $parent_term, $value);
 		}
 		
