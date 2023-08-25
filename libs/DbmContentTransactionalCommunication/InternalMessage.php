@@ -14,9 +14,9 @@
 		public function get_group_id() {
 			if(!$this->group_id) {
 				
-				$relation_ids = $this->resolve_outgoing_relations($this->get_encoded_outgoing_relations_by_type('message-in', null));
-				if(!empty($relation_ids)) {
-					$this->group_id = $relation_ids[0];
+				$group = $this->data_api_post()->single_object_relation_query('out:message-in:*');
+				if($group) {
+					$this->group_id = $group->get_id();
 				}
 				
 				if(!$this->group_id) {

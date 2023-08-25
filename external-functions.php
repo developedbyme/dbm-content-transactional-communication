@@ -647,6 +647,7 @@
 		if(!in_array($type_id, $added_tags)) {
 			$tag_relation = dbmtc_get_group($post->add_incoming_relation_by_name($type_id, 'for'));
 			$tag_relation->update_meta('startAt', time());
+			//METODO: set custom table
 			
 			dbmtc_add_action_to_process('tagAdded', array($id, $type_id), array('item' => $id, 'tag' => $tag));
 		}
@@ -658,12 +659,14 @@
 		$post = dbmtc_get_group($id);
 		
 		$has_relation = false;
-		$relations = $post->get_encoded_incoming_relations_by_type('for', 'type/tag');
+		$relations = $post->data_api_post()->get_incoming_direction()->get_type('for')->get_relations('type/tag');
 		
-		foreach($relations as $relation_data) {
-			if($relation_data['fromId'] === $type_id) {
-				$relation = dbmtc_get_group($relation_data['id']);
+		foreach($relations as $relation) {
+			if($relation->get_object_id() === $type_id) {
+				$relation = dbmtc_get_group($relation->get_id());
 				$relation->set_field('endAt', time());
+				//METODO: set custom table
+				
 				$has_relation = true;
 			}
 		}
