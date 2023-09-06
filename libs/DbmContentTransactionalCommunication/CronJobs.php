@@ -47,6 +47,10 @@
 			
 			$max_length = 10;
 			
+			if(isset($data['numberOfActions'])) {
+				$max_length = (int)$data['numberOfActions'];
+			}
+			
 			wprr_performance_tracker()->start_meassure('CustomRangeHooks filter_global_processActions data get ids');
 			$data_api = wprr_get_data_api();
 			$query = $data_api->database()->new_select_query()->set_post_type('dbm_data')->include_private()->term_query_by_path('dbm_type', 'action')->meta_query('needsToProcess', '1');
