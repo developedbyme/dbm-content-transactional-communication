@@ -325,6 +325,8 @@
 			
 			$current_type = $setup_manager->create_data_type('type/import-type')->set_name('Import type');
 			
+			$current_type = $setup_manager->create_data_type('type/access-rule')->set_name('Access rule');
+			
 			$setup_manager->save_all();
 		}
 		
