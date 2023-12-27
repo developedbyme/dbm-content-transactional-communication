@@ -37,19 +37,17 @@
 				$file_keys = array_keys($_FILES);
 				$file = $_FILES[$file_keys[0]];
 				$original_name = $file['name'];
-			
-				$wp_filetype = wp_check_filetype($original_name, null );
 				
 				$group_id = $data['group'];
 				$field_name = $data['field'];
 				
-				$supported_extensions = apply_filters('dbmtc/supported_extensions', array('pdf', 'word', 'jpg', 'jpeg', 'png', 'gif', 'txt', 'json', 'xlsx', 'xls', 'rtf'), $group_id, $field_name);
+				$supported_extensions = apply_filters('dbmtc/supported_extensions', array('pdf', 'word', 'jpg', 'jpeg', 'png', 'gif', 'svg', 'txt', 'json', 'xlsx', 'xls', 'rtf'), $group_id, $field_name);
 				
-				$extension = strtolower($wp_filetype['ext']);
-				$is_suppoerted = in_array($extension, $supported_extensions);
-				$is_suppoerted = apply_filters('dbmtc/supported_extension', $is_suppoerted, $extension, $group_id, $field_name);
+				$extension = strtolower(pathinfo($original_name)['extension']);
+				$is_supported = in_array($extension, $supported_extensions);
+				$is_supported = apply_filters('dbmtc/supported_extension', $is_supported, $extension, $group_id, $field_name);
 				
-				if($extension === 'php' || $extension === 'cgi' || !$is_suppoerted) {
+				if($extension === 'php' || $extension === 'cgi' || !$is_supported) {
 					return $this->output_error('Unsupported format');
 				}
 			
@@ -71,17 +69,20 @@
 					return $this->output_error('Field doesn\'t support upload');
 				}
 				if($field_type === 'image') {
-					switch($wp_filetype['type']) {
+					$content_type = mime_content_type($file['tmp_name']);
+					switch($content_type) {
 						case 'image/jpeg':
 						case 'image/png':
+						case 'image/gif':
+						case 'image/svg+xml':
 						case 'application/pdf':
 							break;
 						default:
-							return $this->output_error('Unsupported format '.$wp_filetype['type']);
+							return $this->output_error('Unsupported image format '.$content_type);
 					}
 				}
 			
-				$file_name = time().'-'.uniqid().'.'.$wp_filetype['ext'];
+				$file_name = time().'-'.uniqid().'.'.$extension;
 				$path_to_file = '/dbmtc/groups/'.$group_id.'/'.$field_name.'/'.$file_name;
 			
 				$moved = $this->create_folders_and_move_file($wp_upload_dir['basedir'].$path_to_file, $file['tmp_name']);
