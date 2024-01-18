@@ -213,27 +213,23 @@
 			
 			wprr_performance_tracker()->start_meassure('InternalMessageGroup create_message');
 			
-			$group_post = get_post($this->id);
+			$group_post = wprr_get_data_api()->wordpress()->get_post($this->id);
 			
-			$new_id = dbm_create_data($group_post->post_title, 'internal-message', 'admin-grouping/internal-messages');
+			$new_id = dbm_create_data($group_post->get_post_title(), 'internal-message', 'admin-grouping/internal-messages');
 			
-			//$this->relate_post_to_group($new_id);
+			$dbm_post =  wprr_get_data_api()->wordpress()->get_post($new_id);
+			$post_editor = $dbm_post->editor();
+			$post_editor->add_outgoing_relation_by_name($group_post, 'message-in');
 			
-			$dbm_post = dbm_get_post($new_id);
-			$dbm_post->add_outgoing_relation_by_name($this->id, 'message-in');
+			$post_editor->add_term_by_path('dbm_relation', $type);
 			
-			dbm_add_post_relation($new_id, $type);
-			
-			global $wpdb;
-			$wpdb->update($wpdb->posts, array(
-				'post_content' => $body,
-				'post_author' => $from_user,
-				'post_status' => 'private'
-			), array('ID' => $new_id));
-			
-			$message = dbmtc_get_internal_message($new_id);
+			$post_editor->update_field('post_content', $body);
+			$post_editor->update_field('post_author', $from_user);
+			$post_editor->make_private();
 			
 			$this->update_updated_date();
+			
+			$message = dbmtc_get_internal_message($new_id);
 			
 			wprr_performance_tracker()->stop_meassure('InternalMessageGroup create_message');
 			
@@ -665,7 +661,10 @@
 		
 		public function update_updated_date() {
 			wprr_performance_tracker()->start_meassure('InternalMessageGroup update_updated_date');
-			update_post_meta($this->id, 'updated_date', date('Y-m-d\TH:i:s'));
+			
+			$group_post = wprr_get_data_api()->wordpress()->get_post($this->id);
+			$group_post->editor()->update_meta('updated_date', date('Y-m-d\TH:i:s'));
+			
 			wprr_performance_tracker()->stop_meassure('InternalMessageGroup update_updated_date');
 		}
 		
