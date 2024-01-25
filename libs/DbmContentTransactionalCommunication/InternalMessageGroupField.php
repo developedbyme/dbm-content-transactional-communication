@@ -106,7 +106,7 @@
 		
 		public function set_translations($value) {
 			
-			$this->update_meta('dbmtc_value_translations', $value);
+			$this->data_api_post()->editor()->update_meta('dbmtc_value_translations', $value);
 			
 			return $this;
 		}
@@ -121,43 +121,43 @@
 		}
 		
 		public function set_status($status) {
-			dbm_set_single_relation_by_name($this->id, 'field-status', $status);
+			$this->data_api_post()->editor()->add_term_by_path('dbm_relation', 'field-status/'.$status);
 			
 			return $this;
 		}
 		
 		public function get_status_term() {
-			$term_id = dbm_get_single_post_relation($this->id, 'field-status');
 			
-			if($term_id) {
-				return get_term_by('id', $term_id, 'dbm_relation');
+			$parent_term = wprr_get_data_api()->wordpress()->get_taxonomy('dbm_relation')->get_term('field-status');
+			$type_term = $this->data_api_post()->get_single_term_in($parent_term);
+			if($type_term) {
+				return get_term_by('id', $type_term->get_id(), 'dbm_relation');
 			}
 			
 			return null;
 		}
 		
 		public function set_type($type) {
-			dbm_set_single_relation_by_name($this->id, 'field-type', $type);
+			$this->data_api_post()->editor()->add_term_by_path('dbm_relation', 'field-type/'.$type);
 			
 			return $this;
 		}
 		
 		public function get_type() {
-			$term_id = dbm_get_single_post_relation($this->id, 'field-type');
-			
-			if($term_id) {
-				$term = get_term_by('id', $term_id, 'dbm_relation');
-				return $term->slug;
+			$parent_term = wprr_get_data_api()->wordpress()->get_taxonomy('dbm_relation')->get_term('field-type');
+			$type_term = $this->data_api_post()->get_single_term_in($parent_term);
+			if($type_term) {
+				return $type_term->get_slug();
 			}
 			
 			return 'none';
 		}
 		
 		public function get_type_term() {
-			$term_id = dbm_get_single_post_relation($this->id, 'field-type');
-			
-			if($term_id) {
-				return get_term_by('id', $term_id, 'dbm_relation');
+			$parent_term = wprr_get_data_api()->wordpress()->get_taxonomy('dbm_relation')->get_term('field-type');
+			$type_term = $this->data_api_post()->get_single_term_in($parent_term);
+			if($type_term) {
+				return get_term_by('id', $type_term->get_id(), 'dbm_relation');
 			}
 			
 			return null;
@@ -165,7 +165,7 @@
 		
 		public function set_storage_type($type) {
 			if($type) {
-				dbm_set_single_relation_by_name($this->id, 'field-storage', $type);
+				$this->data_api_post()->editor()->add_term_by_path('dbm_relation', 'field-storage/'.$type);
 			}
 			//METODO: remove storage type otherwise
 			
@@ -173,21 +173,21 @@
 		}
 		
 		public function get_storage_type() {
-			$term_id = dbm_get_single_post_relation($this->id, 'field-storage');
 			
-			if($term_id) {
-				$term = get_term_by('id', $term_id, 'dbm_relation');
-				return $term->slug;
+			$parent_term = wprr_get_data_api()->wordpress()->get_taxonomy('dbm_relation')->get_term('field-storage');
+			$type_term = $this->data_api_post()->get_single_term_in($parent_term);
+			if($type_term) {
+				return $type_term->get_slug();
 			}
 			
 			return null;
 		}
 		
 		public function get_storage_type_term() {
-			$term_id = dbm_get_single_post_relation($this->id, 'field-storage');
-			
-			if($term_id) {
-				return get_term_by('id', $term_id, 'dbm_relation');
+			$parent_term = wprr_get_data_api()->wordpress()->get_taxonomy('dbm_relation')->get_term('field-storage');
+			$type_term = $this->data_api_post()->get_single_term_in($parent_term);
+			if($type_term) {
+				return get_term_by('id', $type_term->get_id(), 'dbm_relation');
 			}
 			
 			return null;

@@ -291,8 +291,9 @@
 				
 				wprr_performance_tracker()->start_meassure('InternalMessageGroup create_field_from_template create');
 				$field_id = dbm_create_data($group_post->post_title.' - '.$key, 'internal-message-group-field', 'admin-grouping/internal-message-group-fields');
-				//$this->relate_post_to_group($field_id);
-				update_post_meta($field_id, 'dbmtc_key', $key);
+				$field_post = wprr_get_data_api()->wordpress()->get_post($field_id);
+				
+				$field_post->editor()->update_meta('dbmtc_key', $key);
 				
 				$field = new \DbmContentTransactionalCommunication\InternalMessageGroupField($field_id);
 				
