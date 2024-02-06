@@ -493,7 +493,7 @@
 				}
 				
 				wprr_performance_tracker()->stop_meassure('InternalMessageGroup get_field');
-				throw(new \Exception('No field for key '.$key));
+				throw(new \Exception('No field for key '.$key.' on '.$this->get_id()));
 				return null;
 			}
 			
@@ -543,7 +543,7 @@
 					return $template->get_value();
 				}
 				
-				throw(new \Exception('No field for key '.$key));
+				throw(new \Exception('No field for key '.$key.' on '.$this->get_id()));
 				return null;
 			}
 			
