@@ -379,8 +379,6 @@
 			
 			do_action('dbmtc/internal_message/group_field_set', $this, $key, $value, $user_id, $message);
 			
-			$this->delete_cached_value('encodedFields');
-			
 			$this->update_updated_date();
 			$this->update_name_after_field_change($field);
 			
@@ -693,12 +691,6 @@
 			$provider->set_message_group($this);
 			
 			return $provider;
-		}
-		
-		public function clear_cache() {
-			parent::clear_cache();
-			
-			$this->delete_cached_value('encodedFields');
 		}
 		
 		public static function test_import() {

@@ -277,7 +277,7 @@
 			//echo("change_clearCache");
 			
 			$post = dbmtc_get_group($post_id);
-			$post->clear_cache();
+			
 		}
 		
 		public function change_dbmtc_processAction($data, $post_id, $logger) {

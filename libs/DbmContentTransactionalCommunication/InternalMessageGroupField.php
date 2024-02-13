@@ -86,8 +86,6 @@
 			}
 			
 			$this->update_meta('dbmtc_value', $value);
-			$this->delete_cached_value('encodedItem');
-			dbmtc_get_internal_message_group($this->get_group_id())->delete_cached_value('encodedFields');
 			
 			return $this;
 		}

@@ -177,12 +177,10 @@
 					$end_time = $start_time+60*$minutes_until_expired;
 				
 					$post->end_incoming_relations_from_type('for', 'type/verication-status');
-					$type_relation = dbmtc_get_group($post->add_incoming_relation_by_name($verified_id, 'for'));
-					$type_relation->update_meta('startAt', $start_time);
+					$type_relation = dbmtc_get_group($post->add_incoming_relation_by_name($verified_id, 'for', $start_time));
 					$type_relation->update_meta('endAt', $end_time);
 			
-					$type_relation = dbmtc_get_group($post->add_incoming_relation_by_name($expired_id, 'for'));
-					$type_relation->update_meta('startAt', $end_time);
+					$post->add_incoming_relation_by_name($expired_id, 'for', $end_time);
 				}
 				else if($current_status === 'verified') {
 					$result = true;
@@ -241,8 +239,7 @@
 					$start_time = time();
 				
 					$post->end_incoming_relations_from_type('for', 'type/verication-status');
-					$type_relation = dbmtc_get_group($post->add_incoming_relation_by_name($used_id, 'for'));
-					$type_relation->update_meta('startAt', $start_time);
+					$post->add_incoming_relation_by_name($used_id, 'for', $start_time);
 				}
 				else {
 					throw new \Exception('Can\'t reset with status '.$current_status);
@@ -537,12 +534,10 @@
 			$minutes_until_expired = 10;
 			$end_time = $start_time+60*$minutes_until_expired;
 			
-			$type_relation = dbmtc_get_group($post->add_incoming_relation_by_name($unverified_id, 'for'));
-			$type_relation->update_meta('startAt', $start_time);
+			$type_relation = dbmtc_get_group($post->add_incoming_relation_by_name($unverified_id, 'for', $start_time));
 			$type_relation->update_meta('endAt', $end_time);
 			
-			$type_relation = dbmtc_get_group($post->add_incoming_relation_by_name($expired_id, 'for'));
-			$type_relation->update_meta('startAt', $end_time);
+			$post->add_incoming_relation_by_name($expired_id, 'for', $end_time);
 			
 			$response_data['verificationId'] = $data_id;
 			$response_data['sent'] = array();

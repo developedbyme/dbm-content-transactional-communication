@@ -5,8 +5,6 @@
 	
 	class Plugin extends PluginBase {
 		
-		public $ranges;
-		
 		function __construct() {
 			//echo("\DbmContentTransactionalCommunication\Plugin::__construct<br />");
 			
@@ -57,9 +55,6 @@
 			$this->add_additional_hook(new \DbmContentTransactionalCommunication\ApiActionHooks());
 			$this->add_additional_hook(new \DbmContentTransactionalCommunication\CronJobs());
 			$this->add_additional_hook(new \DbmContentTransactionalCommunication\ProcessActions());
-			
-			$this->ranges = new \DbmContentTransactionalCommunication\CustomRangeFilters();
-			$this->add_additional_hook($this->ranges);
 		}
 		
 		protected function create_rest_api_end_points() {
@@ -83,8 +78,6 @@
 		
 		protected function create_filters() {
 			//echo("\DbmContentTransactionalCommunication\Plugin::create_filters<br />");
-
-			$custom_range_filters = new \DbmContentTransactionalCommunication\CustomRangeFilters();
 			
 			add_filter('dbm_custom_login/registration_is_verified', array($this, 'filter_dbm_custom_login_registration_is_verified'), 10, 2);
 			

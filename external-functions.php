@@ -645,9 +645,7 @@
 		$added_tags = $post->object_relation_query('in:for:type/tag');
 		
 		if(!in_array($type_id, $added_tags)) {
-			$tag_relation = dbmtc_get_group($post->add_incoming_relation_by_name($type_id, 'for'));
-			$tag_relation->update_meta('startAt', time());
-			//METODO: set custom table
+			$tag_relation = dbmtc_get_group($post->add_incoming_relation_by_name($type_id, 'for', time()));
 			
 			dbmtc_add_action_to_process('tagAdded', array($id, $type_id), array('item' => $id, 'tag' => $tag));
 		}
@@ -684,9 +682,7 @@
 		$tigger = dbmtc_get_group(dbm_create_data('Trigger '.$type.' for '.$post_id, 'trigger'));
 		$tigger->add_incoming_relation_by_name($type_id, 'for');
 		
-		$tigger_relation = dbmtc_get_group($post->add_incoming_relation_by_name($tigger->get_id(), 'for'));
-	
-		$tigger_relation->update_meta('startAt', time());
+		$tigger_relation = dbmtc_get_group($post->add_incoming_relation_by_name($tigger->get_id(), 'for', time()));
 		
 		if($valid_for > 0) {
 			$tigger_relation->update_meta('endAt', time()+$valid_for);
@@ -716,9 +712,7 @@
 			$tigger = dbmtc_get_group(dbm_create_data('Trigger '.$type.' for '.$post_id, 'trigger'));
 			$tigger->add_incoming_relation_by_name($type_id, 'for');
 			
-			$tigger_relation = dbmtc_get_group($post->add_incoming_relation_by_name($tigger->get_id(), 'for'));
-		
-			$tigger_relation->update_meta('startAt', time());
+			$tigger_relation = dbmtc_get_group($post->add_incoming_relation_by_name($tigger->get_id(), 'for', time()));
 			
 			if($valid_for > 0) {
 				$tigger_relation->update_meta('endAt', time()+$valid_for);
@@ -737,7 +731,6 @@
 		foreach($trigger_ids as $trigger_id) {
 			$trigger_post = dbmtc_get_group($trigger_id);
 			if($trigger_post->get_single_object_relation_field_value('in:for:type/trigger-type', 'identifier') === $type) {
-				$has_trigger = true;
 				return true;
 			}
 		}
@@ -746,21 +739,18 @@
 	}
 	
 	function dbmtc_remove_trigger($post_id, $type) {
-		$post = dbmtc_get_group($post_id);
 		
-		$trigger_relations_ids = $post->get_incoming_relations('for', 'trigger');
+		$post = wprr_get_data_api()->wordpress()->get_post($post_id);
 		
-		foreach($trigger_relations_ids as $trigger_relations_id) {
-			$relation_post = dbmtc_get_group($trigger_relations_id);
-			$trigger_post = dbmtc_get_group($relation_post->get_meta('fromId'));
-			if($trigger_post->get_single_object_relation_field_value('in:for:type/trigger-type', 'identifier') === $type) {
-				$relation_post->update_meta('endAt', time());
-				$relation_post->clear_cache();
-				$trigger_post->clear_cache();
+		$relation_posts = $post->get_incoming_direction()->get_type('for')->get_relations('trigger');
+		
+		foreach($relation_posts as $relation_post) {
+			$trigger_post = $relation_post->get_object();
+			$type = $trigger_post->single_object_relation_query('in:for:type/trigger-type');
+			if($type && $type->get_meta('identifier') === $type) {
+				$relation_post->editor()->set_object_relation_field('endAt', time());
 			}
 		}
-		
-		$post->clear_cache();
 	}
 	
 	function dbmtc_add_action_to_process($type, $from_ids = null, $data = null, $time = null) {
@@ -791,13 +781,12 @@
 		
 		$action_group->update_meta('needsToProcess', true);
 		$type_id = dbmtc_get_or_create_type('type/action-status', 'readyToProcess');
-		$status_relation = dbmtc_get_group($action_group->add_incoming_relation_by_name($type_id, 'for'));
 		
 		if(!$time) {
 			$time = time();
 		}
 		
-		$status_relation->update_meta('startAt', $time);
+		$status_relation = dbmtc_get_group($action_group->add_incoming_relation_by_name($type_id, 'for', $time));
 		
 		return $action_id;
 	}
@@ -831,17 +820,16 @@
 		
 		$action_group->update_meta('needsToProcess', true);
 		$type_id = dbmtc_get_or_create_type('type/action-status', 'waitingForDependencies');
-		$status_relation = dbmtc_get_group($action_group->add_incoming_relation_by_name($type_id, 'for'));
 		
 		$start_time = time();
 		$end_time = $start_time+$timeout;
-		$status_relation->update_meta('startAt', $start_time);
+		
+		$status_relation = dbmtc_get_group($action_group->add_incoming_relation_by_name($type_id, 'for', $start_time));
+		
 		$status_relation->update_meta('endAt', $end_time);
 		
 		$type_id = dbmtc_get_or_create_type('type/action-status', 'dependenciesTimedOut');
-		$status_relation = dbmtc_get_group($action_group->add_incoming_relation_by_name($type_id, 'for'));
-		
-		$status_relation->update_meta('startAt', $end_time);
+		$status_relation = dbmtc_get_group($action_group->add_incoming_relation_by_name($type_id, 'for', $end_time));
 		
 		return $action_id;
 	}
