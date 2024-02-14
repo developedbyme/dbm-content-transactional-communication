@@ -178,7 +178,7 @@
 				
 					$post->end_incoming_relations_from_type('for', 'type/verication-status');
 					$type_relation = dbmtc_get_group($post->add_incoming_relation_by_name($verified_id, 'for', $start_time));
-					$type_relation->update_meta('endAt', $end_time);
+					$type_relation->data_api_post()->editor()->set_object_relation_field('endAt', $end_time);
 			
 					$post->add_incoming_relation_by_name($expired_id, 'for', $end_time);
 				}
@@ -535,7 +535,7 @@
 			$end_time = $start_time+60*$minutes_until_expired;
 			
 			$type_relation = dbmtc_get_group($post->add_incoming_relation_by_name($unverified_id, 'for', $start_time));
-			$type_relation->update_meta('endAt', $end_time);
+			$type_relation->data_api_post()->editor()->set_object_relation_field('endAt', $end_time);
 			
 			$post->add_incoming_relation_by_name($expired_id, 'for', $end_time);
 			

@@ -661,9 +661,7 @@
 		
 		foreach($relations as $relation) {
 			if($relation->get_object_id() === $type_id) {
-				$relation = dbmtc_get_group($relation->get_id());
-				$relation->set_field('endAt', time());
-				//METODO: set custom table
+				$relation->post()->editor()->set_object_relation_field('endAt', time());
 				
 				$has_relation = true;
 			}
@@ -685,7 +683,7 @@
 		$tigger_relation = dbmtc_get_group($post->add_incoming_relation_by_name($tigger->get_id(), 'for', time()));
 		
 		if($valid_for > 0) {
-			$tigger_relation->update_meta('endAt', time()+$valid_for);
+			$tigger_relation->data_api_post()->editor()->set_object_relation_field('endAt', time()+$valid_for);
 		}
 		
 		$tigger->make_private();
@@ -715,7 +713,7 @@
 			$tigger_relation = dbmtc_get_group($post->add_incoming_relation_by_name($tigger->get_id(), 'for', time()));
 			
 			if($valid_for > 0) {
-				$tigger_relation->update_meta('endAt', time()+$valid_for);
+				$tigger_relation->data_api_post()->editor()->set_object_relation_field('endAt', time()+$valid_for);
 			}
 			
 			$tigger->make_private();
@@ -826,7 +824,7 @@
 		
 		$status_relation = dbmtc_get_group($action_group->add_incoming_relation_by_name($type_id, 'for', $start_time));
 		
-		$status_relation->update_meta('endAt', $end_time);
+		$status_relation->data_api_post()->editor()->set_object_relation_field('endAt', $end_time);
 		
 		$type_id = dbmtc_get_or_create_type('type/action-status', 'dependenciesTimedOut');
 		$status_relation = dbmtc_get_group($action_group->add_incoming_relation_by_name($type_id, 'for', $end_time));
