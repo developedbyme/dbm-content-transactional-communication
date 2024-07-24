@@ -66,36 +66,6 @@
 			return $post_id;
 		}
 		
-		public static function create_global_term_and_page($slug, $title, $post_type = 'page', $parent_id = 0) {
-			$relation_path = 'dbm_relation:global-pages/'.$slug;
-			self::add_term($relation_path, $title);
-			$current_page_id = self::create_page($slug, $title, $post_type, $parent_id);
-			update_post_meta($current_page_id, '_wp_page_template', 'template-global-'.$slug.'.php');
-			self::add_terms_to_post(array($relation_path), $current_page_id);
-			
-			return $current_page_id;
-		}
-		
-		public static function create_user($login, $first_name = '', $last_name = '') {
-			$existing_user = get_user_by('login', $login);
-			
-			if($existing_user) {
-				return $existing_user->ID;
-			}
-			
-			$args = array(
-				'user_login' => $login,
-				'user_pass' => wp_generate_password(),
-				'first_name' => $first_name,
-				'last_name' => $last_name,
-				'display_name' => $first_name
-			);
-			
-			$new_user_id = wp_insert_user($args);
-			
-			return $new_user_id;
-		}
-		
 		public static function run_setup() {
 			
 			self::add_term('dbm_type:internal-message', 'Internal message');
@@ -237,10 +207,14 @@
 			self::add_term('dbm_relation:page-datas', 'Page datas');
 			self::add_term('dbm_relation:link-groups', 'Link groups');
 			
-			self::add_term('dbm_type:object-relation', 'Object relation');
-			self::add_term('dbm_type:object-relation/field-for', 'Field for');
-			self::add_term('dbm_type:object-relation/uploaded-to', 'Uploaded to');
-			self::add_term('dbm_type:object-relation/message-in', 'Message in');
+			$editor = wprr_get_data_api()->wordpress()->editor();
+			
+			$editor->create_object_relation_types(
+				'field-for',
+				'uploaded-to',
+				'uploaded-to',
+				'message-in'
+			);
 			
 			$current_term_id = self::add_term('dbm_relation:global-pages', 'Global pages');
 			$current_term_id = self::add_term('dbm_relation:global-pages/view-internal-message', 'View internal message');
