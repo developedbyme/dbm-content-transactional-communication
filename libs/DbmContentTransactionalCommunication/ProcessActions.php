@@ -24,6 +24,8 @@
 			$this->register_hook_for_type('setStatus');
 			$this->register_hook_for_type('importItem');
 			$this->register_hook_for_type('removeItems');
+			
+			$this->register_hook_for_type('removeOldActions');
 		}
 		
 		public function hook_setStatus($action_id) {
@@ -65,6 +67,26 @@
 			if($skip_logs) {
 				$dbm_skip_trash_log = $previous_dbm_skip_trash_log;
 			}
+		}
+		
+		public function hook_removeOldActions($action_id) {
+			$data_api = wprr_get_data_api();
+			$query = $data_api->database()->new_select_query()->set_post_type('dbm_data')->include_private()->term_query_by_path('dbm_type', 'action');
+			
+			$query->meta_query('needsToProcess', false);
+			
+			$before_date = date('Y-m-d', strtotime('-90 days'));
+			$query->in_date_range("1970-01-01", $before_date);
+			
+			$ids = $query->get_ids();
+			
+			$chunks = array_slice(array_chunk($ids, 10), 0, 20);
+			
+			foreach($chunks as $chunk) {
+				dbmtc_add_action_to_process('removeItems', $chunk, array('source' => 'cron/removeOldActions', 'ids' => $chunk, 'skipLogs' => true));
+			}
+			
+			dbmtc_add_action_to_process('removeOldActions', array());
 		}
 		
 		public function hook_importItem($action_id) {
