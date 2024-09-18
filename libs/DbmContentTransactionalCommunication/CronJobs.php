@@ -27,6 +27,7 @@
 			
 			$this->register_call('removeOldTrashLogs');
 			$this->register_call('removeOldDraftRelations');
+			$this->register_call('removeOldActions');
 		}
 		
 		public function prepare_cron_call($return_object) {
@@ -209,7 +210,7 @@
 			$chunks = array_chunk($ids, 10);
 			
 			foreach($chunks as $chunk) {
-				dbmtc_add_action_to_process('removeItems', $chunk, array('trashLogs' => $chunk));
+				dbmtc_add_action_to_process('removeItems', $chunk, array('source' => 'cron/removeOldTrashLogs', 'ids' => $chunk));
 			}
 		}
 		
@@ -223,14 +224,29 @@
 			$ids = $query->get_ids();
 			
 			$chunks = array_chunk($ids, 10);
-			var_dump($chunks);
 			
 			foreach($chunks as $chunk) {
-				dbmtc_add_action_to_process('removeItems', $chunk, array('relations' => $chunk));
+				dbmtc_add_action_to_process('removeItems', $chunk, array('source' => 'cron/removeOldDraftRelations', 'ids' => $chunk));
 			}
 		}
 		
-		
+		public function cron_removeOldActions($return_object, $item_name, $data) {
+			$data_api = wprr_get_data_api();
+			$query = $data_api->database()->new_select_query()->set_post_type('dbm_data')->include_private()->term_query_by_path('dbm_type', 'action')->meta_query('needsToProcess', false);
+			
+			$before_date = date('Y-m-d', strtotime('-30 days'));
+			$query->in_date_range("1970-01-01", $before_date);
+			
+			$ids = $query->get_ids();
+			
+			$chunks = array_chunk($ids, 10);
+			
+			var_dump($chunks);
+			
+			foreach($chunks as $chunk) {
+				//dbmtc_add_action_to_process('removeItems', $chunk, array('source' => 'cron/removeOldActions', 'ids' => $chunk));
+			}
+		}
 		
 		public static function test_import() {
 			echo("Imported \DbmContentTransactionalCommunication\CronJobs<br />");
