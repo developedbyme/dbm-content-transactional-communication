@@ -86,7 +86,9 @@
 				dbmtc_add_action_to_process('removeItems', $chunk, array('source' => 'cron/removeOldActions', 'ids' => $chunk, 'skipLogs' => true));
 			}
 			
-			dbmtc_add_action_to_process('removeOldActions', array());
+			if(!empty($chunks)) {
+				dbmtc_add_action_to_process('removeOldActions', array());
+			}
 		}
 		
 		public function hook_importItem($action_id) {
