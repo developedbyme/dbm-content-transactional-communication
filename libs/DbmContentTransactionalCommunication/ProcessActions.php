@@ -23,6 +23,7 @@
 			
 			$this->register_hook_for_type('setStatus');
 			$this->register_hook_for_type('importItem');
+			$this->register_hook_for_type('removeItems');
 		}
 		
 		public function hook_setStatus($action_id) {
@@ -40,6 +41,18 @@
 					$action->update_meta('processLog', 'No status set');
 				}
 			}
+		}
+		
+		public function hook_removeItems($action_id) {
+			
+			$data_api = wprr_get_data_api();
+			$action = $data_api->wordpress()->get_post($action_id);
+			$items = $action->object_relation_query('out:from:*');
+			
+			foreach($items as $item) {
+				wp_trash_post($item->get_id());
+			}
+			
 		}
 		
 		public function hook_importItem($action_id) {
