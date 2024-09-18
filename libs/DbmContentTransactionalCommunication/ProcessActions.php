@@ -45,14 +45,26 @@
 		
 		public function hook_removeItems($action_id) {
 			
+			global $dbm_skip_trash_log;
+			
 			$data_api = wprr_get_data_api();
 			$action = $data_api->wordpress()->get_post($action_id);
 			$items = $action->object_relation_query('out:from:*');
+			
+			$data = $action->get_meta('value');
+			$skip_logs = ($data && isset($data['skipLogs']) && $data['skipLogs']);
+			if($skip_logs) {
+				$previous_dbm_skip_trash_log = $dbm_skip_trash_log;
+				$dbm_skip_trash_log = $skip_logs;
+			}
 			
 			foreach($items as $item) {
 				wp_trash_post($item->get_id());
 			}
 			
+			if($skip_logs) {
+				$dbm_skip_trash_log = $previous_dbm_skip_trash_log;
+			}
 		}
 		
 		public function hook_importItem($action_id) {
