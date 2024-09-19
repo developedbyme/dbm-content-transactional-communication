@@ -257,7 +257,7 @@
 			
 			wprr_performance_tracker()->start_meassure('cron_emptyRelationsBin get ids');
 			
-			$remove_ids = $query->get_ids_with_limit(100);
+			$remove_ids = $query->get_ids_with_limit(10);
 			
 			wprr_performance_tracker()->stop_meassure('cron_emptyRelationsBin get ids');
 			
@@ -272,7 +272,7 @@
 			$data_api = wprr_get_data_api();
 			$query = $data_api->database()->new_select_query()->set_post_type('dbm_data')->set_status('trash');
 			
-			$remove_ids = $query->get_ids_with_limit(100);
+			$remove_ids = $query->get_ids_with_limit(10);
 			
 			foreach($remove_ids as $remove_id) {
 				wp_delete_post($remove_id, true);
