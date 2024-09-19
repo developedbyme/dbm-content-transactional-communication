@@ -28,6 +28,9 @@
 			$this->register_call('removeOldTrashLogs');
 			$this->register_call('removeOldDraftRelations');
 			$this->register_call('removeOldActions');
+			
+			$this->register_call('emptyRelationsBin');
+			$this->register_call('emptyDatasBin');
 		}
 		
 		public function prepare_cron_call($return_object) {
@@ -245,6 +248,33 @@
 			
 			foreach($chunks as $chunk) {
 				dbmtc_add_action_to_process('removeItems', $chunk, array('source' => 'cron/removeOldActions', 'ids' => $chunk, 'skipLogs' => true));
+			}
+		}
+		
+		public function cron_emptyRelationsBin($return_object, $item_name, $data) {
+			$data_api = wprr_get_data_api();
+			$query = $data_api->database()->new_select_query()->set_post_type('dbm_object_relation')->set_status('trash');
+			
+			$ids = $query->get_ids();
+			
+			$remove_ids = array_slice($ids, 0, 1000);
+			
+			
+			foreach($remove_ids as $remove_id) {
+				wp_delete_post($remove_id, true);
+			}
+		}
+		
+		public function cron_emptyDatasBin($return_object, $item_name, $data) {
+			$data_api = wprr_get_data_api();
+			$query = $data_api->database()->new_select_query()->set_post_type('dbm_data')->set_status('trash');
+			
+			$ids = $query->get_ids();
+			
+			$remove_ids = array_slice($ids, 0, 1000);
+			
+			foreach($remove_ids as $remove_id) {
+				wp_delete_post($remove_id, true);
 			}
 		}
 		
