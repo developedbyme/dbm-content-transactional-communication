@@ -85,6 +85,7 @@
 			
 			$chunks = array_slice(array_chunk($ids, 10), 0, 20);
 			$action_ids = array();
+			$action_ids[] = $action_id;
 			
 			foreach($chunks as $chunk) {
 				$action_ids[] = dbmtc_add_action_to_process('removeItems', array(), array('source' => 'cron/removeOldActions', 'ids' => $chunk, 'skipLogs' => true));
