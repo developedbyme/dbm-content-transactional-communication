@@ -255,10 +255,7 @@
 			$data_api = wprr_get_data_api();
 			$query = $data_api->database()->new_select_query()->set_post_type('dbm_object_relation')->set_status('trash');
 			
-			$ids = $query->get_ids();
-			
-			$remove_ids = array_slice($ids, 0, 1000);
-			
+			$remove_ids = $query->get_ids_with_limit(100);
 			
 			foreach($remove_ids as $remove_id) {
 				wp_delete_post($remove_id, true);
@@ -269,9 +266,7 @@
 			$data_api = wprr_get_data_api();
 			$query = $data_api->database()->new_select_query()->set_post_type('dbm_data')->set_status('trash');
 			
-			$ids = $query->get_ids();
-			
-			$remove_ids = array_slice($ids, 0, 1000);
+			$remove_ids = $query->get_ids_with_limit(100);
 			
 			foreach($remove_ids as $remove_id) {
 				wp_delete_post($remove_id, true);
