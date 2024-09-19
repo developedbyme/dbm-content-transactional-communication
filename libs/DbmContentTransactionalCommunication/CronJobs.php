@@ -255,11 +255,17 @@
 			$data_api = wprr_get_data_api();
 			$query = $data_api->database()->new_select_query()->set_post_type('dbm_object_relation')->set_status('trash');
 			
+			wprr_performance_tracker()->start_meassure('cron_emptyRelationsBin get ids');
+			
 			$remove_ids = $query->get_ids_with_limit(100);
 			
+			wprr_performance_tracker()->stop_meassure('cron_emptyRelationsBin get ids');
+			
+			wprr_performance_tracker()->start_meassure('cron_emptyRelationsBin trash');
 			foreach($remove_ids as $remove_id) {
 				wp_delete_post($remove_id, true);
 			}
+			wprr_performance_tracker()->stop_meassure('cron_emptyRelationsBin trash');
 		}
 		
 		public function cron_emptyDatasBin($return_object, $item_name, $data) {
