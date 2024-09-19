@@ -51,9 +51,11 @@
 			
 			$data_api = wprr_get_data_api();
 			$action = $data_api->wordpress()->get_post($action_id);
-			$items = $action->object_relation_query('out:from:*');
+			//$items = $action->object_relation_query('out:from:*');
 			
 			$data = $action->get_meta('value');
+			$items = $data['ids'];
+			
 			$skip_logs = ($data && isset($data['skipLogs']) && $data['skipLogs']);
 			if($skip_logs) {
 				$previous_dbm_skip_trash_log = $dbm_skip_trash_log;
@@ -61,7 +63,8 @@
 			}
 			
 			foreach($items as $item) {
-				wp_trash_post($item->get_id());
+				//wp_trash_post($item->get_id());
+				wp_trash_post($item);
 			}
 			
 			if($skip_logs) {
@@ -78,13 +81,16 @@
 			$before_date = date('Y-m-d', strtotime('-90 days'));
 			$query->in_date_range("1970-01-01", $before_date);
 			
-			$ids = $query->get_ids();
+			$ids = $query->get_ids_with_limit(200);
 			
 			$chunks = array_slice(array_chunk($ids, 10), 0, 20);
+			$action_ids = array();
 			
 			foreach($chunks as $chunk) {
-				dbmtc_add_action_to_process('removeItems', $chunk, array('source' => 'cron/removeOldActions', 'ids' => $chunk, 'skipLogs' => true));
+				$action_ids[] = dbmtc_add_action_to_process('removeItems', array(), array('source' => 'cron/removeOldActions', 'ids' => $chunk, 'skipLogs' => true));
 			}
+			
+			dbmtc_add_action_to_process('removeItems', array(), array('source' => 'cron/removeOldActions/cleanup', 'ids' => $action_ids, 'skipLogs' => true));
 			
 			if(!empty($chunks)) {
 				dbmtc_add_action_to_process('removeOldActions', array());
