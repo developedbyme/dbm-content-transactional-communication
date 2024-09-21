@@ -48,6 +48,7 @@
 		public function hook_removeItems($action_id) {
 			
 			global $dbm_skip_trash_log;
+			global $dbm_delete_dependencies_direct_when_trashed;
 			
 			$data_api = wprr_get_data_api();
 			$action = $data_api->wordpress()->get_post($action_id);
@@ -62,6 +63,12 @@
 				$dbm_skip_trash_log = $skip_logs;
 			}
 			
+			$skip_trash = ($data && isset($data['skipTrash']) && $data['skipTrash']);
+			if($skip_trash) {
+				$previous_dbm_delete_dependencies_direct_when_trashed = $dbm_delete_dependencies_direct_when_trashed;
+				$dbm_delete_dependencies_direct_when_trashed = $skip_trash;
+			}
+			
 			foreach($items as $item) {
 				//wp_trash_post($item->get_id());
 				wp_trash_post($item);
@@ -69,6 +76,9 @@
 			
 			if($skip_logs) {
 				$dbm_skip_trash_log = $previous_dbm_skip_trash_log;
+			}
+			if($skip_trash) {
+				$dbm_delete_dependencies_direct_when_trashed = $previous_dbm_delete_dependencies_direct_when_trashed;
 			}
 		}
 		
@@ -88,10 +98,10 @@
 			$action_ids[] = $action_id;
 			
 			foreach($chunks as $chunk) {
-				$action_ids[] = dbmtc_add_action_to_process('removeItems', array(), array('source' => 'cron/removeOldActions', 'ids' => $chunk, 'skipLogs' => true));
+				$action_ids[] = dbmtc_add_action_to_process('removeItems', array(), array('source' => 'cron/removeOldActions', 'ids' => $chunk, 'skipLogs' => true, 'skipTrash' => true));
 			}
 			
-			dbmtc_add_action_to_process('removeItems', array(), array('source' => 'cron/removeOldActions/cleanup', 'ids' => $action_ids, 'skipLogs' => true));
+			dbmtc_add_action_to_process('removeItems', array(), array('source' => 'cron/removeOldActions/cleanup', 'ids' => $action_ids, 'skipLogs' => true, 'skipTrash' => true));
 			
 			if(!empty($chunks)) {
 				dbmtc_add_action_to_process('removeOldActions', array());
