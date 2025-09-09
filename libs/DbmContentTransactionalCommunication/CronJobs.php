@@ -28,6 +28,8 @@
 			$this->register_call('removeOldTrashLogs');
 			$this->register_call('removeOldDraftRelations');
 			$this->register_call('removeOldActions');
+			$this->register_call('removeOldRequests');
+			$this->register_call('removeOldWebhooks');
 			
 			$this->register_call('emptyRelationsBin');
 			$this->register_call('emptyDatasBin');
@@ -221,6 +223,38 @@
 			}
 		}
 		
+		public function cron_removeOldRequests($return_object, $item_name, $data) {
+			$data_api = wprr_get_data_api();
+			$query = $data_api->database()->new_select_query()->set_post_type('dbm_data')->include_private()->term_query_by_path('dbm_type', 'request');
+			
+			$before_date = date('Y-m-d', strtotime('-30 days'));
+			$query->in_date_range("1970-01-01", $before_date);
+			
+			$ids = $query->get_ids();
+			
+			$chunks = array_slice(array_chunk($ids, 10), 0, 20);
+			
+			foreach($chunks as $chunk) {
+				dbmtc_add_action_to_process('removeItems', $chunk, array('source' => 'cron/removeOldRequest', 'ids' => $chunk, 'skipLogs' => true, 'skipTrash' => true));
+			}
+		}
+		
+		public function cron_removeOldWebhooks($return_object, $item_name, $data) {
+			$data_api = wprr_get_data_api();
+			$query = $data_api->database()->new_select_query()->set_post_type('dbm_data')->include_private()->term_query_by_path('dbm_type', 'incoming-webhook-event');
+			
+			$before_date = date('Y-m-d', strtotime('-30 days'));
+			$query->in_date_range("1970-01-01", $before_date);
+			
+			$ids = $query->get_ids();
+			
+			$chunks = array_slice(array_chunk($ids, 10), 0, 20);
+			
+			foreach($chunks as $chunk) {
+				dbmtc_add_action_to_process('removeItems', $chunk, array('source' => 'cron/removeOldWebhooks', 'ids' => $chunk, 'skipLogs' => true, 'skipTrash' => true));
+			}
+		}
+		
 		public function cron_removeOldDraftRelations($return_object, $item_name, $data) {
 			$data_api = wprr_get_data_api();
 			$query = $data_api->database()->new_select_query()->set_post_type('dbm_object_relation')->set_status('draft');
@@ -230,10 +264,10 @@
 			
 			$ids = $query->get_ids();
 			
-			$chunks = array_chunk($ids, 10);
+			$chunks = array_slice(array_chunk($ids, 10), 0, 20);
 			
 			foreach($chunks as $chunk) {
-				dbmtc_add_action_to_process('removeItems', $chunk, array('source' => 'cron/removeOldDraftRelations', 'ids' => $chunk, 'skipLogs' => true));
+				dbmtc_add_action_to_process('removeItems', $chunk, array('source' => 'cron/removeOldDraftRelations', 'ids' => $chunk, 'skipLogs' => true, 'skipTrash' => true));
 			}
 		}
 		
