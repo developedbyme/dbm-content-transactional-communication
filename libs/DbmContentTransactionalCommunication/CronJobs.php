@@ -45,7 +45,7 @@
 			wprr_performance_tracker()->start_meassure('CustomRangeHooks filter_global_processActions');
 			
 			$readyToProcess_id = dbmtc_get_or_create_type('type/action-status', 'readyToProcess');
-			$queued_id = dbmtc_get_or_create_type('type/action-status', 'queued');
+			
 			$processing_id = dbmtc_get_or_create_type('type/action-status', 'processing');
 			$done_id = dbmtc_get_or_create_type('type/action-status', 'done');
 			$noAction_id = dbmtc_get_or_create_type('type/action-status', 'noAction');
@@ -86,10 +86,14 @@
 			
 			$actions = array_map(function($id) {return dbmtc_get_group($id);}, $ids);
 			
-			foreach($actions as $action) {
-				$action->end_incoming_relations_from_type('for', 'type/action-status');
-				$action->add_incoming_relation_by_name($queued_id, 'for', time());
+			if($max_length > 1) {
+				$queued_id = dbmtc_get_or_create_type('type/action-status', 'queued');
+				foreach($actions as $action) {
+					$action->end_incoming_relations_from_type('for', 'type/action-status');
+					$action->add_incoming_relation_by_name($queued_id, 'for', time());
+				}
 			}
+			
 			
 			foreach($actions as $action) {
 				$action_type = $action->get_single_object_relation_field_value('in:for:type/action-type', 'identifier');
