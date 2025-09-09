@@ -771,8 +771,7 @@
 		$action_group = dbmtc_get_group($action_id);
 		
 		if($data) {
-			$action_group->add_type_by_name('value-item');
-			$action_group->set_field('value', $data);
+			$action_group->update_meta('value', $data);
 		}
 		
 		if($from_ids) {
