@@ -890,10 +890,10 @@
 		$request_id = dbm_create_data('Request', 'request');
 		$request = dbmtc_get_group($request_id);
 		
-		$request->set_field('url', $url);
-		$request->set_field('body', $body);
-		$request->set_field('headers', $headers);
-		$request->set_field('curlOptions', $curl_options);
+		$request->update_meta('url', $url);
+		$request->update_meta('body', $body);
+		$request->update_meta('headers', $headers);
+		$request->update_meta('curlOptions', $curl_options);
 		
 		$request->add_incoming_relation_by_name($send_status_id, 'for');
 		$request->add_incoming_relation_by_name($method_id, 'for');
@@ -914,10 +914,10 @@
 			$request->end_incoming_relations_from_type('for', 'type/send-status');
 			$request->add_incoming_relation_by_name($sending_status_id, 'for', time());
 			
-			$url = $request->get_field_value('url');
-			$body = $request->get_field_value('body');
-			$headers = $request->get_field_value('headers');
-			$curl_options = $request->get_field_value('curlOptions');
+			$url = $request->get_meta('url');
+			$body = $request->get_meta('body');
+			$headers = $request->get_meta('headers');
+			$curl_options = $request->get_meta('curlOptions');
 			$method = $request->get_single_object_relation_field_value('in:for:type/request-method', 'identifier');
 			
 			$ch = curl_init($url);
@@ -946,8 +946,8 @@
 				$status_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 				curl_close($ch);
 				
-				$request->set_field('response', $result);
-				$request->set_field('responseCode', $status_code);
+				$request->update_meta('response', $result);
+				$request->update_meta('responseCode', $status_code);
 				
 				$sent_status_id = dbmtc_get_or_create_type('type/send-status', 'sent');
 				$request->end_incoming_relations_from_type('for', 'type/send-status');
