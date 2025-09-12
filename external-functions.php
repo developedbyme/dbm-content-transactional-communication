@@ -645,9 +645,7 @@
 		$added_tags = $post->object_relation_query('in:for:type/tag');
 		
 		if(!in_array($type_id, $added_tags)) {
-			$tag_relation = dbmtc_get_group($post->add_incoming_relation_by_name($type_id, 'for'));
-			$tag_relation->update_meta('startAt', time());
-			//METODO: set custom table
+			$tag_relation = dbmtc_get_group($post->add_incoming_relation_by_name($type_id, 'for', time()));
 			
 			dbmtc_add_action_to_process('tagAdded', array($id, $type_id), array('item' => $id, 'tag' => $tag));
 		}
@@ -664,8 +662,7 @@
 		foreach($relations as $relation) {
 			if($relation->get_object_id() === $type_id) {
 				$relation = dbmtc_get_group($relation->get_id());
-				$relation->set_field('endAt', time());
-				//METODO: set custom table
+				$relation->data_api_post()->editor()->set_object_relation_field('endAt', time());
 				
 				$has_relation = true;
 			}
@@ -684,12 +681,10 @@
 		$tigger = dbmtc_get_group(dbm_create_data('Trigger '.$type.' for '.$post_id, 'trigger'));
 		$tigger->add_incoming_relation_by_name($type_id, 'for');
 		
-		$tigger_relation = dbmtc_get_group($post->add_incoming_relation_by_name($tigger->get_id(), 'for'));
-	
-		$tigger_relation->update_meta('startAt', time());
+		$tigger_relation = dbmtc_get_group($post->add_incoming_relation_by_name($tigger->get_id(), 'for', time()));
 		
 		if($valid_for > 0) {
-			$tigger_relation->update_meta('endAt', time()+$valid_for);
+			$tigger_relation->data_api_post()->editor()->set_object_relation_field('endAt', time()+$valid_for);
 		}
 		
 		$tigger->make_private();
@@ -716,12 +711,10 @@
 			$tigger = dbmtc_get_group(dbm_create_data('Trigger '.$type.' for '.$post_id, 'trigger'));
 			$tigger->add_incoming_relation_by_name($type_id, 'for');
 			
-			$tigger_relation = dbmtc_get_group($post->add_incoming_relation_by_name($tigger->get_id(), 'for'));
-		
-			$tigger_relation->update_meta('startAt', time());
+			$tigger_relation = dbmtc_get_group($post->add_incoming_relation_by_name($tigger->get_id(), 'for', time()));
 			
 			if($valid_for > 0) {
-				$tigger_relation->update_meta('endAt', time()+$valid_for);
+				$tigger_relation->data_api_post()->editor()->set_object_relation_field('endAt', time()+$valid_for);
 			}
 			
 			$tigger->make_private();
@@ -754,7 +747,7 @@
 			$relation_post = dbmtc_get_group($trigger_relations_id);
 			$trigger_post = dbmtc_get_group($relation_post->get_meta('fromId'));
 			if($trigger_post->get_single_object_relation_field_value('in:for:type/trigger-type', 'identifier') === $type) {
-				$relation_post->update_meta('endAt', time());
+				$relation_post->data_api_post()->editor()->set_object_relation_field('endAt', time());
 				$relation_post->clear_cache();
 				$trigger_post->clear_cache();
 			}
@@ -790,13 +783,10 @@
 		
 		$action_group->update_meta('needsToProcess', true);
 		$type_id = dbmtc_get_or_create_type('type/action-status', 'readyToProcess');
-		$status_relation = dbmtc_get_group($action_group->add_incoming_relation_by_name($type_id, 'for'));
-		
 		if(!$time) {
 			$time = time();
 		}
-		
-		$status_relation->update_meta('startAt', $time);
+		$status_relation = dbmtc_get_group($action_group->add_incoming_relation_by_name($type_id, 'for', $time));
 		
 		return $action_id;
 	}
@@ -834,13 +824,13 @@
 		
 		$start_time = time();
 		$end_time = $start_time+$timeout;
-		$status_relation->update_meta('startAt', $start_time);
-		$status_relation->update_meta('endAt', $end_time);
+		$status_relation->data_api_post()->editor()->set_object_relation_field('startAt', $start_time);
+		$status_relation->data_api_post()->editor()->set_object_relation_field('endAt', $end_time);
 		
 		$type_id = dbmtc_get_or_create_type('type/action-status', 'dependenciesTimedOut');
 		$status_relation = dbmtc_get_group($action_group->add_incoming_relation_by_name($type_id, 'for'));
 		
-		$status_relation->update_meta('startAt', $end_time);
+		$status_relation->data_api_post()->editor()->set_object_relation_field('startAt', $end_time);
 		
 		return $action_id;
 	}
