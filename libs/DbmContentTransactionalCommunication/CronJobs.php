@@ -219,7 +219,7 @@
 			$chunks = array_chunk($ids, 10);
 			
 			foreach($chunks as $chunk) {
-				dbmtc_add_action_to_process('removeItems', $chunk, array('source' => 'cron/removeOldTrashLogs', 'ids' => $chunk));
+				dbmtc_add_action_to_process('removeItems', array(), array('source' => 'cron/removeOldTrashLogs', 'ids' => $chunk));
 			}
 		}
 		
@@ -235,7 +235,7 @@
 			$chunks = array_slice(array_chunk($ids, 10), 0, 20);
 			
 			foreach($chunks as $chunk) {
-				dbmtc_add_action_to_process('removeItems', $chunk, array('source' => 'cron/removeOldRequest', 'ids' => $chunk, 'skipLogs' => true, 'skipTrash' => true));
+				dbmtc_add_action_to_process('removeItems', array(), array('source' => 'cron/removeOldRequest', 'ids' => $chunk, 'skipLogs' => true, 'skipTrash' => true));
 			}
 		}
 		
@@ -251,7 +251,7 @@
 			$chunks = array_slice(array_chunk($ids, 10), 0, 20);
 			
 			foreach($chunks as $chunk) {
-				dbmtc_add_action_to_process('removeItems', $chunk, array('source' => 'cron/removeOldWebhooks', 'ids' => $chunk, 'skipLogs' => true, 'skipTrash' => true));
+				dbmtc_add_action_to_process('removeItems', array(), array('source' => 'cron/removeOldWebhooks', 'ids' => $chunk, 'skipLogs' => true, 'skipTrash' => true));
 			}
 		}
 		
@@ -267,7 +267,7 @@
 			$chunks = array_slice(array_chunk($ids, 10), 0, 20);
 			
 			foreach($chunks as $chunk) {
-				dbmtc_add_action_to_process('removeItems', $chunk, array('source' => 'cron/removeOldDraftRelations', 'ids' => $chunk, 'skipLogs' => true, 'skipTrash' => true));
+				dbmtc_add_action_to_process('removeItems', array(), array('source' => 'cron/removeOldDraftRelations', 'ids' => $chunk, 'skipLogs' => true, 'skipTrash' => true));
 			}
 		}
 		
@@ -285,7 +285,7 @@
 			$chunks = array_slice(array_chunk($ids, 10), 0, 20);
 			
 			foreach($chunks as $chunk) {
-				dbmtc_add_action_to_process('removeItems', $chunk, array('source' => 'cron/removeOldActions', 'ids' => $chunk, 'skipLogs' => true));
+				dbmtc_add_action_to_process('removeItems', array(), array('source' => 'cron/removeOldActions', 'ids' => $chunk, 'skipLogs' => true));
 			}
 		}
 		
