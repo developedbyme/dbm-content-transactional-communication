@@ -24,6 +24,15 @@
 			
 			$this->register_call('processActions');
 			$this->register_call('checkActionDependencies');
+			
+			$this->register_call('removeOldTrashLogs');
+			$this->register_call('removeOldDraftRelations');
+			$this->register_call('removeOldActions');
+			$this->register_call('removeOldRequests');
+			$this->register_call('removeOldWebhooks');
+			
+			$this->register_call('emptyRelationsBin');
+			$this->register_call('emptyDatasBin');
 		}
 		
 		public function prepare_cron_call($return_object) {
@@ -38,7 +47,7 @@
 			wprr_performance_tracker()->start_meassure('CustomRangeHooks filter_global_processActions');
 			
 			$readyToProcess_id = dbmtc_get_or_create_type('type/action-status', 'readyToProcess');
-			$queued_id = dbmtc_get_or_create_type('type/action-status', 'queued');
+			
 			$processing_id = dbmtc_get_or_create_type('type/action-status', 'processing');
 			$done_id = dbmtc_get_or_create_type('type/action-status', 'done');
 			$noAction_id = dbmtc_get_or_create_type('type/action-status', 'noAction');
@@ -79,10 +88,14 @@
 			
 			$actions = array_map(function($id) {return dbmtc_get_group($id);}, $ids);
 			
-			foreach($actions as $action) {
-				$action->end_incoming_relations_from_type('for', 'type/action-status');
-				$action->add_incoming_relation_by_name($queued_id, 'for', time());
+			if($max_length > 1) {
+				$queued_id = dbmtc_get_or_create_type('type/action-status', 'queued');
+				foreach($actions as $action) {
+					$action->end_incoming_relations_from_type('for', 'type/action-status');
+					$action->add_incoming_relation_by_name($queued_id, 'for', time());
+				}
 			}
+			
 			
 			foreach($actions as $action) {
 				$action_type = $action->get_single_object_relation_field_value('in:for:type/action-type', 'identifier');
@@ -192,6 +205,116 @@
 			wprr_performance_tracker()->stop_meassure('CustomRangeHooks cron_checkActionDependencies');
 			
 			return $return_object;
+		}
+		
+		public function cron_removeOldTrashLogs($return_object, $item_name, $data) {
+			$data_api = wprr_get_data_api();
+			$query = $data_api->database()->new_select_query()->set_post_type('dbm_data')->include_private()->term_query_by_path('dbm_type', 'trash-log');
+			
+			$before_date = date('Y-m-d', strtotime('-30 days'));
+			$query->in_date_range("1970-01-01", $before_date);
+			
+			$ids = $query->get_ids();
+			
+			$chunks = array_chunk($ids, 10);
+			
+			foreach($chunks as $chunk) {
+				dbmtc_add_action_to_process('removeItems', array(), array('source' => 'cron/removeOldTrashLogs', 'ids' => $chunk));
+			}
+		}
+		
+		public function cron_removeOldRequests($return_object, $item_name, $data) {
+			$data_api = wprr_get_data_api();
+			$query = $data_api->database()->new_select_query()->set_post_type('dbm_data')->include_private()->term_query_by_path('dbm_type', 'request');
+			
+			$before_date = date('Y-m-d', strtotime('-30 days'));
+			$query->in_date_range("1970-01-01", $before_date);
+			
+			$ids = $query->get_ids();
+			
+			$chunks = array_slice(array_chunk($ids, 10), 0, 20);
+			
+			foreach($chunks as $chunk) {
+				dbmtc_add_action_to_process('removeItems', array(), array('source' => 'cron/removeOldRequest', 'ids' => $chunk, 'skipLogs' => true, 'skipTrash' => true));
+			}
+		}
+		
+		public function cron_removeOldWebhooks($return_object, $item_name, $data) {
+			$data_api = wprr_get_data_api();
+			$query = $data_api->database()->new_select_query()->set_post_type('dbm_data')->include_private()->term_query_by_path('dbm_type', 'incoming-webhook-event');
+			
+			$before_date = date('Y-m-d', strtotime('-30 days'));
+			$query->in_date_range("1970-01-01", $before_date);
+			
+			$ids = $query->get_ids();
+			
+			$chunks = array_slice(array_chunk($ids, 10), 0, 20);
+			
+			foreach($chunks as $chunk) {
+				dbmtc_add_action_to_process('removeItems', array(), array('source' => 'cron/removeOldWebhooks', 'ids' => $chunk, 'skipLogs' => true, 'skipTrash' => true));
+			}
+		}
+		
+		public function cron_removeOldDraftRelations($return_object, $item_name, $data) {
+			$data_api = wprr_get_data_api();
+			$query = $data_api->database()->new_select_query()->set_post_type('dbm_object_relation')->set_status('draft');
+			
+			$before_date = date('Y-m-d', strtotime('-30 days'));
+			$query->in_date_range("1970-01-01", $before_date);
+			
+			$ids = $query->get_ids();
+			
+			$chunks = array_slice(array_chunk($ids, 10), 0, 20);
+			
+			foreach($chunks as $chunk) {
+				dbmtc_add_action_to_process('removeItems', array(), array('source' => 'cron/removeOldDraftRelations', 'ids' => $chunk, 'skipLogs' => true, 'skipTrash' => true));
+			}
+		}
+		
+		public function cron_removeOldActions($return_object, $item_name, $data) {
+			$data_api = wprr_get_data_api();
+			$query = $data_api->database()->new_select_query()->set_post_type('dbm_data')->include_private()->term_query_by_path('dbm_type', 'action');
+			
+			$query->meta_query('needsToProcess', false);
+			
+			$before_date = date('Y-m-d', strtotime('-90 days'));
+			$query->in_date_range("1970-01-01", $before_date);
+			
+			$ids = $query->get_ids();
+			
+			$chunks = array_slice(array_chunk($ids, 10), 0, 20);
+			
+			foreach($chunks as $chunk) {
+				dbmtc_add_action_to_process('removeItems', array(), array('source' => 'cron/removeOldActions', 'ids' => $chunk, 'skipLogs' => true));
+			}
+		}
+		
+		public function cron_emptyRelationsBin($return_object, $item_name, $data) {
+			$data_api = wprr_get_data_api();
+			$query = $data_api->database()->new_select_query()->set_post_type('dbm_object_relation')->set_status('trash');
+			
+			wprr_performance_tracker()->start_meassure('cron_emptyRelationsBin get ids');
+			
+			$remove_ids = $query->get_ids_with_limit(10);
+			
+			wprr_performance_tracker()->stop_meassure('cron_emptyRelationsBin get ids');
+			
+			wprr_performance_tracker()->start_meassure('cron_emptyRelationsBin trash');
+			foreach($remove_ids as $remove_id) {
+				wp_delete_post($remove_id, true);
+			}
+			wprr_performance_tracker()->stop_meassure('cron_emptyRelationsBin trash');
+		}
+		
+		public function cron_emptyDatasBin($return_object, $item_name, $data) {
+			$data_api = wprr_get_data_api();
+			$query = $data_api->database()->new_select_query()->set_post_type('dbm_data')->set_status('trash');
+			
+			$remove_ids = $query->get_ids_with_limit(10);
+			
+			foreach($remove_ids as $remove_id) {
+				wp_delete_post($remove_id, true);
+			}
 		}
 		
 		public static function test_import() {
