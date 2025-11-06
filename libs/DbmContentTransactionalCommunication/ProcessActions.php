@@ -26,6 +26,8 @@
 			$this->register_hook_for_type('removeItems');
 			
 			$this->register_hook_for_type('removeOldActions');
+			$this->register_hook_for_type('removeOldRequests');
+			$this->register_hook_for_type('removeOldWebhooks');
 		}
 		
 		public function hook_setStatus($action_id) {
@@ -98,13 +100,61 @@
 			$action_ids[] = $action_id;
 			
 			foreach($chunks as $chunk) {
-				$action_ids[] = dbmtc_add_action_to_process('removeItems', array(), array('source' => 'cron/removeOldActions', 'ids' => $chunk, 'skipLogs' => true, 'skipTrash' => true));
+				$action_ids[] = dbmtc_add_action_to_process('removeItems', array(), array('source' => 'removeOldActions', 'ids' => $chunk, 'skipLogs' => true, 'skipTrash' => true));
 			}
 			
-			dbmtc_add_action_to_process('removeItems', array(), array('source' => 'cron/removeOldActions/cleanup', 'ids' => $action_ids, 'skipLogs' => true, 'skipTrash' => true));
+			dbmtc_add_action_to_process('removeItems', array(), array('source' => 'removeOldActions/cleanup', 'ids' => $action_ids, 'skipLogs' => true, 'skipTrash' => true));
 			
 			if(!empty($chunks)) {
 				dbmtc_add_action_to_process('removeOldActions', array());
+			}
+		}
+		
+		public function hook_removeOldRequests($action_id) {
+			$data_api = wprr_get_data_api();
+			$query = $data_api->database()->new_select_query()->set_post_type('dbm_data')->include_private()->term_query_by_path('dbm_type', 'request');
+			
+			$before_date = date('Y-m-d', strtotime('-90 days'));
+			$query->in_date_range("1970-01-01", $before_date);
+			
+			$ids = $query->get_ids_with_limit(200);
+			
+			$chunks = array_slice(array_chunk($ids, 10), 0, 20);
+			$action_ids = array();
+			$action_ids[] = $action_id;
+			
+			foreach($chunks as $chunk) {
+				$action_ids[] = dbmtc_add_action_to_process('removeItems', array(), array('source' => 'removeOldRequests', 'ids' => $chunk, 'skipLogs' => true, 'skipTrash' => true));
+			}
+			
+			dbmtc_add_action_to_process('removeItems', array(), array('source' => 'removeOldRequests/cleanup', 'ids' => $action_ids, 'skipLogs' => true, 'skipTrash' => true));
+			
+			if(!empty($chunks)) {
+				dbmtc_add_action_to_process('removeOldRequests', array());
+			}
+		}
+		
+		public function hook_removeOldWebhooks($action_id) {
+			$data_api = wprr_get_data_api();
+			$query = $data_api->database()->new_select_query()->set_post_type('dbm_data')->include_private()->term_query_by_path('dbm_type', 'incoming-webhook-event');
+			
+			$before_date = date('Y-m-d', strtotime('-90 days'));
+			$query->in_date_range("1970-01-01", $before_date);
+			
+			$ids = $query->get_ids_with_limit(200);
+			
+			$chunks = array_slice(array_chunk($ids, 10), 0, 20);
+			$action_ids = array();
+			$action_ids[] = $action_id;
+			
+			foreach($chunks as $chunk) {
+				$action_ids[] = dbmtc_add_action_to_process('removeItems', array(), array('source' => 'removeOldWebhooks', 'ids' => $chunk, 'skipLogs' => true, 'skipTrash' => true));
+			}
+			
+			dbmtc_add_action_to_process('removeItems', array(), array('source' => 'removeOldWebhooks/cleanup', 'ids' => $action_ids, 'skipLogs' => true, 'skipTrash' => true));
+			
+			if(!empty($chunks)) {
+				dbmtc_add_action_to_process('removeOldWebhooks', array());
 			}
 		}
 		
