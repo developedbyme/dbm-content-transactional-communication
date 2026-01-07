@@ -719,7 +719,7 @@
 			
 			$tigger->make_private();
 			
-			dbmtc_add_action_to_process('handleTrigger/'.$type, array($tigger->get_id()));
+			dbmtc_add_action_to_process('handleTrigger/'.$type, array($tigger->get_id()), array('postId' => $post_id));
 		}
 	}
 	
